@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>AI 먹이주기 · 어떤 데이터를 먹여야 할까?</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    background:#f4f7fb;
+    color:#1a2b40;
+    font-family:'Pretendard','Apple SD Gothic Neo',sans-serif;
+    min-height:100vh;
+    padding:0 0 60px;
+  }
+
+  /* ── 헤더 ── */
+  .hero{
+    background:linear-gradient(135deg,#1a2b40 0%,#1e4a6e 100%);
+    color:#fff;
+    padding:28px 24px 22px;
+    text-align:center;
+  }
+  .hero .label{
+    display:inline-block;background:rgba(127,255,212,.2);
+    border:1px solid rgba(127,255,212,.5);
+    color:#7fffd4;padding:3px 12px;border-radius:20px;
+    font-size:.75rem;margin-bottom:10px;letter-spacing:.05em;
+  }
+  .hero h1{font-size:1.4rem;margin-bottom:6px;line-height:1.3}
+  .hero p{font-size:.87rem;color:#a0c8e8;line-height:1.6}
+
+  /* ── AI 캐릭터 영역 ── */
+  .ai-section{
+    max-width:680px;margin:0 auto;padding:24px 16px 0;
+    display:flex;flex-direction:column;align-items:center;
+  }
+  .ai-wrap{
+    background:#fff;border-radius:20px;padding:24px;
+    box-shadow:0 4px 16px rgba(0,0,0,.09);
+    width:100%;display:flex;gap:20px;align-items:center;
+    margin-bottom:16px;
+  }
+  .ai-char{
+    width:90px;height:90px;border-radius:16px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:3rem;flex-shrink:0;
+    background:linear-gradient(135deg,#e8f4ff,#d0eaff);
+    border:3px solid #b0d4f0;
+    transition:transform .3s,background .5s;
+  }
+  .ai-char.happy{background:linear-gradient(135deg,#e0fff4,#b8ffe0);border-color:#7fffd4;transform:scale(1.08)}
+  .ai-char.sad{background:linear-gradient(135deg,#fff0f0,#ffd0d0);border-color:#ffaaaa;transform:scale(.95)}
+  .ai-char.sick{background:linear-gradient(135deg,#fff8e0,#ffe8a0);border-color:#f0c840;animation:shake-char .5s}
+  @keyframes shake-char{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+
+  .ai-status{flex:1}
+  .ai-name{font-weight:700;font-size:1rem;color:#1a2b40;margin-bottom:8px}
+  .ai-name span{font-size:.78rem;color:#7a9ab0;font-weight:400;margin-left:6px}
+
+  /* ── 스탯 바 ── */
+  .stat{margin-bottom:8px}
+  .stat-label{
+    display:flex;justify-content:space-between;
+    font-size:.75rem;color:#7a9ab0;margin-bottom:3px;
+  }
+  .stat-label strong{color:#1a2b40}
+  .bar-bg{background:#e8f0f8;border-radius:6px;height:10px}
+  .bar-fill{height:10px;border-radius:6px;transition:width .5s cubic-bezier(.4,0,.2,1)}
+  .bar-quality{background:linear-gradient(90deg,#2b9f8a,#7fffd4)}
+  .bar-balance{background:linear-gradient(90deg,#4a7aff,#90b0ff)}
+  .bar-label{background:linear-gradient(90deg,#f0a020,#ffd060)}
+
+  /* ── 말풍선 ── */
+  .bubble{
+    background:#f0faf8;border:2px solid #c0ead8;border-radius:12px;
+    padding:10px 14px;font-size:.85rem;color:#2a5040;
+    position:relative;margin-bottom:16px;min-height:42px;
+    text-align:center;line-height:1.5;transition:all .3s;
+  }
+  .bubble::before{
+    content:'';position:absolute;top:-10px;left:50%;transform:translateX(-50%);
+    border:8px solid transparent;border-bottom-color:#c0ead8;border-top:none;
+  }
+
+  /* ── 라운드 안내 ── */
+  .round-info{
+    width:100%;background:#fff;border-radius:12px;
+    padding:14px 18px;box-shadow:0 2px 8px rgba(0,0,0,.07);
+    margin-bottom:16px;
+  }
+  .round-info .r-label{font-size:.72rem;color:#7a9ab0;margin-bottom:4px}
+  .round-info .r-title{font-weight:700;font-size:.95rem;color:#1a2b40;margin-bottom:4px}
+  .round-info .r-desc{font-size:.82rem;color:#5a7590;line-height:1.5}
+  .round-counter{
+    display:flex;gap:6px;margin-top:10px;
+  }
+  .r-dot{
+    width:10px;height:10px;border-radius:50%;background:#dce8f0;transition:.3s;
+  }
+  .r-dot.done{background:#2b9f8a}
+  .r-dot.current{background:#2b9f8a;box-shadow:0 0 0 3px rgba(43,159,138,.25)}
+
+  /* ── 먹이 카드 ── */
+  .feed-section{
+    max-width:680px;margin:0 auto;padding:0 16px;
+  }
+  .feed-title{
+    font-size:.9rem;font-weight:700;color:#1a2b40;
+    margin-bottom:12px;display:flex;align-items:center;gap:8px;
+  }
+  .feed-title .hint{font-size:.75rem;color:#7a9ab0;font-weight:400}
+  .feed-grid{display:flex;flex-direction:column;gap:10px}
+  .feed-card{
+    background:#fff;border-radius:12px;padding:16px 18px;
+    box-shadow:0 2px 8px rgba(0,0,0,.06);
+    display:flex;gap:14px;align-items:center;
+    cursor:pointer;border:2px solid transparent;transition:.2s;
+  }
+  .feed-card:hover{border-color:#2b9f8a;transform:translateY(-1px);box-shadow:0 4px 14px rgba(0,0,0,.1)}
+  .feed-card.chosen{border-color:#2b9f8a;background:#f0faf8}
+  .feed-icon{font-size:1.8rem;flex-shrink:0;width:48px;text-align:center}
+  .feed-body{flex:1}
+  .feed-name{font-weight:700;font-size:.93rem;margin-bottom:3px;color:#1a2b40}
+  .feed-detail{font-size:.8rem;color:#7a9ab0;line-height:1.4}
+  .feed-badge{
+    flex-shrink:0;padding:4px 10px;border-radius:20px;font-size:.72rem;font-weight:600;
+    background:#f0f4f8;color:#8fa8c0;border:1px solid #dce8f0;
+  }
+
+  /* ── 결과 오버레이 ── */
+  .overlay{
+    display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);
+    z-index:100;align-items:center;justify-content:center;padding:16px;
+  }
+  .overlay.show{display:flex}
+  .result-box{
+    background:#fff;border-radius:20px;padding:28px 24px;
+    max-width:480px;width:100%;text-align:center;
+    box-shadow:0 8px 32px rgba(0,0,0,.25);
+  }
+  .result-emoji{font-size:3rem;margin-bottom:10px}
+  .result-title{font-size:1.2rem;font-weight:700;margin-bottom:6px}
+  .result-msg{font-size:.87rem;color:#5a7590;line-height:1.6;margin-bottom:18px}
+  .result-effects{
+    display:flex;justify-content:center;gap:20px;margin-bottom:20px;
+  }
+  .effect{text-align:center}
+  .effect .val{
+    font-size:1.3rem;font-weight:700;margin-bottom:2px;
+  }
+  .effect .val.up{color:#2b9f8a}
+  .effect .val.down{color:#e05050}
+  .effect .val.neutral{color:#7a9ab0}
+  .effect .ename{font-size:.72rem;color:#7a9ab0}
+  .result-box button{
+    width:100%;padding:13px;background:#2b9f8a;color:#fff;
+    border:none;border-radius:10px;font-size:.95rem;font-weight:700;cursor:pointer;
+  }
+
+  /* ── 최종 결과 ── */
+  .final-section{
+    display:none;max-width:680px;margin:24px auto 0;padding:0 16px;
+  }
+  .final-section.show{display:block}
+  .final-box{
+    background:linear-gradient(135deg,#1a2b40,#1b5a4a);
+    border-radius:16px;padding:30px 24px;text-align:center;color:#fff;
+  }
+  .final-box h2{font-size:1.25rem;color:#7fffd4;margin-bottom:8px}
+  .final-ai{font-size:4rem;margin-bottom:12px}
+  .final-grade{
+    display:inline-block;font-size:1.5rem;font-weight:700;
+    background:rgba(127,255,212,.2);border:2px solid #7fffd4;
+    color:#7fffd4;padding:6px 24px;border-radius:24px;margin-bottom:12px;
+  }
+  .final-desc{font-size:.88rem;color:#a0c8e8;line-height:1.7;margin-bottom:20px}
+  .final-stats{
+    display:flex;justify-content:center;gap:24px;
+    margin-bottom:20px;flex-wrap:wrap;
+  }
+  .fstat{text-align:center}
+  .fstat .fval{font-size:1.4rem;font-weight:700;color:#fff}
+  .fstat .flabel{font-size:.72rem;color:#7fffd4;margin-top:2px}
+  .final-lesson{
+    background:rgba(255,255,255,.08);border-radius:12px;
+    padding:14px;font-size:.85rem;color:#c0ddf0;line-height:1.7;
+    text-align:left;margin-bottom:20px;
+  }
+  .final-lesson strong{color:#7fffd4}
+  .final-box button{
+    padding:12px 32px;background:#7fffd4;color:#1a2b40;
+    border:none;border-radius:24px;font-size:.95rem;font-weight:700;cursor:pointer;
+  }
+</style>
+</head>
+<body>
+
+<!-- 헤더 -->
+<div class="hero">
+  <div class="label">1차시 · 데이터와 관리자의 역할</div>
+  <h1>🤖 AI 먹이주기</h1>
+  <p>AI는 데이터를 먹고 자랍니다.<br>어떤 데이터를 먹여야 똑똑한 AI가 될까요?</p>
+</div>
+
+<!-- AI 캐릭터 -->
+<div class="ai-section">
+  <div class="ai-wrap">
+    <div class="ai-char" id="aiChar">🤖</div>
+    <div class="ai-status">
+      <div class="ai-name">아미봇 <span>내가 키우는 AI</span></div>
+      <div class="stat">
+        <div class="stat-label"><strong>데이터 품질</strong><span id="qualityVal">50%</span></div>
+        <div class="bar-bg"><div class="bar-fill bar-quality" id="barQuality" style="width:50%"></div></div>
+      </div>
+      <div class="stat">
+        <div class="stat-label"><strong>데이터 균형</strong><span id="balanceVal">50%</span></div>
+        <div class="bar-bg"><div class="bar-fill bar-balance" id="barBalance" style="width:50%"></div></div>
+      </div>
+      <div class="stat">
+        <div class="stat-label"><strong>라벨 정확도</strong><span id="labelVal">50%</span></div>
+        <div class="bar-bg"><div class="bar-fill bar-label" id="barLabel" style="width:50%"></div></div>
+      </div>
+    </div>
+  </div>
+  <div class="bubble" id="bubble">
+    어떤 데이터를 먹여줄건가요? 배고파요! 🍽️
+  </div>
+
+  <!-- 라운드 안내 -->
+  <div class="round-info">
+    <div class="r-label" id="rLabel">라운드 1 / 5</div>
+    <div class="r-title" id="rTitle"></div>
+    <div class="r-desc" id="rDesc"></div>
+    <div class="round-counter" id="roundDots"></div>
+  </div>
+</div>
+
+<!-- 먹이 카드 -->
+<div class="feed-section">
+  <div class="feed-title">
+    🍽️ 먹이 선택 <span class="hint">AI에게 줄 데이터를 하나 고르세요</span>
+  </div>
+  <div class="feed-grid" id="feedGrid"></div>
+</div>
+
+<!-- 결과 오버레이 -->
+<div class="overlay" id="overlay">
+  <div class="result-box">
+    <div class="result-emoji" id="resEmoji"></div>
+    <div class="result-title" id="resTitle"></div>
+    <div class="result-msg" id="resMsg"></div>
+    <div class="result-effects" id="resEffects"></div>
+    <button onclick="nextRound()">다음 라운드 ▶</button>
+  </div>
+</div>
+
+<!-- 최종 결과 -->
+<div class="final-section" id="finalSection">
+  <div class="final-box">
+    <div class="final-ai" id="finalEmoji"></div>
+    <h2>학습 완료! 아미봇의 최종 상태</h2>
+    <div class="final-grade" id="finalGrade"></div>
+    <div class="final-desc" id="finalDesc"></div>
+    <div class="final-stats">
+      <div class="fstat">
+        <div class="fval" id="fQuality"></div>
+        <div class="flabel">데이터 품질</div>
+      </div>
+      <div class="fstat">
+        <div class="fval" id="fBalance"></div>
+        <div class="flabel">데이터 균형</div>
+      </div>
+      <div class="fstat">
+        <div class="fval" id="fLabel"></div>
+        <div class="flabel">라벨 정확도</div>
+      </div>
+    </div>
+    <div class="final-lesson" id="finalLesson"></div>
+    <button onclick="restart()">다시 키우기 ↻</button>
+  </div>
+</div>
+
+<script>
+/* ══════════════════════════════
+   데이터 정의
+══════════════════════════════ */
+const ROUNDS = [
+  {
+    title: "🗂️ 정비일지 데이터 선택",
+    desc: "장비 고장 예측 AI를 만들려고 합니다. 어떤 정비일지 데이터를 먹이겠습니까?",
+    choices: [
+      {
+        icon: "📋",
+        name: "3년치 정비일지 (항목 통일·결측 없음)",
+        detail: "2021~2023년, 장비별 정비 날짜·소요시간·부품 코드 완전 기록",
+        badge: "추천",
+        quality: +20, balance: +15, label: +10,
+        result: {
+          emoji: "🎉",
+          title: "최고의 먹이!",
+          msg: "깨끗하고 일관된 데이터를 줬군요. AI가 패턴을 잘 학습할 수 있어요.\n항목이 통일되어 있어 전처리도 거의 필요 없습니다.",
+          effects: [
+            {name:"품질",val:"+20",dir:"up"},
+            {name:"균형",val:"+15",dir:"up"},
+            {name:"라벨",val:"+10",dir:"up"},
+          ]
+        }
+      },
+      {
+        icon: "📝",
+        name: "1개월치 정비일지 (최신 데이터)",
+        detail: "지난달 기록만. 데이터가 적고 계절 변화를 반영하지 못함.",
+        badge: "주의",
+        quality: +5, balance: -15, label: +5,
+        result: {
+          emoji: "😐",
+          title: "조금 아쉬워요",
+          msg: "데이터가 너무 적으면 AI가 다양한 상황을 배우지 못합니다. 특히 계절·환경별 고장 패턴을 알 수 없어요.",
+          effects: [
+            {name:"품질",val:"+5",dir:"up"},
+            {name:"균형",val:"-15",dir:"down"},
+            {name:"라벨",val:"+5",dir:"up"},
+          ]
+        }
+      },
+      {
+        icon: "🗃️",
+        name: "종이 정비일지 (스캔 이미지)",
+        detail: "손으로 쓴 종이를 그대로 스캔. 글씨 인식이 어렵고 항목이 제각각.",
+        badge: "위험",
+        quality: -20, balance: -5, label: -15,
+        result: {
+          emoji: "🤢",
+          title: "AI가 배탈이 났어요",
+          msg: "이미지 속 손글씨는 AI가 바로 읽을 수 없습니다. 먼저 OCR 변환 → 항목 정리 → 검수 작업이 필요해요.",
+          effects: [
+            {name:"품질",val:"-20",dir:"down"},
+            {name:"균형",val:"-5",dir:"down"},
+            {name:"라벨",val:"-15",dir:"down"},
+          ]
+        }
+      }
+    ]
+  },
+  {
+    title: "🏷️ 라벨(정답 표시) 방식 선택",
+    desc: "고장/정상을 AI에게 가르치려면 라벨이 필요합니다. 어떤 방식을 쓸까요?",
+    choices: [
+      {
+        icon: "✅",
+        name: "전문 정비관이 직접 확인·표시한 라벨",
+        detail: "각 데이터마다 정비 담당자가 '고장/정상/경고' 를 직접 판별해 기록",
+        badge: "추천",
+        quality: +15, balance: +5, label: +25,
+        result: {
+          emoji: "🎯",
+          title: "정확한 라벨!",
+          msg: "전문가가 붙인 라벨은 AI 학습의 핵심입니다. 정답이 정확해야 AI도 정확해져요.",
+          effects: [
+            {name:"품질",val:"+15",dir:"up"},
+            {name:"균형",val:"+5",dir:"up"},
+            {name:"라벨",val:"+25",dir:"up"},
+          ]
+        }
+      },
+      {
+        icon: "🤖",
+        name: "기존 AI가 자동으로 붙인 라벨",
+        detail: "이전 버전 AI가 예측한 결과를 그대로 라벨로 사용",
+        badge: "주의",
+        quality: -5, balance: +5, label: -20,
+        result: {
+          emoji: "😵",
+          title: "라벨이 오염됐어요",
+          msg: "AI가 붙인 라벨로 다시 AI를 학습하면 오류가 증폭됩니다. 이를 '라벨 오염'이라고 해요. 반드시 사람이 검수해야 합니다.",
+          effects: [
+            {name:"품질",val:"-5",dir:"down"},
+            {name:"균형",val:"+5",dir:"up"},
+            {name:"라벨",val:"-20",dir:"down"},
+          ]
+        }
+      },
+      {
+        icon: "🙋",
+        name: "군인들이 직접 설문으로 표시",
+        detail: "정비 후 '고장이었나요?' 설문 결과를 라벨로 사용",
+        badge: "보통",
+        quality: +5, balance: 0, label: -5,
+        result: {
+          emoji: "🤔",
+          title: "애매해요",
+          msg: "비전문가의 판단은 일관성이 떨어질 수 있습니다. 라벨 기준이 사람마다 달라지면 AI가 혼란스러워해요.",
+          effects: [
+            {name:"품질",val:"+5",dir:"up"},
+            {name:"균형",val:"0",dir:"neutral"},
+            {name:"라벨",val:"-5",dir:"down"},
+          ]
+        }
+      }
+    ]
+  },
+  {
+    title: "⚖️ 데이터 균형 맞추기",
+    desc: "정상 장비 9,800건, 고장 장비 200건 데이터가 있습니다. 어떻게 처리할까요?",
+    choices: [
+      {
+        icon: "⚖️",
+        name: "고장 데이터를 복제해 균형을 맞춘다",
+        detail: "고장 사례를 인위적으로 늘려 정상:고장 = 1:1 비율로 조정",
+        badge: "추천",
+        quality: +10, balance: +25, label: +5,
+        result: {
+          emoji: "🎉",
+          title: "균형 잡힌 식단!",
+          msg: "데이터 불균형은 AI의 큰 적입니다. 고장 데이터를 오버샘플링하면 AI가 '고장'을 제대로 배울 수 있어요.",
+          effects: [
+            {name:"품질",val:"+10",dir:"up"},
+            {name:"균형",val:"+25",dir:"up"},
+            {name:"라벨",val:"+5",dir:"up"},
+          ]
+        }
+      },
+      {
+        icon: "📦",
+        name: "그냥 있는 데이터 그대로 사용",
+        detail: "따로 처리 없이 9,800건+200건을 그대로 학습에 투입",
+        badge: "위험",
+        quality: 0, balance: -25, label: 0,
+        result: {
+          emoji: "😰",
+          title: "AI가 편향됐어요",
+          msg: "AI가 '모두 정상'이라고만 예측해도 98% 정확도가 나옵니다. 하지만 정작 고장 탐지는 못 해요. 이것이 불균형 데이터의 함정입니다.",
+          effects: [
+            {name:"품질",val:"0",dir:"neutral"},
+            {name:"균형",val:"-25",dir:"down"},
+            {name:"라벨",val:"0",dir:"neutral"},
+          ]
+        }
+      },
+      {
+        icon: "✂️",
+        name: "정상 데이터를 200건만 남기고 삭제",
+        detail: "정상 데이터를 줄여 고장 데이터와 건수를 맞춤",
+        badge: "보통",
+        quality: -10, balance: +15, label: 0,
+        result: {
+          emoji: "😐",
+          title: "균형은 맞췄지만…",
+          msg: "언더샘플링도 균형을 맞출 수 있지만, 유용한 정상 데이터를 버리는 손실이 생깁니다. 오버샘플링보다는 덜 권장해요.",
+          effects: [
+            {name:"품질",val:"-10",dir:"down"},
+            {name:"균형",val:"+15",dir:"up"},
+            {name:"라벨",val:"0",dir:"neutral"},
+          ]
+        }
+      }
+    ]
+  },
+  {
+    title: "🧹 데이터 전처리 선택",
+    desc: "수집한 데이터에 결측값(빈 칸)과 이상값(9999 같은 오류)이 있습니다. 어떻게 할까요?",
+    choices: [
+      {
+        icon: "🧹",
+        name: "결측값→평균 대체, 이상값→제거 후 기록",
+        detail: "결측은 그 열의 평균으로 채우고, 이상값은 삭제 후 처리 내역을 문서화",
+        badge: "추천",
+        quality: +20, balance: +5, label: +10,
+        result: {
+          emoji: "✨",
+          title: "깨끗한 데이터!",
+          msg: "결측값과 이상값을 적절히 처리하고 기록까지 남겼어요. 원본 보존 원칙을 지키면서 품질을 높이는 모범 사례입니다.",
+          effects: [
+            {name:"품질",val:"+20",dir:"up"},
+            {name:"균형",val:"+5",dir:"up"},
+            {name:"라벨",val:"+10",dir:"up"},
+          ]
+        }
+      },
+      {
+        icon: "🗑️",
+        name: "결측·이상값이 있는 행을 전부 삭제",
+        detail: "문제 있는 데이터를 그냥 지워버림. 빠르지만 데이터 손실 큼.",
+        badge: "주의",
+        quality: +5, balance: -10, label: 0,
+        result: {
+          emoji: "😬",
+          title: "너무 많이 버렸어요",
+          msg: "데이터를 함부로 삭제하면 중요한 패턴도 함께 사라집니다. 특히 고장 데이터는 원래 적은데 더 줄어들면 큰 문제예요.",
+          effects: [
+            {name:"품질",val:"+5",dir:"up"},
+            {name:"균형",val:"-10",dir:"down"},
+            {name:"라벨",val:"0",dir:"neutral"},
+          ]
+        }
+      },
+      {
+        icon: "🙈",
+        name: "그냥 무시하고 그대로 사용",
+        detail: "전처리 없이 원본 데이터를 그대로 AI 학습에 투입",
+        badge: "위험",
+        quality: -20, balance: -5, label: -10,
+        result: {
+          emoji: "🤮",
+          title: "AI가 많이 아파요",
+          msg: "\"쓰레기 데이터를 넣으면 쓰레기 결과가 나온다 (GIGO)\" — 결측·이상값을 그대로 두면 AI가 잘못된 패턴을 학습합니다.",
+          effects: [
+            {name:"품질",val:"-20",dir:"down"},
+            {name:"균형",val:"-5",dir:"down"},
+            {name:"라벨",val:"-10",dir:"down"},
+          ]
+        }
+      }
+    ]
+  },
+  {
+    title: "🔒 개인정보 처리 방식",
+    desc: "데이터에 정비 담당자 이름·군번이 포함되어 있습니다. AI 학습 전 어떻게 처리할까요?",
+    choices: [
+      {
+        icon: "🔒",
+        name: "비식별화 후 학습 (이름→코드 변환)",
+        detail: "이름은 '담당자001'처럼, 군번은 해시값으로 변환 후 원본은 별도 보관",
+        badge: "추천",
+        quality: +10, balance: 0, label: +15,
+        result: {
+          emoji: "🛡️",
+          title: "안전한 AI!",
+          msg: "개인정보를 보호하면서도 학습에 필요한 패턴은 유지했습니다. 데이터 관리자의 핵심 역할 중 하나입니다.",
+          effects: [
+            {name:"품질",val:"+10",dir:"up"},
+            {name:"균형",val:"0",dir:"neutral"},
+            {name:"라벨",val:"+15",dir:"up"},
+          ]
+        }
+      },
+      {
+        icon: "📤",
+        name: "개인정보 포함 그대로 학습에 사용",
+        detail: "처리 과정이 번거로우니 원본 그대로 AI 서버에 업로드",
+        badge: "위험",
+        quality: -5, balance: 0, label: -5,
+        result: {
+          emoji: "🚨",
+          title: "법 위반 위험!",
+          msg: "개인정보보호법 위반 가능성이 있습니다. AI 서버에 개인정보가 노출되면 보안 사고로 이어질 수 있어요. 반드시 비식별화가 먼저입니다.",
+          effects: [
+            {name:"품질",val:"-5",dir:"down"},
+            {name:"균형",val:"0",dir:"neutral"},
+            {name:"라벨",val:"-5",dir:"down"},
+          ]
+        }
+      },
+      {
+        icon: "🗑️",
+        name: "개인정보 열(column)을 통째로 삭제",
+        detail: "이름·군번 열 자체를 제거하고 나머지 데이터만 학습에 사용",
+        badge: "보통",
+        quality: +5, balance: 0, label: +5,
+        result: {
+          emoji: "🤷",
+          title: "안전하지만 아쉬워요",
+          msg: "개인정보 보호는 됩니다. 하지만 담당자 숙련도 같은 유용한 정보도 함께 사라져요. 비식별화가 더 나은 선택입니다.",
+          effects: [
+            {name:"품질",val:"+5",dir:"up"},
+            {name:"균형",val:"0",dir:"neutral"},
+            {name:"라벨",val:"+5",dir:"up"},
+          ]
+        }
+      }
+    ]
+  }
+];
+
+/* ══════════════════════════════
+   상태
+══════════════════════════════ */
+let curRound = 0;
+let stats = { quality: 50, balance: 50, label: 50 };
+let chosen = false;
+
+/* ══════════════════════════════
+   유틸
+══════════════════════════════ */
+function clamp(v){ return Math.max(0, Math.min(100, v)); }
+
+function updateStats(q, b, l) {
+  stats.quality  = clamp(stats.quality  + q);
+  stats.balance  = clamp(stats.balance  + b);
+  stats.label    = clamp(stats.label    + l);
+  document.getElementById('qualityVal').textContent = stats.quality  + '%';
+  document.getElementById('balanceVal').textContent = stats.balance  + '%';
+  document.getElementById('labelVal').textContent   = stats.label    + '%';
+  document.getElementById('barQuality').style.width = stats.quality  + '%';
+  document.getElementById('barBalance').style.width = stats.balance  + '%';
+  document.getElementById('barLabel').style.width   = stats.label    + '%';
+}
+
+function updateAIChar() {
+  const avg = (stats.quality + stats.balance + stats.label) / 3;
+  const el = document.getElementById('aiChar');
+  el.className = 'ai-char';
+  if (avg >= 70) { el.textContent = '🤩'; el.classList.add('happy'); }
+  else if (avg >= 50) { el.textContent = '🤖'; }
+  else if (avg >= 35) { el.textContent = '😟'; el.classList.add('sick'); }
+  else { el.textContent = '🤒'; el.classList.add('sad'); }
+}
+
+function setBubble(msg) {
+  document.getElementById('bubble').textContent = msg;
+}
+
+/* ══════════════════════════════
+   렌더
+══════════════════════════════ */
+function renderRound() {
+  chosen = false;
+  const round = ROUNDS[curRound];
+  document.getElementById('rLabel').textContent = `라운드 ${curRound + 1} / ${ROUNDS.length}`;
+  document.getElementById('rTitle').textContent = round.title;
+  document.getElementById('rDesc').textContent  = round.desc;
+
+  // 점 표시
+  const dots = document.getElementById('roundDots');
+  dots.innerHTML = '';
+  ROUNDS.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'r-dot' + (i < curRound ? ' done' : i === curRound ? ' current' : '');
+    dots.appendChild(d);
+  });
+
+  // 먹이 카드
+  const grid = document.getElementById('feedGrid');
+  grid.innerHTML = '';
+  round.choices.forEach((ch, ci) => {
+    const card = document.createElement('div');
+    card.className = 'feed-card';
+    card.innerHTML = `
+      <div class="feed-icon">${ch.icon}</div>
+      <div class="feed-body">
+        <div class="feed-name">${ch.name}</div>
+        <div class="feed-detail">${ch.detail}</div>
+      </div>
+      <div class="feed-badge">${ch.badge}</div>
+    `;
+    card.addEventListener('click', () => feed(ci));
+    grid.appendChild(card);
+  });
+
+  setBubble('어떤 걸 먹여줄 건가요? 잘 골라주세요! 🤔');
+}
+
+/* ══════════════════════════════
+   먹이 선택
+══════════════════════════════ */
+function feed(ci) {
+  if (chosen) return;
+  chosen = true;
+}
