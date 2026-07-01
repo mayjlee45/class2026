@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>데이터 클리닝</title><style>
+    :root {
+      --bg:#0f1720;--card:#172230;--line:#2a3a4d;--ink:#eaf1f8;
+      --sub:#9fb2c6;--accent:#3d8bfd;--ok:#27ae60;--err:#e74c3c;--warn:#e67e22;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:var(--ink);
+      font-family:Pretendard,"Malgun Gothic","맑은 고딕",system-ui,sans-serif;
+      min-height:100vh;padding:28px 14px;display:flex;justify-content:center;}
+    .wrap{width:100%;max-width:680px;}
+    .back{display:inline-block;margin-bottom:18px;font-size:13px;color:var(--sub);text-decoration:none;}
+    .back:hover{color:var(--ink);}
+    .tag{display:inline-block;font-size:12px;font-weight:700;color:var(--accent);
+      background:rgba(61,139,253,.12);border:1px solid rgba(61,139,253,.3);
+      padding:4px 11px;border-radius:999px;margin-bottom:10px;}
+    h2{font-size:22px;margin-bottom:8px;}
+    .lead{color:var(--sub);font-size:14.5px;line-height:1.65;margin-bottom:22px;}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:14px;
+      padding:18px 20px;margin-bottom:14px;}
+    .card h3{font-size:15px;margin-bottom:10px;}
+    .opts{display:grid;gap:8px;margin-top:10px;}
+    .opts.g2{grid-template-columns:1fr 1fr;}
+    .opts.g1{grid-template-columns:1fr;}
+    .btn{padding:10px 14px;border-radius:10px;background:#1e3050;color:var(--ink);
+      border:1px solid var(--line);font-size:14px;cursor:pointer;text-align:left;
+      transition:background .15s,border-color .15s;}
+    .btn:hover:not(:disabled){background:#253d63;border-color:var(--accent);}
+    .btn:disabled{opacity:.55;cursor:default;}
+    .btn.correct{background:rgba(39,174,96,.2)!important;border-color:var(--ok)!important;color:#6fe09f;}
+    .btn.wrong{background:rgba(231,76,60,.15)!important;border-color:var(--err)!important;color:#f08080;}
+    .fb{margin-top:10px;font-size:13.5px;padding:10px 14px;border-radius:10px;display:none;}
+    .fb.ok{background:rgba(39,174,96,.12);color:#6fe09f;display:block;}
+    .fb.err{background:rgba(231,76,60,.1);color:#f08080;display:block;}
+    .progress{font-size:13px;color:var(--sub);margin-bottom:16px;}
+    .score-box{background:var(--card);border:1px solid var(--line);border-radius:14px;
+      padding:24px;text-align:center;margin-top:18px;display:none;}
+    .score-box .big{font-size:48px;margin-bottom:8px;}
+    .score-box p{color:var(--sub);font-size:14px;}
+    .foot{text-align:center;font-size:12px;color:#4a5a6a;margin-top:36px;
+      padding-top:14px;border-top:1px solid var(--line);}
+    /* drag styles */
+    .drag-item{padding:10px 14px;background:#1e3050;border:1px solid var(--line);
+      border-radius:10px;cursor:grab;font-size:14px;user-select:none;transition:opacity .15s;}
+    .drag-item:active{cursor:grabbing;opacity:.7;}
+    .drag-item.dragging{opacity:.4;}
+    .drop-zone{min-height:54px;background:rgba(61,139,253,.06);border:2px dashed var(--line);
+      border-radius:10px;padding:8px;display:flex;flex-direction:column;gap:6px;}
+    .drop-zone.over{border-color:var(--accent);background:rgba(61,139,253,.12);}
+    .zone-label{font-size:12px;color:var(--sub);margin-bottom:4px;font-weight:600;}
+</style></head>
+<body><div class="wrap">
+<a class="back" href="index.html">← 목록으로</a>
+<div class="tag">🧹 8차시 실습</div><h2>데이터 클리닝 단계별 실습</h2><p class="lead">결측·이상값·표준화·수치화 — 전처리 4단계를 순서대로 처리해보세요.</p>
+
+  <div id="clean-qs"></div>
+  <script>
+  var steps=[
+    {title:"STEP 1. 결측 처리",
+     data:["2026-01-15 | 홍길동 | 정기 | 45 | A","2026-01-20 | (없음) | 수시 | 30 | B","2026-02-01 | 박민수 | 긴급 | (없음) | C"],
+     question:"담당자가 없는 2번째 행의 '소요시간 없음(3행)'을 어떻게 처리할까요?",
+     opts:["전체 행 삭제","담당자 확인 후 입력 / 소요시간은 수시 평균값으로 대체 또는 NaN 유지","0으로 채운다","그대로 쓴다"],
+     correct:1,hint:"담당자는 반드시 확인 필요(완전성). 소요시간은 평균으로 채우거나 NaN 유지 — 상황에 따라 다릅니다."},
+    {title:"STEP 2. 이상값 처리",
+     data:["소요시간 분포: 20~180분 정상","이상값: -30분 (1건), 9999분 (1건)","정상범위: 0~480분"],
+     question:"-30분과 9999분을 어떻게 처리할까요?",
+     opts:["그대로 분석에 포함","담당자 확인 → 오류 확인 시 제거 또는 NaN 처리","평균값(85분)으로 대체","상한·하한으로 클리핑 (0, 480)"],
+     correct:1,hint:"이상값은 먼저 담당자에게 확인! 오류 확인 후 제거 또는 NaN. 클리핑은 데이터가 충분할 때 차선책."},
+    {title:"STEP 3. 표준화",
+     data:["무전기 AN/PRC-150 (200건)","무선기 PRC150 (15건)","무전기 (5건)"],
+     question:"같은 장비의 표기가 3가지입니다. 어떻게 통일할까요?",
+     opts:["AI가 알아서 처리하도록 둔다","'무전기 AN/PRC-150'으로 표준화 후 find-replace 적용","모두 '장비1'로 코드화","제일 많은 것(200건)을 기준으로 통일"],
+     correct:3,hint:"제일 많이 쓰인 표준 명칭 기준으로 통일하는 것이 현실적입니다. 단, 공식 명칭이 있다면 그것 우선."},
+    {title:"STEP 4. 수치화",
+     data:["고장증상 텍스트: '냉각팬 과열'","'엔진 시동 불량'","'배터리 완전 방전'"],
+     question:"AI 학습에 활용하려면 이 텍스트를 어떻게 처리해야 할까요?",
+     opts:["그대로 사용 (AI가 읽을 수 있으니까)","카테고리(경미/보통/심각)로 수동 라벨링","숫자 코드로 변환 (1=냉각,2=엔진,3=배터리)","삭제"],
+     correct:1,hint:"지도학습에는 정답 라벨이 필요합니다. 카테고리 라벨링 후 학습 데이터로 활용. 텍스트 그대로도 NLP 모델에는 쓸 수 있지만 구조화가 더 효과적."},
+  ];
+  var container=document.getElementById('clean-qs');
+  steps.forEach(function(s,i){
+    var dataHtml=s.data.map(function(d){return '<div style="padding:6px 10px;background:#0d1820;border-radius:6px;font-size:12px;font-family:monospace;color:#9fb2c6">'+d+'</div>';}).join('');
+    var opts=s.opts.map(function(o,oi){
+      return '<button class="btn cl-btn" data-qi="'+i+'" data-val="'+oi+'" onclick="pickCL(this,'+i+','+oi+','+s.correct+',''+s.hint.replace(/'/g,'\'')+'')" style="text-align:left;width:100%;margin-bottom:6px;font-size:13px">'+o+'</button>';
+    }).join('');
+    var div=document.createElement('div');div.className='card';div.style.marginBottom='14px';
+    div.innerHTML='<h3 style="font-size:15px;color:var(--accent);margin-bottom:10px">'+s.title+'</h3>'
+      +'<div style="display:flex;flex-direction:column;gap:4px;margin-bottom:12px">'+dataHtml+'</div>'
+      +'<p style="font-size:14px;margin-bottom:10px">'+s.question+'</p>'+opts
+      +'<div class="cl-fb-'+i+' fb"></div>';
+    container.appendChild(div);
+  });
+  function pickCL(btn,qi,val,correct,hint){
+    document.querySelectorAll('[data-qi="'+qi+'"]').forEach(function(b){b.disabled=true;});
+    var fb=document.querySelector('.cl-fb-'+qi);
+    if(val===correct){btn.classList.add('correct');fb.textContent='✅ '+hint;fb.className='cl-fb-'+qi+' fb ok';}
+    else{btn.classList.add('wrong');document.querySelector('[data-qi="'+qi+'"][data-val="'+correct+'"]').classList.add('correct');fb.textContent='❌ '+hint;fb.className='cl-fb-'+qi+' fb err';}
+  }
+  </script>
+
+<div class="foot">데이터 관리자 기본·실무 교육 · 8차시</div>
+</div></body></html>

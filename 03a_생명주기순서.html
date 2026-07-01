@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>생명주기 순서 맞히기</title>
+  <style>
+    :root {
+      --bg:#0f1720;--card:#172230;--line:#2a3a4d;--ink:#eaf1f8;
+      --sub:#9fb2c6;--accent:#3d8bfd;--ok:#27ae60;--err:#e74c3c;--warn:#e67e22;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:var(--ink);
+      font-family:Pretendard,"Malgun Gothic","맑은 고딕",system-ui,sans-serif;
+      min-height:100vh;padding:28px 14px;display:flex;justify-content:center;}
+    .wrap{width:100%;max-width:680px;}
+    .back{display:inline-block;margin-bottom:18px;font-size:13px;color:var(--sub);text-decoration:none;}
+    .back:hover{color:var(--ink);}
+    .tag{display:inline-block;font-size:12px;font-weight:700;color:var(--accent);
+      background:rgba(61,139,253,.12);border:1px solid rgba(61,139,253,.3);
+      padding:4px 11px;border-radius:999px;margin-bottom:10px;}
+    h2{font-size:22px;margin-bottom:8px;}
+    .lead{color:var(--sub);font-size:14.5px;line-height:1.65;margin-bottom:22px;}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:14px;
+      padding:18px 20px;margin-bottom:14px;}
+    .card h3{font-size:15px;margin-bottom:10px;}
+    .opts{display:grid;gap:8px;margin-top:10px;}
+    .opts.g2{grid-template-columns:1fr 1fr;}
+    .opts.g1{grid-template-columns:1fr;}
+    .btn{padding:10px 14px;border-radius:10px;background:#1e3050;color:var(--ink);
+      border:1px solid var(--line);font-size:14px;cursor:pointer;text-align:left;
+      transition:background .15s,border-color .15s;}
+    .btn:hover:not(:disabled){background:#253d63;border-color:var(--accent);}
+    .btn:disabled{opacity:.55;cursor:default;}
+    .btn.correct{background:rgba(39,174,96,.2)!important;border-color:var(--ok)!important;color:#6fe09f;}
+    .btn.wrong{background:rgba(231,76,60,.15)!important;border-color:var(--err)!important;color:#f08080;}
+    .fb{margin-top:10px;font-size:13.5px;padding:10px 14px;border-radius:10px;display:none;}
+    .fb.ok{background:rgba(39,174,96,.12);color:#6fe09f;display:block;}
+    .fb.err{background:rgba(231,76,60,.1);color:#f08080;display:block;}
+    .progress{font-size:13px;color:var(--sub);margin-bottom:16px;}
+    .score-box{background:var(--card);border:1px solid var(--line);border-radius:14px;
+      padding:24px;text-align:center;margin-top:18px;display:none;}
+    .score-box .big{font-size:48px;margin-bottom:8px;}
+    .score-box p{color:var(--sub);font-size:14px;}
+    .foot{text-align:center;font-size:12px;color:#4a5a6a;margin-top:36px;
+      padding-top:14px;border-top:1px solid var(--line);}
+    /* drag styles */
+    .drag-item{padding:10px 14px;background:#1e3050;border:1px solid var(--line);
+      border-radius:10px;cursor:grab;font-size:14px;user-select:none;transition:opacity .15s;}
+    .drag-item:active{cursor:grabbing;opacity:.7;}
+    .drag-item.dragging{opacity:.4;}
+    .drop-zone{min-height:54px;background:rgba(61,139,253,.06);border:2px dashed var(--line);
+      border-radius:10px;padding:8px;display:flex;flex-direction:column;gap:6px;}
+    .drop-zone.over{border-color:var(--accent);background:rgba(61,139,253,.12);}
+    .zone-label{font-size:12px;color:var(--sub);margin-bottom:4px;font-weight:600;}
+
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="index.html">← 목록으로</a>
+  <div class="tag">🔢 3차시 순서</div>
+  <h2>데이터 생명주기 순서 맞히기</h2>
+  <p class="lead">6단계를 느낌대로 순서대로 배치해보세요. 드래그로 위아래로 이동할 수 있습니다.</p>
+
+  <div class="card">
+    <p style="font-size:14px;color:var(--sub);margin-bottom:14px">
+      섞인 6단계를 올바른 순서로 드래그해 배치하세요. 직감대로 도전해보세요!
+    </p>
+    <div id="sort-list" style="display:flex;flex-direction:column;gap:8px;"></div>
+    <div id="sort-fb" class="fb" style="margin-top:14px"></div>
+    <div style="display:flex;gap:8px;margin-top:12px">
+      <button class="btn" style="flex:1;background:var(--accent);color:#fff" onclick="checkSort()">정답 확인</button>
+      <button class="btn" style="flex:1" onclick="resetSort()">다시 섞기</button>
+    </div>
+  </div>
+  <div class="card" id="answer-reveal" style="display:none">
+    <h3>✅ 정답: 데이터 생명주기 6단계</h3>
+    <div style="font-size:14px;color:var(--sub);line-height:1.9">
+      <b style="color:var(--ink)">① 생성</b> → <b style="color:var(--ink)">② 수집 ⚠️</b> → <b style="color:var(--ink)">③ 저장</b> → <b style="color:var(--ink)">④ 활용</b> → <b style="color:var(--ink)">⑤ 보존</b> → <b style="color:var(--ink)">⑥ 폐기 ⚠️</b><br>
+      <span style="color:var(--warn)">⚠️ 급소: 수집(잘못 모으면 뒤에서 못 고침) · 폐기(안 지우면 보안 사고)</span>
+    </div>
+  </div>
+  <script>
+  var correct=["생성","수집","저장","활용","보존","폐기"];
+  var emojis={"생성":"🌱","수집":"📥","저장":"💾","활용":"🔍","보존":"🗄️","폐기":"🗑️"};
+  var current=[...correct].sort(()=>Math.random()-0.5);
+  var dragging=null;
+  function buildList(){
+    var list=document.getElementById('sort-list');
+    list.innerHTML='';
+    current.forEach(function(s,i){
+      var el=document.createElement('div');
+      el.className='drag-item';
+      el.draggable=true;
+      el.innerHTML='<span style="margin-right:8px;font-size:18px">'+emojis[s]+'</span>'+s;
+      el.dataset.val=s;
+      el.addEventListener('dragstart',function(){dragging=this;setTimeout(()=>this.classList.add('dragging'),0);});
+      el.addEventListener('dragend',function(){this.classList.remove('dragging');dragging=null;});
+      el.addEventListener('dragover',function(e){e.preventDefault();
+        var r=this.getBoundingClientRect();
+        if(e.clientY<r.top+r.height/2) list.insertBefore(dragging,this);
+        else list.insertBefore(dragging,this.nextSibling);
+      });
+      list.appendChild(el);
+    });
+  }
+  buildList();
+  function checkSort(){
+    var els=document.querySelectorAll('#sort-list .drag-item');
+    var order=[...els].map(function(e){return e.dataset.val;});
+    var allOk=order.every(function(v,i){return v===correct[i];});
+    var fb=document.getElementById('sort-fb');
+    var score=order.filter(function(v,i){return v===correct[i];}).length;
+    fb.textContent=(allOk?'✅ 완벽합니다! ':'❌ '+score+'/6 정답. ')+
+      (allOk?'생명주기 6단계를 정확히 알고 있군요!':'생성→수집→저장→활용→보존→폐기 순서입니다.');
+    fb.className='fb '+(allOk?'ok':'err');
+    if(score>=4) document.getElementById('answer-reveal').style.display='block';
+  }
+  function resetSort(){
+    current=[...correct].sort(()=>Math.random()-0.5);
+    buildList();
+    document.getElementById('sort-fb').className='fb';
+    document.getElementById('sort-fb').textContent='';
+    document.getElementById('answer-reveal').style.display='none';
+  }
+  </script>
+
+  <div class="foot">데이터 관리자 기본·실무 교육 · 3차시</div>
+</div>
+
+</body>
+</html>

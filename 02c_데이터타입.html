@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>데이터 타입</title>
+  <style>
+    :root {
+      --bg:#0f1720;--card:#172230;--line:#2a3a4d;--ink:#eaf1f8;
+      --sub:#9fb2c6;--accent:#3d8bfd;--ok:#27ae60;--err:#e74c3c;--warn:#e67e22;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:var(--ink);
+      font-family:Pretendard,"Malgun Gothic","맑은 고딕",system-ui,sans-serif;
+      min-height:100vh;padding:28px 14px;display:flex;justify-content:center;}
+    .wrap{width:100%;max-width:680px;}
+    .back{display:inline-block;margin-bottom:18px;font-size:13px;color:var(--sub);text-decoration:none;}
+    .back:hover{color:var(--ink);}
+    .tag{display:inline-block;font-size:12px;font-weight:700;color:var(--accent);
+      background:rgba(61,139,253,.12);border:1px solid rgba(61,139,253,.3);
+      padding:4px 11px;border-radius:999px;margin-bottom:10px;}
+    h2{font-size:22px;margin-bottom:8px;}
+    .lead{color:var(--sub);font-size:14.5px;line-height:1.65;margin-bottom:22px;}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:14px;
+      padding:18px 20px;margin-bottom:14px;}
+    .card h3{font-size:15px;margin-bottom:10px;}
+    .opts{display:grid;gap:8px;margin-top:10px;}
+    .opts.g2{grid-template-columns:1fr 1fr;}
+    .opts.g1{grid-template-columns:1fr;}
+    .btn{padding:10px 14px;border-radius:10px;background:#1e3050;color:var(--ink);
+      border:1px solid var(--line);font-size:14px;cursor:pointer;text-align:left;
+      transition:background .15s,border-color .15s;}
+    .btn:hover:not(:disabled){background:#253d63;border-color:var(--accent);}
+    .btn:disabled{opacity:.55;cursor:default;}
+    .btn.correct{background:rgba(39,174,96,.2)!important;border-color:var(--ok)!important;color:#6fe09f;}
+    .btn.wrong{background:rgba(231,76,60,.15)!important;border-color:var(--err)!important;color:#f08080;}
+    .fb{margin-top:10px;font-size:13.5px;padding:10px 14px;border-radius:10px;display:none;}
+    .fb.ok{background:rgba(39,174,96,.12);color:#6fe09f;display:block;}
+    .fb.err{background:rgba(231,76,60,.1);color:#f08080;display:block;}
+    .progress{font-size:13px;color:var(--sub);margin-bottom:16px;}
+    .score-box{background:var(--card);border:1px solid var(--line);border-radius:14px;
+      padding:24px;text-align:center;margin-top:18px;display:none;}
+    .score-box .big{font-size:48px;margin-bottom:8px;}
+    .score-box p{color:var(--sub);font-size:14px;}
+    .foot{text-align:center;font-size:12px;color:#4a5a6a;margin-top:36px;
+      padding-top:14px;border-top:1px solid var(--line);}
+    /* drag styles */
+    .drag-item{padding:10px 14px;background:#1e3050;border:1px solid var(--line);
+      border-radius:10px;cursor:grab;font-size:14px;user-select:none;transition:opacity .15s;}
+    .drag-item:active{cursor:grabbing;opacity:.7;}
+    .drag-item.dragging{opacity:.4;}
+    .drop-zone{min-height:54px;background:rgba(61,139,253,.06);border:2px dashed var(--line);
+      border-radius:10px;padding:8px;display:flex;flex-direction:column;gap:6px;}
+    .drop-zone.over{border-color:var(--accent);background:rgba(61,139,253,.12);}
+    .zone-label{font-size:12px;color:var(--sub);margin-bottom:4px;font-weight:600;}
+
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="index.html">← 목록으로</a>
+  <div class="tag">📋 2차시 실습</div>
+  <h2>정비일지 칸별 데이터 타입 맞히기</h2>
+  <p class="lead">각 칸이 수치·텍스트·범주·시계열 중 어떤 타입인지 선택하세요. 함정 항목이 있습니다!</p>
+
+  <div class="card" style="margin-bottom:10px">
+    <h3>정비일지 각 칸의 데이터 타입은?</h3>
+    <p style="font-size:13.5px;color:var(--sub);line-height:1.6;margin-bottom:14px">
+      아래 정비일지 컬럼마다 가장 적합한 데이터 타입을 선택하세요.<br>
+      <span style="color:var(--warn)">⚠️ 함정 항목이 있습니다 — 표 안에 있다고 다 정형이 아닙니다!</span>
+    </p>
+  </div>
+  <div id="type-qs"></div>
+  <div id="type-result" class="fb" style="margin-top:4px"></div>
+  <button class="btn" style="margin-top:12px;width:100%;background:var(--accent);color:#fff;" onclick="checkTypes()">정답 확인</button>
+  <script>
+  var typeQ=[
+    {col:"정비일자",correct:"시계열",hint:"날짜·시간 정보 = datetime (시계열)"},
+    {col:"소요시간(분)",correct:"수치",hint:"계산 가능한 숫자 = 수치 (float/int)"},
+    {col:"정비유형 (정기/수시/긴급)",correct:"범주",hint:"정해진 항목 중 선택 = 범주 (enum/string)"},
+    {col:"고장증상 (자유 기술)",correct:"텍스트",hint:"자유 서술 = 텍스트 (string)"},
+    {col:"담당자명",correct:"텍스트",hint:"이름 = 텍스트 (string)"},
+    {col:"장비코드 (A/B/C 중 하나)",correct:"범주",hint:"정해진 코드 중 선택 = 범주"},
+    {col:"점검완료 여부 (Y/N)",correct:"범주",hint:"Y/N = 범주 (bool에 가까운 enum)"},
+    {col:"점검 사진 (파일 경로 기록)",correct:"텍스트",hint:"파일 경로 문자열 = 텍스트 — 사진 자체는 비정형이지만 경로는 텍스트입니다"},
+  ];
+  var types=["수치","텍스트","범주","시계열"];
+  var container=document.getElementById('type-qs');
+  typeQ.forEach(function(q,i){
+    var div=document.createElement('div');
+    div.className='card';div.style.marginBottom='10px';
+    var opts=types.map(function(t){
+      return '<button class="btn type-btn" data-qi="'+i+'" data-type="'+t+'" onclick="selType(this,'+i+')" style="flex:1;font-size:13px;padding:8px 6px">'+t+'</button>';
+    }).join('');
+    div.innerHTML='<h3 style="font-size:14.5px">'+q.col+'</h3><div style="display:flex;gap:6px;margin-top:10px">'+opts+'</div><div class="fb type-fb-'+i+'"></div>';
+    container.appendChild(div);
+  });
+  var selected={};
+  function selType(btn,qi){
+    var btns=document.querySelectorAll('[data-qi="'+qi+'"]');
+    btns.forEach(function(b){b.classList.remove('correct','wrong');b.style.background='#1e3050';});
+    btn.style.background='rgba(61,139,253,.3)';
+    selected[qi]=btn.dataset.type;
+  }
+  function checkTypes(){
+    var correct=0;
+    typeQ.forEach(function(q,i){
+      var fb=document.querySelector('.type-fb-'+i);
+      var btns=document.querySelectorAll('[data-qi="'+i+'"]');
+      btns.forEach(function(b){b.disabled=true;});
+      if(selected[i]===q.correct){
+        correct++;
+        document.querySelector('[data-qi="'+i+'"][data-type="'+q.correct+'"]').classList.add('correct');
+        fb.textContent='✅ 정답! '+q.hint;fb.className='fb ok';
+      } else {
+        document.querySelector('[data-qi="'+i+'"][data-type="'+q.correct+'"]').classList.add('correct');
+        if(selected[i]) document.querySelector('[data-qi="'+i+'"][data-type="'+selected[i]+'"]').classList.add('wrong');
+        fb.textContent='❌ '+q.hint;fb.className='fb err';
+      }
+    });
+    var r=document.getElementById('type-result');
+    r.textContent=correct+'/'+typeQ.length+'개 정답!'+(correct===typeQ.length?' 완벽합니다 🎉':'');
+    r.className='fb '+(correct===typeQ.length?'ok':'err');
+  }
+  </script>
+
+  <div class="foot">데이터 관리자 기본·실무 교육 · 2차시</div>
+</div>
+
+</body>
+</html>

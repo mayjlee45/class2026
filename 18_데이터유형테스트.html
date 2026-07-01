@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>데이터 유형 테스트</title><style>
+    :root {
+      --bg:#0f1720;--card:#172230;--line:#2a3a4d;--ink:#eaf1f8;
+      --sub:#9fb2c6;--accent:#3d8bfd;--ok:#27ae60;--err:#e74c3c;--warn:#e67e22;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:var(--ink);
+      font-family:Pretendard,"Malgun Gothic","맑은 고딕",system-ui,sans-serif;
+      min-height:100vh;padding:28px 14px;display:flex;justify-content:center;}
+    .wrap{width:100%;max-width:680px;}
+    .back{display:inline-block;margin-bottom:18px;font-size:13px;color:var(--sub);text-decoration:none;}
+    .back:hover{color:var(--ink);}
+    .tag{display:inline-block;font-size:12px;font-weight:700;color:var(--accent);
+      background:rgba(61,139,253,.12);border:1px solid rgba(61,139,253,.3);
+      padding:4px 11px;border-radius:999px;margin-bottom:10px;}
+    h2{font-size:22px;margin-bottom:8px;}
+    .lead{color:var(--sub);font-size:14.5px;line-height:1.65;margin-bottom:22px;}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:14px;
+      padding:18px 20px;margin-bottom:14px;}
+    .card h3{font-size:15px;margin-bottom:10px;}
+    .opts{display:grid;gap:8px;margin-top:10px;}
+    .opts.g2{grid-template-columns:1fr 1fr;}
+    .opts.g1{grid-template-columns:1fr;}
+    .btn{padding:10px 14px;border-radius:10px;background:#1e3050;color:var(--ink);
+      border:1px solid var(--line);font-size:14px;cursor:pointer;text-align:left;
+      transition:background .15s,border-color .15s;}
+    .btn:hover:not(:disabled){background:#253d63;border-color:var(--accent);}
+    .btn:disabled{opacity:.55;cursor:default;}
+    .btn.correct{background:rgba(39,174,96,.2)!important;border-color:var(--ok)!important;color:#6fe09f;}
+    .btn.wrong{background:rgba(231,76,60,.15)!important;border-color:var(--err)!important;color:#f08080;}
+    .fb{margin-top:10px;font-size:13.5px;padding:10px 14px;border-radius:10px;display:none;}
+    .fb.ok{background:rgba(39,174,96,.12);color:#6fe09f;display:block;}
+    .fb.err{background:rgba(231,76,60,.1);color:#f08080;display:block;}
+    .progress{font-size:13px;color:var(--sub);margin-bottom:16px;}
+    .score-box{background:var(--card);border:1px solid var(--line);border-radius:14px;
+      padding:24px;text-align:center;margin-top:18px;display:none;}
+    .score-box .big{font-size:48px;margin-bottom:8px;}
+    .score-box p{color:var(--sub);font-size:14px;}
+    .foot{text-align:center;font-size:12px;color:#4a5a6a;margin-top:36px;
+      padding-top:14px;border-top:1px solid var(--line);}
+    /* drag styles */
+    .drag-item{padding:10px 14px;background:#1e3050;border:1px solid var(--line);
+      border-radius:10px;cursor:grab;font-size:14px;user-select:none;transition:opacity .15s;}
+    .drag-item:active{cursor:grabbing;opacity:.7;}
+    .drag-item.dragging{opacity:.4;}
+    .drop-zone{min-height:54px;background:rgba(61,139,253,.06);border:2px dashed var(--line);
+      border-radius:10px;padding:8px;display:flex;flex-direction:column;gap:6px;}
+    .drop-zone.over{border-color:var(--accent);background:rgba(61,139,253,.12);}
+    .zone-label{font-size:12px;color:var(--sub);margin-bottom:4px;font-weight:600;}
+</style></head>
+<body><div class="wrap">
+<a class="back" href="index.html">← 목록으로</a>
+<div class="tag">🧭 18차시 테스트</div><h2>나의 데이터 유형 테스트</h2><p class="lead">내 업무 데이터의 특성을 진단해보세요. 정답이 없는 자기 탐색 테스트입니다.</p>
+
+  <div class="progress" id="dt-prog">1 / 6</div>
+  <div id="dt-area"></div>
+  <div id="dt-result" class="score-box"></div>
+  <script>
+  var qs=[
+    {q:"내 주요 업무 데이터는 어떤 형태인가요?",opts:["표(엑셀·DB 테이블) 위주","사진·영상 위주","문서(한글·워드) 위주","음성 녹음 위주"],a:null,tag:["정형","비정형","비정형","비정형"]},
+    {q:"데이터를 기록할 때 주로 어떤 도구를 사용하나요?",opts:["엑셀·DB 시스템","스마트폰 카메라","한글·워드 문서","메모장·종이"],a:null,tag:["정형/정제화","비정형","반정형","비정형/발굴대상"]},
+    {q:"기록한 데이터를 나중에 검색하거나 집계한 적 있나요?",opts:["자주 한다","가끔 한다","거의 안 한다","그런 기능이 없다"],a:null,tag:["활용 높음","활용 중간","개선 여지","인프라 필요"]},
+    {q:"내가 만드는 데이터에 '표준 양식'이 있나요?",opts:["있고 잘 지킨다","있지만 가끔 안 지킨다","없다","모르겠다"],a:null,tag:["표준화 우수","일관성 위험","표준화 필요","점검 필요"]},
+    {q:"업무 중 데이터 관련 가장 큰 불편함은?",opts:["찾기 어렵다","형식이 제각각이다","누락이 많다","무엇이 있는지 모른다"],a:null,tag:["목록화 필요","일관성 문제","완전성 문제","인벤토리 필요"]},
+    {q:"3일 교육 후 가장 실천하고 싶은 것은?",opts:["메타데이터 작성","날짜 형식 통일","정기적 데이터 점검","AI 프롬프트 작성 연습"],a:null,tag:["6차시 핵심","8차시 실무","5차시 품질","13~16차시 활용"]},
+  ];
+  var answers=[];
+  var cur=0;
+  function render(){
+    var prog=document.getElementById('dt-prog'),area=document.getElementById('dt-area');
+    if(cur>=qs.length){area.style.display='none';prog.style.display='none';
+      var res=document.getElementById('dt-result');res.style.display='block';
+      var summary=answers.map(function(a,i){return '<div style="font-size:13px;color:var(--sub);padding:6px 0;border-bottom:1px solid var(--line)"><b style="color:var(--ink)">Q'+(i+1)+'</b>: '+qs[i].opts[a]+' → <span style="color:var(--accent)">'+qs[i].tag[a]+'</span></div>';}).join('');
+      res.innerHTML='<div class="big">📊</div><div style="font-size:16px;font-weight:700;margin:8px 0">내 데이터 유형 결과</div><div style="margin:14px 0;text-align:left">'+summary+'</div><p style="font-size:13px;color:var(--sub)">이 결과를 바탕으로 나만의 데이터 관리 개선 계획을 세워보세요!</p><button class="btn" style="margin-top:14px;background:var(--accent);color:#fff" onclick="cur=0;answers=[];document.getElementById('dt-result').style.display='none';document.getElementById('dt-area').style.display='block';document.getElementById('dt-prog').style.display='block';render()">다시 테스트</button>';
+      return;}
+    prog.textContent=(cur+1)+' / '+qs.length;
+    var q=qs[cur];
+    var opts=q.opts.map(function(o,i){return '<button class="btn" onclick="pick('+i+')" style="text-align:left;width:100%;margin-bottom:8px">'+o+'</button>';}).join('');
+    area.innerHTML='<div class="card"><h3 style="font-size:16px;margin-bottom:16px">Q'+(cur+1)+'. '+q.q+'</h3>'+opts+'</div>';
+  }
+  function pick(i){answers.push(i);cur++;render();}
+  render();
+  </script>
+
+<div class="foot">데이터 관리자 기본·실무 교육 · 18차시</div>
+</div></body></html>

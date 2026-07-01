@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>내 입력 습관 돌아보기</title>
+  <style>
+    :root {
+      --bg:#0f1720;--card:#172230;--line:#2a3a4d;--ink:#eaf1f8;
+      --sub:#9fb2c6;--accent:#3d8bfd;--ok:#27ae60;--err:#e74c3c;--warn:#e67e22;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:var(--ink);
+      font-family:Pretendard,"Malgun Gothic","맑은 고딕",system-ui,sans-serif;
+      min-height:100vh;padding:28px 14px;display:flex;justify-content:center;}
+    .wrap{width:100%;max-width:680px;}
+    .back{display:inline-block;margin-bottom:18px;font-size:13px;color:var(--sub);text-decoration:none;}
+    .back:hover{color:var(--ink);}
+    .tag{display:inline-block;font-size:12px;font-weight:700;color:var(--accent);
+      background:rgba(61,139,253,.12);border:1px solid rgba(61,139,253,.3);
+      padding:4px 11px;border-radius:999px;margin-bottom:10px;}
+    h2{font-size:22px;margin-bottom:8px;}
+    .lead{color:var(--sub);font-size:14.5px;line-height:1.65;margin-bottom:22px;}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:14px;
+      padding:18px 20px;margin-bottom:14px;}
+    .card h3{font-size:15px;margin-bottom:10px;}
+    .opts{display:grid;gap:8px;margin-top:10px;}
+    .opts.g2{grid-template-columns:1fr 1fr;}
+    .opts.g1{grid-template-columns:1fr;}
+    .btn{padding:10px 14px;border-radius:10px;background:#1e3050;color:var(--ink);
+      border:1px solid var(--line);font-size:14px;cursor:pointer;text-align:left;
+      transition:background .15s,border-color .15s;}
+    .btn:hover:not(:disabled){background:#253d63;border-color:var(--accent);}
+    .btn:disabled{opacity:.55;cursor:default;}
+    .btn.correct{background:rgba(39,174,96,.2)!important;border-color:var(--ok)!important;color:#6fe09f;}
+    .btn.wrong{background:rgba(231,76,60,.15)!important;border-color:var(--err)!important;color:#f08080;}
+    .fb{margin-top:10px;font-size:13.5px;padding:10px 14px;border-radius:10px;display:none;}
+    .fb.ok{background:rgba(39,174,96,.12);color:#6fe09f;display:block;}
+    .fb.err{background:rgba(231,76,60,.1);color:#f08080;display:block;}
+    .progress{font-size:13px;color:var(--sub);margin-bottom:16px;}
+    .score-box{background:var(--card);border:1px solid var(--line);border-radius:14px;
+      padding:24px;text-align:center;margin-top:18px;display:none;}
+    .score-box .big{font-size:48px;margin-bottom:8px;}
+    .score-box p{color:var(--sub);font-size:14px;}
+    .foot{text-align:center;font-size:12px;color:#4a5a6a;margin-top:36px;
+      padding-top:14px;border-top:1px solid var(--line);}
+    /* drag styles */
+    .drag-item{padding:10px 14px;background:#1e3050;border:1px solid var(--line);
+      border-radius:10px;cursor:grab;font-size:14px;user-select:none;transition:opacity .15s;}
+    .drag-item:active{cursor:grabbing;opacity:.7;}
+    .drag-item.dragging{opacity:.4;}
+    .drop-zone{min-height:54px;background:rgba(61,139,253,.06);border:2px dashed var(--line);
+      border-radius:10px;padding:8px;display:flex;flex-direction:column;gap:6px;}
+    .drop-zone.over{border-color:var(--accent);background:rgba(61,139,253,.12);}
+    .zone-label{font-size:12px;color:var(--sub);margin-bottom:4px;font-weight:600;}
+
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="index.html">← 목록으로</a>
+  <div class="tag">🪞 4차시 성찰</div>
+  <h2>내 입력 습관 돌아보기</h2>
+  <p class="lead">데이터를 만드는 생산자로서 내가 실수하기 쉬운 것을 솔직하게 체크해보세요.</p>
+
+  <div class="card">
+    <p style="font-size:14px;color:var(--sub);margin-bottom:14px">
+      솔직하게 체크해보세요. 기록이 남지 않으니 안심하고 체크하세요!
+    </p>
+    <div id="habit-list" style="display:flex;flex-direction:column;gap:8px;"></div>
+  </div>
+  <div class="card" id="tips-card" style="display:none">
+    <h3>📋 내 개선 힌트</h3>
+    <div id="tips-content" style="font-size:13.5px;color:var(--sub);line-height:1.8;margin-top:8px"></div>
+  </div>
+  <script>
+  var habits=[
+    {label:"필드가 뭔지 모르겠어서 그냥 비워두는 경우가 있다",tip:"💡 모르면 '불명' 또는 '확인 필요'라도 적어두세요. 빈칸보다 낫습니다."},
+    {label:"날짜를 때로는 YYYYMMDD, 때로는 YYYY.MM.DD로 적는다",tip:"💡 날짜 형식을 하나로 통일하세요 (YYYY-MM-DD 권장)."},
+    {label:"같은 장비를 '무전기'라고도 하고 '무선기'라고도 쓴다",tip:"💡 용어 표준을 정해두고 항상 같은 이름을 사용하세요."},
+    {label:"'나중에 고쳐야지' 하고 임시값(999, 0 등)을 넣고 잊어버린다",tip:"💡 임시값보다 결측(빈칸)이 나을 수 있습니다. 나중에 발견하기 어렵습니다."},
+    {label:"숫자 칸에 단위도 같이 넣는다 (예: '45분', '2.5시간')",tip:"💡 단위는 별도 컬럼이나 헤더에 표시하고, 칸에는 숫자만 입력하세요."},
+    {label:"이미 저장된 데이터를 복사·수정해서 쓸 때 원본을 덮어쓴다",tip:"💡 원본 불변 원칙! 복사본을 만들어서 수정하세요."},
+    {label:"특수문자(/, \, &)를 필드 안에 쓰는 경우가 있다",tip:"💡 특수문자는 시스템 오류의 원인이 됩니다. 피하거나 이스케이프 처리하세요."},
+    {label:"실수한 걸 알았을 때 조용히 고치고 기록을 남기지 않는다",tip:"💡 수정 이력을 남겨두세요 (수정일, 수정자, 수정 이유)."},
+  ];
+  var container=document.getElementById('habit-list');
+  var checked=new Set();
+  habits.forEach(function(h,i){
+    var div=document.createElement('div');
+    div.style.cssText='display:flex;align-items:flex-start;gap:10px;padding:11px 14px;background:#1e3050;border:1px solid var(--line);border-radius:10px;cursor:pointer;transition:all .15s;';
+    div.innerHTML='<span style="font-size:20px;flex-shrink:0;margin-top:1px">⬜</span><span style="font-size:13.5px;line-height:1.5">'+h.label+'</span>';
+    div.onclick=function(){
+      if(checked.has(i)){
+        checked.delete(i);
+        this.style.background='#1e3050';this.style.borderColor='var(--line)';
+        this.querySelector('span').textContent='⬜';
+      } else {
+        checked.add(i);
+        this.style.background='rgba(231,76,60,.12)';this.style.borderColor='var(--warn)';
+        this.querySelector('span').textContent='⚠️';
+      }
+      update();
+    };
+    container.appendChild(div);
+  });
+  function update(){
+    var tc=document.getElementById('tips-content');
+    var card=document.getElementById('tips-card');
+    if(checked.size===0){card.style.display='none';return;}
+    card.style.display='block';
+    tc.innerHTML=[...checked].map(function(i){return habits[i].tip;}).join('<br>');
+  }
+  </script>
+
+  <div class="foot">데이터 관리자 기본·실무 교육 · 4차시</div>
+</div>
+
+</body>
+</html>

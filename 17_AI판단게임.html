@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 판단 게임</title><style>
+    :root {
+      --bg:#0f1720;--card:#172230;--line:#2a3a4d;--ink:#eaf1f8;
+      --sub:#9fb2c6;--accent:#3d8bfd;--ok:#27ae60;--err:#e74c3c;--warn:#e67e22;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:var(--ink);
+      font-family:Pretendard,"Malgun Gothic","맑은 고딕",system-ui,sans-serif;
+      min-height:100vh;padding:28px 14px;display:flex;justify-content:center;}
+    .wrap{width:100%;max-width:680px;}
+    .back{display:inline-block;margin-bottom:18px;font-size:13px;color:var(--sub);text-decoration:none;}
+    .back:hover{color:var(--ink);}
+    .tag{display:inline-block;font-size:12px;font-weight:700;color:var(--accent);
+      background:rgba(61,139,253,.12);border:1px solid rgba(61,139,253,.3);
+      padding:4px 11px;border-radius:999px;margin-bottom:10px;}
+    h2{font-size:22px;margin-bottom:8px;}
+    .lead{color:var(--sub);font-size:14.5px;line-height:1.65;margin-bottom:22px;}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:14px;
+      padding:18px 20px;margin-bottom:14px;}
+    .card h3{font-size:15px;margin-bottom:10px;}
+    .opts{display:grid;gap:8px;margin-top:10px;}
+    .opts.g2{grid-template-columns:1fr 1fr;}
+    .opts.g1{grid-template-columns:1fr;}
+    .btn{padding:10px 14px;border-radius:10px;background:#1e3050;color:var(--ink);
+      border:1px solid var(--line);font-size:14px;cursor:pointer;text-align:left;
+      transition:background .15s,border-color .15s;}
+    .btn:hover:not(:disabled){background:#253d63;border-color:var(--accent);}
+    .btn:disabled{opacity:.55;cursor:default;}
+    .btn.correct{background:rgba(39,174,96,.2)!important;border-color:var(--ok)!important;color:#6fe09f;}
+    .btn.wrong{background:rgba(231,76,60,.15)!important;border-color:var(--err)!important;color:#f08080;}
+    .fb{margin-top:10px;font-size:13.5px;padding:10px 14px;border-radius:10px;display:none;}
+    .fb.ok{background:rgba(39,174,96,.12);color:#6fe09f;display:block;}
+    .fb.err{background:rgba(231,76,60,.1);color:#f08080;display:block;}
+    .progress{font-size:13px;color:var(--sub);margin-bottom:16px;}
+    .score-box{background:var(--card);border:1px solid var(--line);border-radius:14px;
+      padding:24px;text-align:center;margin-top:18px;display:none;}
+    .score-box .big{font-size:48px;margin-bottom:8px;}
+    .score-box p{color:var(--sub);font-size:14px;}
+    .foot{text-align:center;font-size:12px;color:#4a5a6a;margin-top:36px;
+      padding-top:14px;border-top:1px solid var(--line);}
+    /* drag styles */
+    .drag-item{padding:10px 14px;background:#1e3050;border:1px solid var(--line);
+      border-radius:10px;cursor:grab;font-size:14px;user-select:none;transition:opacity .15s;}
+    .drag-item:active{cursor:grabbing;opacity:.7;}
+    .drag-item.dragging{opacity:.4;}
+    .drop-zone{min-height:54px;background:rgba(61,139,253,.06);border:2px dashed var(--line);
+      border-radius:10px;padding:8px;display:flex;flex-direction:column;gap:6px;}
+    .drop-zone.over{border-color:var(--accent);background:rgba(61,139,253,.12);}
+    .zone-label{font-size:12px;color:var(--sub);margin-bottom:4px;font-weight:600;}
+</style></head>
+<body><div class="wrap">
+<a class="back" href="index.html">← 목록으로</a>
+<div class="tag">⚖️ 17차시 게임</div><h2>AI 판단 게임 — 믿어도 될까?</h2><p class="lead">실제 상황에서 AI 결과를 어떻게 판단해야 하는지 5가지 케이스로 확인해보세요.</p>
+
+  <div id="judge-qs"></div>
+  <script>
+  var cases=[
+    {scenario:"AI에게 '우리 부대 고장 패턴을 분석해줘'라고 했더니 구체적인 데이터 없이 일반적인 답변을 했다.",
+     q:"AI가 이렇게 답한 이유는?",
+     opts:["AI가 고장 패턴을 이미 알고 있어서","데이터를 제공하지 않아서 일반적으로 답할 수밖에 없었다","질문이 너무 어려워서","AI가 군 정보를 숨기기 때문"],
+     a:1,exp:"AI는 입력된 것만 알고 있습니다. 실제 데이터를 붙여넣어야 구체적인 답변이 가능합니다."},
+    {scenario:"AI가 '2025년 AA부대 정비 현황'에 대해 아주 그럴듯하고 구체적으로 답했다.",
+     q:"이 답변을 바로 믿어도 될까요?",
+     opts:["그렇다. AI는 정확하다","아니다. 없는 데이터를 지어냈을 가능성(환각) 확인 필요","AI가 군 데이터에 접근한 것이다","답변이 구체적이면 신뢰할 수 있다"],
+     a:1,exp:"환각! AI는 '모른다'고 하지 않고 그럴듯하게 지어냅니다. 구체적일수록 더 의심하세요."},
+    {scenario:"프롬프트 창에 실제 근무자 명단과 개인정보를 입력했다.",
+     q:"이것이 문제인 이유는?",
+     opts:["AI가 개인정보를 싫어해서","입력한 내용이 외부 서버로 전송되어 보안 위반 가능성","AI가 느려져서","개인정보는 분석이 안 되기 때문"],
+     a:1,exp:"프롬프트 입력창에 적는 모든 내용은 외부 서버로 전송됩니다. 실데이터·개인정보 입력 절대 금지!"},
+    {scenario:"AI가 제안한 전처리 방법이 그럴듯해 보인다.",
+     q:"바로 적용해야 할까요?",
+     opts:["그렇다. AI가 더 잘 안다","아니다. 원본에서 테스트하고 결과를 사람이 검증해야 한다","맞다면 즉시 적용해도 된다","데이터가 많으면 괜찮다"],
+     a:1,exp:"AI 제안 = 검토 대상. 복사본에서 먼저 테스트, 결과를 원본과 비교, 최종 판단은 사람이!"},
+    {scenario:"AI가 '이 법령에 따르면...'이라며 조항을 인용했다.",
+     q:"어떻게 검증해야 하나요?",
+     opts:["AI가 법령을 정확히 알고 있으니 믿는다","원문을 직접 검색해서 조항이 실제로 존재하는지 확인","다른 AI에게 물어본다","조항 번호가 있으면 신뢰"],
+     a:1,exp:"가짜 출처 주의! AI는 없는 조항을 그럴듯하게 인용합니다. 반드시 원문 직접 확인."},
+  ];
+  var c=document.getElementById('judge-qs');
+  cases.forEach(function(cs,i){
+    var opts=cs.opts.map(function(o,oi){return '<button class="btn jd-btn" data-qi="'+i+'" data-val="'+oi+'" onclick="pickJD(this,'+i+','+oi+','+cs.a+',''+cs.exp.replace(/'/g,'\'')+'')" style="text-align:left;width:100%;margin-bottom:6px;font-size:13px">'+o+'</button>';}).join('');
+    var div=document.createElement('div');div.className='card';div.style.marginBottom='14px';
+    div.innerHTML='<p style="font-size:13px;background:rgba(255,255,255,.04);padding:10px;border-radius:8px;color:var(--sub);margin-bottom:10px;line-height:1.6">📋 '+cs.scenario+'</p><h3 style="font-size:14.5px;margin-bottom:10px">'+cs.q+'</h3>'+opts+'<div class="jd-fb-'+i+' fb"></div>';
+    c.appendChild(div);
+  });
+  function pickJD(btn,qi,val,a,exp){document.querySelectorAll('[data-qi="'+qi+'"]').forEach(function(b){b.disabled=true;});var fb=document.querySelector('.jd-fb-'+qi);if(val===a){btn.classList.add('correct');fb.textContent='✅ '+exp;fb.className='jd-fb-'+qi+' fb ok';}else{btn.classList.add('wrong');document.querySelector('[data-qi="'+qi+'"][data-val="'+a+'"]').classList.add('correct');fb.textContent='❌ '+exp;fb.className='jd-fb-'+qi+' fb err';}}
+  </script>
+
+<div class="foot">데이터 관리자 기본·실무 교육 · 17차시</div>
+</div></body></html>

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>그래프 학습</title><style>
+    :root {
+      --bg:#0f1720;--card:#172230;--line:#2a3a4d;--ink:#eaf1f8;
+      --sub:#9fb2c6;--accent:#3d8bfd;--ok:#27ae60;--err:#e74c3c;--warn:#e67e22;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:var(--ink);
+      font-family:Pretendard,"Malgun Gothic","맑은 고딕",system-ui,sans-serif;
+      min-height:100vh;padding:28px 14px;display:flex;justify-content:center;}
+    .wrap{width:100%;max-width:680px;}
+    .back{display:inline-block;margin-bottom:18px;font-size:13px;color:var(--sub);text-decoration:none;}
+    .back:hover{color:var(--ink);}
+    .tag{display:inline-block;font-size:12px;font-weight:700;color:var(--accent);
+      background:rgba(61,139,253,.12);border:1px solid rgba(61,139,253,.3);
+      padding:4px 11px;border-radius:999px;margin-bottom:10px;}
+    h2{font-size:22px;margin-bottom:8px;}
+    .lead{color:var(--sub);font-size:14.5px;line-height:1.65;margin-bottom:22px;}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:14px;
+      padding:18px 20px;margin-bottom:14px;}
+    .card h3{font-size:15px;margin-bottom:10px;}
+    .opts{display:grid;gap:8px;margin-top:10px;}
+    .opts.g2{grid-template-columns:1fr 1fr;}
+    .opts.g1{grid-template-columns:1fr;}
+    .btn{padding:10px 14px;border-radius:10px;background:#1e3050;color:var(--ink);
+      border:1px solid var(--line);font-size:14px;cursor:pointer;text-align:left;
+      transition:background .15s,border-color .15s;}
+    .btn:hover:not(:disabled){background:#253d63;border-color:var(--accent);}
+    .btn:disabled{opacity:.55;cursor:default;}
+    .btn.correct{background:rgba(39,174,96,.2)!important;border-color:var(--ok)!important;color:#6fe09f;}
+    .btn.wrong{background:rgba(231,76,60,.15)!important;border-color:var(--err)!important;color:#f08080;}
+    .fb{margin-top:10px;font-size:13.5px;padding:10px 14px;border-radius:10px;display:none;}
+    .fb.ok{background:rgba(39,174,96,.12);color:#6fe09f;display:block;}
+    .fb.err{background:rgba(231,76,60,.1);color:#f08080;display:block;}
+    .progress{font-size:13px;color:var(--sub);margin-bottom:16px;}
+    .score-box{background:var(--card);border:1px solid var(--line);border-radius:14px;
+      padding:24px;text-align:center;margin-top:18px;display:none;}
+    .score-box .big{font-size:48px;margin-bottom:8px;}
+    .score-box p{color:var(--sub);font-size:14px;}
+    .foot{text-align:center;font-size:12px;color:#4a5a6a;margin-top:36px;
+      padding-top:14px;border-top:1px solid var(--line);}
+    /* drag styles */
+    .drag-item{padding:10px 14px;background:#1e3050;border:1px solid var(--line);
+      border-radius:10px;cursor:grab;font-size:14px;user-select:none;transition:opacity .15s;}
+    .drag-item:active{cursor:grabbing;opacity:.7;}
+    .drag-item.dragging{opacity:.4;}
+    .drop-zone{min-height:54px;background:rgba(61,139,253,.06);border:2px dashed var(--line);
+      border-radius:10px;padding:8px;display:flex;flex-direction:column;gap:6px;}
+    .drop-zone.over{border-color:var(--accent);background:rgba(61,139,253,.12);}
+    .zone-label{font-size:12px;color:var(--sub);margin-bottom:4px;font-weight:600;}
+</style></head>
+<body><div class="wrap">
+<a class="back" href="index.html">← 목록으로</a>
+<div class="tag">📈 10차시</div><h2>그래프 이해 퀴즈</h2><p class="lead">히스토그램·산점도·박스플롯 핵심 개념.</p>
+<div id="graph-qs"></div><script>
+var qs=[
+  {q:"막대그래프(Bar Chart)는 언제 사용하나요?",opts:["시간에 따른 변화","카테고리 간 값 비교","두 변수의 관계","데이터 분포"],a:1,exp:"막대그래프: 장비유형별 정비 횟수처럼 카테고리 비교에 최적."},
+  {q:"히스토그램이 막대그래프와 다른 점은?",opts:["색이 다르다","X축이 연속형 수치(구간)다","범례가 없다","3D로만 그린다"],a:1,exp:"히스토그램: 연속 수치의 분포. 막대 사이 간격 없음."},
+  {q:"박스플롯에서 수염(Whisker) 밖의 점은?",opts:["최솟값","평균값","이상값(Outlier)","중앙값"],a:2,exp:"수염 밖 점 = 이상값. 전처리 전에 반드시 확인!"},
+  {q:"Y축을 0부터 시작하지 않으면?",opts:["그래프가 예쁘지 않다","차이가 과장될 수 있다","데이터가 틀릴 수 있다","아무 문제없다"],a:1,exp:"축 척도의 함정: 작은 차이도 엄청난 차이처럼 보임."},
+  {q:"안스콤 콰르텟의 교훈은?",opts:["평균이 가장 중요하다","같은 통계값이어도 분포는 전혀 다를 수 있다","그래프 없이도 분석 가능","데이터는 많을수록 좋다"],a:1,exp:"시각화 필수! 같은 통계값이어도 실제 분포는 완전히 다릅니다."},
+];
+var c=document.getElementById('graph-qs');
+qs.forEach(function(q,i){
+  var div=document.createElement('div');div.className='card';div.style.marginBottom='14px';
+  var opts=q.opts.map(function(o,oi){return '<button class="btn" data-qi="'+i+'" data-val="'+oi+'" onclick="pickQ(this,'+i+','+oi+','+q.a+',''+q.exp.replace(/'/g,'\'\'')+'')">'+['①','②','③','④'][oi]+' '+o+'</button>';}).join('');
+  div.innerHTML='<h3 style="font-size:14.5px;margin-bottom:10px">Q'+(i+1)+'. '+q.q+'</h3><div style="display:flex;flex-direction:column;gap:6px">'+opts+'</div><div class="qfb-'+i+' fb"></div>';
+  c.appendChild(div);
+});
+function pickQ(btn,qi,val,a,exp){document.querySelectorAll('[data-qi="'+qi+'"]').forEach(function(b){b.disabled=true;});var fb=document.querySelector('.qfb-'+qi);if(val===a){btn.classList.add('correct');fb.textContent='✅ '+exp;fb.className='qfb-'+qi+' fb ok';}else{btn.classList.add('wrong');document.querySelector('[data-qi="'+qi+'"][data-val="'+a+'"]').classList.add('correct');fb.textContent='❌ '+exp;fb.className='qfb-'+qi+' fb err';}}
+</script>
+<div class="foot">데이터 관리자 기본·실무 교육 · 10차시</div>
+</div></body></html>

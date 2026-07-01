@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>품질 헌트</title><style>
+    :root {
+      --bg:#0f1720;--card:#172230;--line:#2a3a4d;--ink:#eaf1f8;
+      --sub:#9fb2c6;--accent:#3d8bfd;--ok:#27ae60;--err:#e74c3c;--warn:#e67e22;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:var(--ink);
+      font-family:Pretendard,"Malgun Gothic","맑은 고딕",system-ui,sans-serif;
+      min-height:100vh;padding:28px 14px;display:flex;justify-content:center;}
+    .wrap{width:100%;max-width:680px;}
+    .back{display:inline-block;margin-bottom:18px;font-size:13px;color:var(--sub);text-decoration:none;}
+    .back:hover{color:var(--ink);}
+    .tag{display:inline-block;font-size:12px;font-weight:700;color:var(--accent);
+      background:rgba(61,139,253,.12);border:1px solid rgba(61,139,253,.3);
+      padding:4px 11px;border-radius:999px;margin-bottom:10px;}
+    h2{font-size:22px;margin-bottom:8px;}
+    .lead{color:var(--sub);font-size:14.5px;line-height:1.65;margin-bottom:22px;}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:14px;
+      padding:18px 20px;margin-bottom:14px;}
+    .card h3{font-size:15px;margin-bottom:10px;}
+    .opts{display:grid;gap:8px;margin-top:10px;}
+    .opts.g2{grid-template-columns:1fr 1fr;}
+    .opts.g1{grid-template-columns:1fr;}
+    .btn{padding:10px 14px;border-radius:10px;background:#1e3050;color:var(--ink);
+      border:1px solid var(--line);font-size:14px;cursor:pointer;text-align:left;
+      transition:background .15s,border-color .15s;}
+    .btn:hover:not(:disabled){background:#253d63;border-color:var(--accent);}
+    .btn:disabled{opacity:.55;cursor:default;}
+    .btn.correct{background:rgba(39,174,96,.2)!important;border-color:var(--ok)!important;color:#6fe09f;}
+    .btn.wrong{background:rgba(231,76,60,.15)!important;border-color:var(--err)!important;color:#f08080;}
+    .fb{margin-top:10px;font-size:13.5px;padding:10px 14px;border-radius:10px;display:none;}
+    .fb.ok{background:rgba(39,174,96,.12);color:#6fe09f;display:block;}
+    .fb.err{background:rgba(231,76,60,.1);color:#f08080;display:block;}
+    .progress{font-size:13px;color:var(--sub);margin-bottom:16px;}
+    .score-box{background:var(--card);border:1px solid var(--line);border-radius:14px;
+      padding:24px;text-align:center;margin-top:18px;display:none;}
+    .score-box .big{font-size:48px;margin-bottom:8px;}
+    .score-box p{color:var(--sub);font-size:14px;}
+    .foot{text-align:center;font-size:12px;color:#4a5a6a;margin-top:36px;
+      padding-top:14px;border-top:1px solid var(--line);}
+    /* drag styles */
+    .drag-item{padding:10px 14px;background:#1e3050;border:1px solid var(--line);
+      border-radius:10px;cursor:grab;font-size:14px;user-select:none;transition:opacity .15s;}
+    .drag-item:active{cursor:grabbing;opacity:.7;}
+    .drag-item.dragging{opacity:.4;}
+    .drop-zone{min-height:54px;background:rgba(61,139,253,.06);border:2px dashed var(--line);
+      border-radius:10px;padding:8px;display:flex;flex-direction:column;gap:6px;}
+    .drop-zone.over{border-color:var(--accent);background:rgba(61,139,253,.12);}
+    .zone-label{font-size:12px;color:var(--sub);margin-bottom:4px;font-weight:600;}
+</style></head>
+<body><div class="wrap">
+<a class="back" href="index.html">← 목록으로</a>
+<div class="tag">🔍 5차시 분류</div><h2>데이터 품질 기준 분류</h2><p class="lead">각 결함 사례가 완전성·유효성·정확성·일관성 중 어느 기준을 위반했는지 선택하세요.</p>
+
+  <div id="qhunt-qs"></div>
+  <div id="qhunt-score" class="fb" style="margin-top:4px"></div>
+  <button class="btn" style="width:100%;background:var(--accent);color:#fff;margin-top:12px" onclick="checkQH()">전체 정답 확인</button>
+  <script>
+  var defects=[
+    {d:"담당자 칸 비어 있음",opts:["완전성","유효성","정확성","일관성"],correct:"완전성",hint:"빠진 값 = 완전성 위반"},
+    {d:"소요시간 -30분",opts:["완전성","유효성","정확성","일관성"],correct:"유효성",hint:"음수 불가 규칙 위반 = 유효성"},
+    {d:"'완료'인데 소요시간 0분",opts:["완전성","유효성","정확성","일관성"],correct:"정확성",hint:"사실과 다름 = 정확성 위반 (규칙은 통과하지만 현실과 불일치)"},
+    {d:"'무전기'와 '무선기' 혼용",opts:["완전성","유효성","정확성","일관성"],correct:"일관성",hint:"같은 대상 다르게 표기 = 일관성 위반"},
+    {d:"코드 'D' 입력 (허용값 A·B·C)",opts:["완전성","유효성","정확성","일관성"],correct:"유효성",hint:"허용 범위 초과 = 유효성 위반"},
+    {d:"날짜 형식 2026.2.3 / 03/15/2026 혼용",opts:["완전성","유효성","정확성","일관성"],correct:"일관성",hint:"형식 불일치 = 일관성 위반"},
+    {d:"부품번호 칸에 '확인 예정' 텍스트 입력",opts:["완전성","유효성","정확성","일관성"],correct:"유효성",hint:"숫자 필드에 텍스트 = 유효성 위반 (형식 규칙)"},
+    {d:"2027년 미래 날짜가 정비일자에 입력됨",opts:["완전성","유효성","정확성","일관성"],correct:"정확성",hint:"실제로 발생할 수 없는 미래 날짜 = 정확성 위반"},
+  ];
+  var container=document.getElementById('qhunt-qs');
+  var sels={};
+  defects.forEach(function(d,i){
+    var div=document.createElement('div');div.className='card';div.style.marginBottom='12px';
+    var opts=d.opts.map(function(o){
+      return '<button class="btn qh-btn" data-qi="'+i+'" data-val="'+o+'" onclick="selQH(this,'+i+',''+o+'')" style="flex:1;font-size:13px;padding:8px 6px">'+o+'</button>';
+    }).join('');
+    div.innerHTML='<h3 style="font-size:14.5px">'+d.d+'</h3><div style="display:flex;gap:6px;margin-top:10px">'+opts+'</div><div class="qh-fb-'+i+' fb"></div>';
+    container.appendChild(div);
+  });
+  function selQH(btn,qi,val){
+    document.querySelectorAll('[data-qi="'+qi+'"]').forEach(function(b){b.style.background='#1e3050';});
+    btn.style.background='rgba(61,139,253,.3)';sels[qi]=val;
+  }
+  function checkQH(){
+    var correct=0;
+    defects.forEach(function(d,i){
+      var fb=document.querySelector('.qh-fb-'+i);
+      var btns=document.querySelectorAll('[data-qi="'+i+'"]');
+      btns.forEach(function(b){b.disabled=true;});
+      var corBtn=document.querySelector('[data-qi="'+i+'"][data-val="'+d.correct+'"]');
+      if(sels[i]===d.correct){
+        correct++;corBtn.classList.add('correct');
+        fb.textContent='✅ '+d.hint;fb.className='qh-fb-'+i+' fb ok';
+      } else {
+        corBtn.classList.add('correct');
+        if(sels[i]) document.querySelector('[data-qi="'+i+'"][data-val="'+sels[i]+'"]').classList.add('wrong');
+        fb.textContent='❌ '+d.hint;fb.className='qh-fb-'+i+' fb err';
+      }
+    });
+    var sc=document.getElementById('qhunt-score');
+    sc.textContent=correct+'/'+defects.length+'개 정답!'+(correct===defects.length?' 완벽합니다 🎉':'');
+    sc.className='fb '+(correct===defects.length?'ok':'err');
+  }
+  </script>
+
+<div class="foot">데이터 관리자 기본·실무 교육 · 5차시</div>
+</div></body></html>

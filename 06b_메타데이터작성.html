@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>메타데이터 작성</title><style>
+    :root {
+      --bg:#0f1720;--card:#172230;--line:#2a3a4d;--ink:#eaf1f8;
+      --sub:#9fb2c6;--accent:#3d8bfd;--ok:#27ae60;--err:#e74c3c;--warn:#e67e22;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:var(--ink);
+      font-family:Pretendard,"Malgun Gothic","맑은 고딕",system-ui,sans-serif;
+      min-height:100vh;padding:28px 14px;display:flex;justify-content:center;}
+    .wrap{width:100%;max-width:680px;}
+    .back{display:inline-block;margin-bottom:18px;font-size:13px;color:var(--sub);text-decoration:none;}
+    .back:hover{color:var(--ink);}
+    .tag{display:inline-block;font-size:12px;font-weight:700;color:var(--accent);
+      background:rgba(61,139,253,.12);border:1px solid rgba(61,139,253,.3);
+      padding:4px 11px;border-radius:999px;margin-bottom:10px;}
+    h2{font-size:22px;margin-bottom:8px;}
+    .lead{color:var(--sub);font-size:14.5px;line-height:1.65;margin-bottom:22px;}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:14px;
+      padding:18px 20px;margin-bottom:14px;}
+    .card h3{font-size:15px;margin-bottom:10px;}
+    .opts{display:grid;gap:8px;margin-top:10px;}
+    .opts.g2{grid-template-columns:1fr 1fr;}
+    .opts.g1{grid-template-columns:1fr;}
+    .btn{padding:10px 14px;border-radius:10px;background:#1e3050;color:var(--ink);
+      border:1px solid var(--line);font-size:14px;cursor:pointer;text-align:left;
+      transition:background .15s,border-color .15s;}
+    .btn:hover:not(:disabled){background:#253d63;border-color:var(--accent);}
+    .btn:disabled{opacity:.55;cursor:default;}
+    .btn.correct{background:rgba(39,174,96,.2)!important;border-color:var(--ok)!important;color:#6fe09f;}
+    .btn.wrong{background:rgba(231,76,60,.15)!important;border-color:var(--err)!important;color:#f08080;}
+    .fb{margin-top:10px;font-size:13.5px;padding:10px 14px;border-radius:10px;display:none;}
+    .fb.ok{background:rgba(39,174,96,.12);color:#6fe09f;display:block;}
+    .fb.err{background:rgba(231,76,60,.1);color:#f08080;display:block;}
+    .progress{font-size:13px;color:var(--sub);margin-bottom:16px;}
+    .score-box{background:var(--card);border:1px solid var(--line);border-radius:14px;
+      padding:24px;text-align:center;margin-top:18px;display:none;}
+    .score-box .big{font-size:48px;margin-bottom:8px;}
+    .score-box p{color:var(--sub);font-size:14px;}
+    .foot{text-align:center;font-size:12px;color:#4a5a6a;margin-top:36px;
+      padding-top:14px;border-top:1px solid var(--line);}
+    /* drag styles */
+    .drag-item{padding:10px 14px;background:#1e3050;border:1px solid var(--line);
+      border-radius:10px;cursor:grab;font-size:14px;user-select:none;transition:opacity .15s;}
+    .drag-item:active{cursor:grabbing;opacity:.7;}
+    .drag-item.dragging{opacity:.4;}
+    .drop-zone{min-height:54px;background:rgba(61,139,253,.06);border:2px dashed var(--line);
+      border-radius:10px;padding:8px;display:flex;flex-direction:column;gap:6px;}
+    .drop-zone.over{border-color:var(--accent);background:rgba(61,139,253,.12);}
+    .zone-label{font-size:12px;color:var(--sub);margin-bottom:4px;font-weight:600;}
+</style></head>
+<body><div class="wrap">
+<a class="back" href="index.html">← 목록으로</a>
+<div class="tag">📝 6차시 실습</div><h2>메타데이터 6필드 작성</h2><p class="lead">공용 정비일지에 대한 메타데이터 양식을 직접 채워보세요. ⚠️ 본인 실제 업무 데이터 사용 금지!</p>
+
+  <div class="card">
+    <h3>공용 정비일지 메타데이터 작성</h3>
+    <p style="font-size:13.5px;color:var(--sub);margin-bottom:16px">
+      ⚠️ 실습 시 <b style="color:var(--warn)">본인 업무 데이터 사용 금지</b> — 아래 공용 정비일지 예시를 기준으로 작성하세요.
+    </p>
+    <div style="background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:10px;padding:12px;margin-bottom:18px;font-size:13px;color:var(--sub)">
+      📋 <b style="color:var(--ink)">참고 데이터</b>: 공용 정비일지 (정비일자·담당자·정비유형·소요시간·결과코드·고장증상 / xlsx / 약 240행 / 정비 발생 시 수시 갱신)
+    </div>
+    <div id="meta-form" style="display:flex;flex-direction:column;gap:12px;"></div>
+    <div id="meta-fb" class="fb" style="margin-top:14px"></div>
+    <div style="display:flex;gap:8px;margin-top:12px">
+      <button class="btn" style="flex:1;background:var(--accent);color:#fff" onclick="checkMeta()">예시 정답과 비교</button>
+      <button class="btn" style="flex:1" onclick="clearMeta()">초기화</button>
+    </div>
+  </div>
+  <div class="card" id="meta-answer" style="display:none">
+    <h3>✅ 예시 정답</h3>
+    <div id="answer-content" style="font-size:13px;color:var(--sub);line-height:2"></div>
+  </div>
+  <script>
+  var fields=[
+    {key:"name",label:"① 데이터명",placeholder:"예: 장비 정비일지 (공용)"},
+    {key:"owner",label:"② 생산 주체 (관리 담당자)",placeholder:"예: 정비부대 정비관리팀 / 홍길동 상사"},
+    {key:"format",label:"③ 형식 (파일 형태·구조·규모)",placeholder:"예: xlsx · 6컬럼 · 약 240행"},
+    {key:"update",label:"④ 갱신 주기",placeholder:"예: 정비 발생 시 수시"},
+    {key:"security",label:"⑤ 보안등급·접근권한",placeholder:"예: 대내비밀 / 정비 담당자 이상 열람"},
+    {key:"dict",label:"⑥ 항목 정의 (데이터 사전 — 주요 컬럼 설명)",placeholder:"예: 정비유형: A=정기, B=수시, C=긴급 / 결과코드: A=완료, B=부분완료, C=불가"},
+  ];
+  var answers={
+    name:"공용 정비일지",owner:"정비부대 정비관리팀",
+    format:"xlsx · 6컬럼 · 약 240행",update:"정비 발생 시 수시",
+    security:"3급 비밀 / 해당 부대 정비 담당자 이상",
+    dict:"정비유형: A=정기 B=수시 C=긴급 / 결과코드: A=완료 B=부분완료 C=불가 / 소요시간: 분 단위 정수"
+  };
+  var form=document.getElementById('meta-form');
+  fields.forEach(function(f){
+    var div=document.createElement('div');
+    div.innerHTML='<label style="font-size:13px;color:var(--sub);display:block;margin-bottom:6px">'+f.label+'</label>'
+      +'<textarea data-key="'+f.key+'" placeholder="'+f.placeholder+'" rows="'+(f.key==='dict'?3:1)+'" style="width:100%;background:#1e3050;border:1px solid var(--line);border-radius:8px;padding:10px 12px;color:var(--ink);font-size:13.5px;font-family:inherit;resize:vertical;"></textarea>';
+    form.appendChild(div);
+  });
+  function checkMeta(){
+    var filled=0;
+    document.querySelectorAll('[data-key]').forEach(function(ta){if(ta.value.trim()) filled++;});
+    var fb=document.getElementById('meta-fb');
+    fb.textContent=filled+'/'+fields.length+'개 항목 작성됨. '+(filled===fields.length?'모두 작성했습니다! 아래 예시 정답과 비교해보세요.':'나머지 항목도 채워보세요.');
+    fb.className='fb '+(filled===fields.length?'ok':'err');
+    var ac=document.getElementById('answer-content');
+    var ans=Object.entries(answers).map(function(e,i){
+      return '<b style="color:var(--ink)">'+fields[i].label+'</b>: '+e[1];
+    }).join('<br>');
+    ac.innerHTML=ans;
+    document.getElementById('meta-answer').style.display='block';
+  }
+  function clearMeta(){
+    document.querySelectorAll('[data-key]').forEach(function(ta){ta.value='';});
+    document.getElementById('meta-fb').className='fb';
+    document.getElementById('meta-fb').textContent='';
+    document.getElementById('meta-answer').style.display='none';
+  }
+  </script>
+
+<div class="foot">데이터 관리자 기본·실무 교육 · 6차시</div>
+</div></body></html>

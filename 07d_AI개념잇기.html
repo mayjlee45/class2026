@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 개념 잇기</title><style>
+    :root {
+      --bg:#0f1720;--card:#172230;--line:#2a3a4d;--ink:#eaf1f8;
+      --sub:#9fb2c6;--accent:#3d8bfd;--ok:#27ae60;--err:#e74c3c;--warn:#e67e22;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:var(--ink);
+      font-family:Pretendard,"Malgun Gothic","맑은 고딕",system-ui,sans-serif;
+      min-height:100vh;padding:28px 14px;display:flex;justify-content:center;}
+    .wrap{width:100%;max-width:680px;}
+    .back{display:inline-block;margin-bottom:18px;font-size:13px;color:var(--sub);text-decoration:none;}
+    .back:hover{color:var(--ink);}
+    .tag{display:inline-block;font-size:12px;font-weight:700;color:var(--accent);
+      background:rgba(61,139,253,.12);border:1px solid rgba(61,139,253,.3);
+      padding:4px 11px;border-radius:999px;margin-bottom:10px;}
+    h2{font-size:22px;margin-bottom:8px;}
+    .lead{color:var(--sub);font-size:14.5px;line-height:1.65;margin-bottom:22px;}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:14px;
+      padding:18px 20px;margin-bottom:14px;}
+    .card h3{font-size:15px;margin-bottom:10px;}
+    .opts{display:grid;gap:8px;margin-top:10px;}
+    .opts.g2{grid-template-columns:1fr 1fr;}
+    .opts.g1{grid-template-columns:1fr;}
+    .btn{padding:10px 14px;border-radius:10px;background:#1e3050;color:var(--ink);
+      border:1px solid var(--line);font-size:14px;cursor:pointer;text-align:left;
+      transition:background .15s,border-color .15s;}
+    .btn:hover:not(:disabled){background:#253d63;border-color:var(--accent);}
+    .btn:disabled{opacity:.55;cursor:default;}
+    .btn.correct{background:rgba(39,174,96,.2)!important;border-color:var(--ok)!important;color:#6fe09f;}
+    .btn.wrong{background:rgba(231,76,60,.15)!important;border-color:var(--err)!important;color:#f08080;}
+    .fb{margin-top:10px;font-size:13.5px;padding:10px 14px;border-radius:10px;display:none;}
+    .fb.ok{background:rgba(39,174,96,.12);color:#6fe09f;display:block;}
+    .fb.err{background:rgba(231,76,60,.1);color:#f08080;display:block;}
+    .progress{font-size:13px;color:var(--sub);margin-bottom:16px;}
+    .score-box{background:var(--card);border:1px solid var(--line);border-radius:14px;
+      padding:24px;text-align:center;margin-top:18px;display:none;}
+    .score-box .big{font-size:48px;margin-bottom:8px;}
+    .score-box p{color:var(--sub);font-size:14px;}
+    .foot{text-align:center;font-size:12px;color:#4a5a6a;margin-top:36px;
+      padding-top:14px;border-top:1px solid var(--line);}
+    /* drag styles */
+    .drag-item{padding:10px 14px;background:#1e3050;border:1px solid var(--line);
+      border-radius:10px;cursor:grab;font-size:14px;user-select:none;transition:opacity .15s;}
+    .drag-item:active{cursor:grabbing;opacity:.7;}
+    .drag-item.dragging{opacity:.4;}
+    .drop-zone{min-height:54px;background:rgba(61,139,253,.06);border:2px dashed var(--line);
+      border-radius:10px;padding:8px;display:flex;flex-direction:column;gap:6px;}
+    .drop-zone.over{border-color:var(--accent);background:rgba(61,139,253,.12);}
+    .zone-label{font-size:12px;color:var(--sub);margin-bottom:4px;font-weight:600;}
+</style></head>
+<body><div class="wrap">
+<a class="back" href="index.html">← 목록으로</a>
+<div class="tag">🔗 7차시 매칭</div><h2>AI 핵심 개념 잇기</h2><p class="lead">AI 학습 방식과 주요 개념을 설명과 연결하세요.</p>
+
+  <div class="card">
+    <h3>AI 개념과 설명 연결하기</h3>
+    <p style="font-size:13.5px;color:var(--sub);margin-bottom:14px">왼쪽 개념을 클릭한 뒤 오른쪽 설명을 클릭해 연결하세요.</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div><div class="zone-label">개념</div><div id="lc" style="display:flex;flex-direction:column;gap:8px;"></div></div>
+      <div><div class="zone-label">설명</div><div id="rc" style="display:flex;flex-direction:column;gap:8px;"></div></div>
+    </div>
+    <div id="ai-match-fb" class="fb" style="margin-top:14px"></div>
+  </div>
+  <script>
+  var pairs=[
+    {term:"지도학습",def:"정답(라벨)을 보고 배우는 학습 방식"},
+    {term:"비지도학습",def:"정답 없이 데이터의 패턴·군집을 스스로 찾기"},
+    {term:"환각(Hallucination)",def:"AI가 없는 사실을 그럴듯하게 만들어내는 현상"},
+    {term:"RAG",def:"검색 증강 생성 — 외부 문서를 검색해 답변에 활용"},
+    {term:"LLM",def:"거대 언어 모델 — 방대한 텍스트로 학습된 AI"},
+    {term:"RLHF",def:"인간 피드백 기반 강화학습 — 사람의 선호도로 AI 개선"},
+    {term:"멀티모달",def:"텍스트·이미지·음성 등 여러 형태의 데이터를 처리"},
+    {term:"편향(Bias)",def:"AI가 치우친 데이터를 학습해 공정하지 않은 결과 출력"},
+  ];
+  var shuffled=[...pairs].sort(()=>Math.random()-0.5);
+  var selL=null,selR=null,done={};
+  var lc=document.getElementById('lc'),rc=document.getElementById('rc');
+  pairs.forEach(function(p,i){
+    var el=document.createElement('div');el.className='drag-item';el.textContent=p.term;
+    el.dataset.idx=i;el.dataset.role='L';el.style.cursor='pointer';
+    el.onclick=function(){if(done[i])return;document.querySelectorAll('[data-role="L"]').forEach(x=>x.style.borderColor='var(--line)');this.style.borderColor='var(--accent)';selL=this;tryM();};
+    lc.appendChild(el);
+  });
+  shuffled.forEach(function(p){
+    var oi=pairs.indexOf(p);
+    var el=document.createElement('div');el.className='drag-item';el.textContent=p.def;
+    el.dataset.idx=oi;el.dataset.role='R';el.style.cursor='pointer';el.style.fontSize='13px';
+    el.onclick=function(){if(done[oi])return;document.querySelectorAll('[data-role="R"]').forEach(x=>x.style.borderColor='var(--line)');this.style.borderColor='var(--accent)';selR=this;tryM();};
+    rc.appendChild(el);
+  });
+  function tryM(){
+    if(!selL||!selR)return;
+    var li=parseInt(selL.dataset.idx),ri=parseInt(selR.dataset.idx);
+    var fb=document.getElementById('ai-match-fb');
+    if(li===ri){selL.style.borderColor='var(--ok)';selL.style.color='#6fe09f';done[li]=true;selR.style.borderColor='var(--ok)';selR.style.color='#6fe09f';fb.textContent='✅ 맞았습니다!';fb.className='fb ok';}
+    else{[selL,selR].forEach(el=>el.style.background='rgba(231,76,60,.15)');fb.textContent='❌ 다시 해보세요.';fb.className='fb err';setTimeout(()=>{[selL,selR].forEach(el=>{el.style.background='';el.style.borderColor='var(--line)';});},700);}
+    selL=null;selR=null;
+    if(Object.keys(done).length===pairs.length){fb.textContent='🎉 모두 연결 완료!';fb.className='fb ok';}
+  }
+  </script>
+
+<div class="foot">데이터 관리자 기본·실무 교육 · 7차시</div>
+</div></body></html>

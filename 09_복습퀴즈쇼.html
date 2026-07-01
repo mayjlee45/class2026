@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>복습 퀴즈쇼</title><style>
+    :root {
+      --bg:#0f1720;--card:#172230;--line:#2a3a4d;--ink:#eaf1f8;
+      --sub:#9fb2c6;--accent:#3d8bfd;--ok:#27ae60;--err:#e74c3c;--warn:#e67e22;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:var(--ink);
+      font-family:Pretendard,"Malgun Gothic","맑은 고딕",system-ui,sans-serif;
+      min-height:100vh;padding:28px 14px;display:flex;justify-content:center;}
+    .wrap{width:100%;max-width:680px;}
+    .back{display:inline-block;margin-bottom:18px;font-size:13px;color:var(--sub);text-decoration:none;}
+    .back:hover{color:var(--ink);}
+    .tag{display:inline-block;font-size:12px;font-weight:700;color:var(--accent);
+      background:rgba(61,139,253,.12);border:1px solid rgba(61,139,253,.3);
+      padding:4px 11px;border-radius:999px;margin-bottom:10px;}
+    h2{font-size:22px;margin-bottom:8px;}
+    .lead{color:var(--sub);font-size:14.5px;line-height:1.65;margin-bottom:22px;}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:14px;
+      padding:18px 20px;margin-bottom:14px;}
+    .card h3{font-size:15px;margin-bottom:10px;}
+    .opts{display:grid;gap:8px;margin-top:10px;}
+    .opts.g2{grid-template-columns:1fr 1fr;}
+    .opts.g1{grid-template-columns:1fr;}
+    .btn{padding:10px 14px;border-radius:10px;background:#1e3050;color:var(--ink);
+      border:1px solid var(--line);font-size:14px;cursor:pointer;text-align:left;
+      transition:background .15s,border-color .15s;}
+    .btn:hover:not(:disabled){background:#253d63;border-color:var(--accent);}
+    .btn:disabled{opacity:.55;cursor:default;}
+    .btn.correct{background:rgba(39,174,96,.2)!important;border-color:var(--ok)!important;color:#6fe09f;}
+    .btn.wrong{background:rgba(231,76,60,.15)!important;border-color:var(--err)!important;color:#f08080;}
+    .fb{margin-top:10px;font-size:13.5px;padding:10px 14px;border-radius:10px;display:none;}
+    .fb.ok{background:rgba(39,174,96,.12);color:#6fe09f;display:block;}
+    .fb.err{background:rgba(231,76,60,.1);color:#f08080;display:block;}
+    .progress{font-size:13px;color:var(--sub);margin-bottom:16px;}
+    .score-box{background:var(--card);border:1px solid var(--line);border-radius:14px;
+      padding:24px;text-align:center;margin-top:18px;display:none;}
+    .score-box .big{font-size:48px;margin-bottom:8px;}
+    .score-box p{color:var(--sub);font-size:14px;}
+    .foot{text-align:center;font-size:12px;color:#4a5a6a;margin-top:36px;
+      padding-top:14px;border-top:1px solid var(--line);}
+    /* drag styles */
+    .drag-item{padding:10px 14px;background:#1e3050;border:1px solid var(--line);
+      border-radius:10px;cursor:grab;font-size:14px;user-select:none;transition:opacity .15s;}
+    .drag-item:active{cursor:grabbing;opacity:.7;}
+    .drag-item.dragging{opacity:.4;}
+    .drop-zone{min-height:54px;background:rgba(61,139,253,.06);border:2px dashed var(--line);
+      border-radius:10px;padding:8px;display:flex;flex-direction:column;gap:6px;}
+    .drop-zone.over{border-color:var(--accent);background:rgba(61,139,253,.12);}
+    .zone-label{font-size:12px;color:var(--sub);margin-bottom:4px;font-weight:600;}
+</style></head>
+<body><div class="wrap">
+<a class="back" href="index.html">← 목록으로</a>
+<div class="tag">🎬 9차시 복습</div><h2>8차시 전처리 복습 퀴즈쇼</h2><p class="lead">전처리와 표준화 핵심 개념 7문제. 빠르게 도전!</p>
+
+  <div class="progress" id="qs-prog">1 / 7</div>
+  <div id="qs-area"></div>
+  <div id="qs-final" class="score-box"></div>
+  <script>
+  var qs=[
+    {q:"전처리와 정제가 왜 필요한가?",opts:["AI가 처리 못하는 데이터를 버리기 위해","분석 결과의 신뢰성을 높이기 위해","파일 용량을 줄이기 위해","예쁘게 보이게 하기 위해"],a:1,exp:"전처리 = 분석 결과의 품질 결정. 쓰레기 데이터를 정제하지 않으면 결과도 쓰레기."},
+    {q:"원본 불변 원칙이란?",opts:["원본 파일을 절대 열지 않는다","수정 시 원본을 보존하고 복사본에서 작업","원본 데이터는 AI만 접근 가능","원본 파일명에 '원본' 표시"],a:1,exp:"원본 불변: 전처리 전 원본을 반드시 백업 보존. 복사본에서만 작업."},
+    {q:"결측값 처리 방법 중 올바른 것은?",opts:["무조건 삭제","무조건 평균으로 대체","상황에 따라 삭제·대체·유지 중 선택","AI가 알아서 처리"],a:2,exp:"결측값은 '왜 비어있는가'에 따라 다르게 처리. 맥락이 핵심!"},
+    {q:"'무전기'와 '무선기' 혼용 문제를 해결하는 전처리 기법은?",opts:["삭제","표준화 (통일된 명칭으로 치환)","결측 처리","모두 영어로 변환"],a:1,exp:"일관성 위반 = 표준화로 해결. 통일된 명칭으로 find-replace."},
+    {q:"수치 필드에 '약 1시간'이라는 텍스트가 입력되었다. 처리 방법은?",opts:["그대로 사용","60으로 수치화 (담당자 확인 후)","삭제","'1'로 입력"],a:1,exp:"텍스트 → 수치 변환(수치화). 담당자에게 확인 후 60(분)으로 처리."},
+    {q:"전처리 기록을 남겨야 하는 이유는?",opts:["법적 의무이기 때문","누가 왜 어떻게 수정했는지 추적하기 위해","데이터 용량 증가를 막기 위해","필요 없음 — AI가 기억"],a:1,exp:"전처리 이력 = 재현성과 신뢰성의 기반. 수정 이유를 모르면 나중에 검증 불가."},
+    {q:"'이상값'과 '결측값'의 차이는?",opts:["이상값=없는 값, 결측값=잘못된 값","이상값=범위 벗어난 값, 결측값=없는 값","둘 다 같은 의미","이상값만 전처리 대상"],a:1,exp:"이상값: 값은 있지만 비정상 (예: -30분). 결측값: 값 자체가 없음 (예: 빈칸)."},
+  ];
+  var cur=0,correct=0;
+  function render(){
+    var prog=document.getElementById('qs-prog'),area=document.getElementById('qs-area');
+    if(cur>=qs.length){area.style.display='none';prog.style.display='none';
+      var f=document.getElementById('qs-final');f.style.display='block';
+      f.innerHTML='<div class="big">'+(correct>=6?'🏆':correct>=5?'🥇':'📚')+'</div><div style="font-size:20px;font-weight:700;margin:8px 0">'+correct+'/'+qs.length+' 정답</div><p style="color:var(--sub);font-size:14px">'+(correct===qs.length?'완벽합니다!':'틀린 문제를 다시 확인해보세요.')+'</p><button class="btn" style="margin-top:14px;background:var(--accent);color:#fff" onclick="cur=0;correct=0;document.getElementById('qs-final').style.display='none';document.getElementById('qs-area').style.display='block';document.getElementById('qs-prog').style.display='block';render()">다시 도전</button>';
+      return;}
+    prog.textContent=(cur+1)+' / '+qs.length;
+    var q=qs[cur];
+    area.innerHTML='<div class="card"><h3 style="font-size:16px;margin-bottom:16px">Q'+(cur+1)+'. '+q.q+'</h3>'+q.opts.map(function(o,i){return '<button class="btn" onclick="pick('+i+')" style="text-align:left;width:100%;margin-bottom:8px">'+['①','②','③','④'][i]+' '+o+'</button>';}).join('')+'<div id="qfb" class="fb"></div></div>';
+  }
+  function pick(i){
+    var q=qs[cur];document.querySelectorAll('.btn').forEach(function(b){b.disabled=true;});
+    if(i===q.a){correct++;document.querySelectorAll('.btn')[i].classList.add('correct');document.getElementById('qfb').textContent='✅ '+q.exp;document.getElementById('qfb').className='fb ok';}
+    else{document.querySelectorAll('.btn')[i].classList.add('wrong');document.querySelectorAll('.btn')[q.a].classList.add('correct');document.getElementById('qfb').textContent='❌ '+q.exp;document.getElementById('qfb').className='fb err';}
+    setTimeout(function(){cur++;render();},1800);
+  }
+  render();
+  </script>
+
+<div class="foot">데이터 관리자 기본·실무 교육 · 9차시</div>
+</div></body></html>

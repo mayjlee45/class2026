@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>품질 검사관</title><style>
+    :root {
+      --bg:#0f1720;--card:#172230;--line:#2a3a4d;--ink:#eaf1f8;
+      --sub:#9fb2c6;--accent:#3d8bfd;--ok:#27ae60;--err:#e74c3c;--warn:#e67e22;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:var(--ink);
+      font-family:Pretendard,"Malgun Gothic","맑은 고딕",system-ui,sans-serif;
+      min-height:100vh;padding:28px 14px;display:flex;justify-content:center;}
+    .wrap{width:100%;max-width:680px;}
+    .back{display:inline-block;margin-bottom:18px;font-size:13px;color:var(--sub);text-decoration:none;}
+    .back:hover{color:var(--ink);}
+    .tag{display:inline-block;font-size:12px;font-weight:700;color:var(--accent);
+      background:rgba(61,139,253,.12);border:1px solid rgba(61,139,253,.3);
+      padding:4px 11px;border-radius:999px;margin-bottom:10px;}
+    h2{font-size:22px;margin-bottom:8px;}
+    .lead{color:var(--sub);font-size:14.5px;line-height:1.65;margin-bottom:22px;}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:14px;
+      padding:18px 20px;margin-bottom:14px;}
+    .card h3{font-size:15px;margin-bottom:10px;}
+    .opts{display:grid;gap:8px;margin-top:10px;}
+    .opts.g2{grid-template-columns:1fr 1fr;}
+    .opts.g1{grid-template-columns:1fr;}
+    .btn{padding:10px 14px;border-radius:10px;background:#1e3050;color:var(--ink);
+      border:1px solid var(--line);font-size:14px;cursor:pointer;text-align:left;
+      transition:background .15s,border-color .15s;}
+    .btn:hover:not(:disabled){background:#253d63;border-color:var(--accent);}
+    .btn:disabled{opacity:.55;cursor:default;}
+    .btn.correct{background:rgba(39,174,96,.2)!important;border-color:var(--ok)!important;color:#6fe09f;}
+    .btn.wrong{background:rgba(231,76,60,.15)!important;border-color:var(--err)!important;color:#f08080;}
+    .fb{margin-top:10px;font-size:13.5px;padding:10px 14px;border-radius:10px;display:none;}
+    .fb.ok{background:rgba(39,174,96,.12);color:#6fe09f;display:block;}
+    .fb.err{background:rgba(231,76,60,.1);color:#f08080;display:block;}
+    .progress{font-size:13px;color:var(--sub);margin-bottom:16px;}
+    .score-box{background:var(--card);border:1px solid var(--line);border-radius:14px;
+      padding:24px;text-align:center;margin-top:18px;display:none;}
+    .score-box .big{font-size:48px;margin-bottom:8px;}
+    .score-box p{color:var(--sub);font-size:14px;}
+    .foot{text-align:center;font-size:12px;color:#4a5a6a;margin-top:36px;
+      padding-top:14px;border-top:1px solid var(--line);}
+    /* drag styles */
+    .drag-item{padding:10px 14px;background:#1e3050;border:1px solid var(--line);
+      border-radius:10px;cursor:grab;font-size:14px;user-select:none;transition:opacity .15s;}
+    .drag-item:active{cursor:grabbing;opacity:.7;}
+    .drag-item.dragging{opacity:.4;}
+    .drop-zone{min-height:54px;background:rgba(61,139,253,.06);border:2px dashed var(--line);
+      border-radius:10px;padding:8px;display:flex;flex-direction:column;gap:6px;}
+    .drop-zone.over{border-color:var(--accent);background:rgba(61,139,253,.12);}
+    .zone-label{font-size:12px;color:var(--sub);margin-bottom:4px;font-weight:600;}
+</style></head>
+<body><div class="wrap">
+<a class="back" href="index.html">← 목록으로</a>
+<div class="tag">🔬 5차시 실습</div><h2>품질 검사관 실습</h2><p class="lead">실제 상황에서 품질 문제를 발견하고 올바른 처리 방법을 선택해보세요.</p>
+
+  <div id="inspector-qs"></div>
+  <div id="ins-score" class="fb" style="margin-top:4px"></div>
+  <script>
+  var cases=[
+    {scenario:"정비일지 '소요시간' 칸에 '약 1시간'이 입력되어 있다.",
+     question:"이 데이터, 어떻게 처리해야 할까요?",
+     opts:["그대로 두고 분석에 사용","담당자에게 확인 후 60으로 수치화","삭제한다"],
+     correct:1,hint:"텍스트 → 수치 변환 필요. 담당자 확인 후 60(분)으로 표준화하는 것이 정석입니다."},
+    {scenario:"10,000건 중 3건의 '비고' 칸만 비어 있다.",
+     question:"어떻게 판단하는 것이 가장 합리적일까요?",
+     opts:["즉시 재수집한다","비고는 필수 항목이 아니므로 무시해도 됨","결측 표시 후 분석 제외"],
+     correct:1,hint:"비고는 보통 선택 항목. 전체 0.03%의 결측은 분석에 큰 영향 없습니다. 단, 비고가 핵심 정보라면 담당자 확인."},
+    {scenario:"'장비코드' 칸에 A/B/C/D/E가 혼용되어 있다. 허용값은 A·B·C만.",
+     question:"D와 E는 어떻게 처리해야 할까요?",
+     opts:["분석에 그냥 포함","담당자에게 D·E의 의미를 확인하고 수정 또는 별도 처리","모두 삭제"],
+     correct:1,hint:"D·E가 입력 오류인지 새 코드인지 확인이 먼저입니다. 확인 없이 삭제하면 정보 손실 위험."},
+    {scenario:"같은 장비가 '무전기 AN/PRC-150'과 '무선기 PRC150'으로 혼용되어 있다.",
+     question:"무엇이 문제이며 어떻게 해결해야 할까요?",
+     opts:["문제없음, 의미는 같으니까","일관성 위반 — 표준 명칭을 정해 통일","비정형이므로 AI가 알아서 처리"],
+     correct:1,hint:"일관성 위반! '무전기 AN/PRC-150'처럼 표준 명칭을 정하고 find-replace로 통일하세요."},
+  ];
+  var container=document.getElementById('inspector-qs');
+  var sels={};
+  cases.forEach(function(c,i){
+    var div=document.createElement('div');div.className='card';div.style.marginBottom='12px';
+    var opts=c.opts.map(function(o,oi){
+      return '<button class="btn ins-btn" data-qi="'+i+'" data-val="'+oi+'" onclick="selIns(this,'+i+','+oi+','+c.correct+',''+c.hint.replace(/'/g,'\'')+'')" style="text-align:left;width:100%;margin-bottom:6px;font-size:13px">'+o+'</button>';
+    }).join('');
+    div.innerHTML='<p style="font-size:13px;background:rgba(255,255,255,.04);padding:10px;border-radius:8px;margin-bottom:10px;color:var(--sub)">📋 '+c.scenario+'</p><h3 style="font-size:14.5px;margin-bottom:10px">'+c.question+'</h3>'+opts+'<div class="ins-fb-'+i+' fb"></div>';
+    container.appendChild(div);
+  });
+  function selIns(btn,qi,val,correct,hint){
+    var btns=document.querySelectorAll('[data-qi="'+qi+'"]');
+    btns.forEach(function(b){b.disabled=true;});
+    var fb=document.querySelector('.ins-fb-'+qi);
+    if(val===correct){
+      btn.classList.add('correct');fb.textContent='✅ '+hint;fb.className='ins-fb-'+qi+' fb ok';
+    } else {
+      btn.classList.add('wrong');
+      document.querySelector('[data-qi="'+qi+'"][data-val="'+correct+'"]').classList.add('correct');
+      fb.textContent='❌ '+hint;fb.className='ins-fb-'+qi+' fb err';
+    }
+  }
+  </script>
+
+<div class="foot">데이터 관리자 기본·실무 교육 · 5차시</div>
+</div></body></html>

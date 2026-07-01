@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI 먹이 주기</title>
+  <style>
+    :root {
+      --bg:#0f1720;--card:#172230;--line:#2a3a4d;--ink:#eaf1f8;
+      --sub:#9fb2c6;--accent:#3d8bfd;--ok:#27ae60;--err:#e74c3c;--warn:#e67e22;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:var(--ink);
+      font-family:Pretendard,"Malgun Gothic","맑은 고딕",system-ui,sans-serif;
+      min-height:100vh;padding:28px 14px;display:flex;justify-content:center;}
+    .wrap{width:100%;max-width:680px;}
+    .back{display:inline-block;margin-bottom:18px;font-size:13px;color:var(--sub);text-decoration:none;}
+    .back:hover{color:var(--ink);}
+    .tag{display:inline-block;font-size:12px;font-weight:700;color:var(--accent);
+      background:rgba(61,139,253,.12);border:1px solid rgba(61,139,253,.3);
+      padding:4px 11px;border-radius:999px;margin-bottom:10px;}
+    h2{font-size:22px;margin-bottom:8px;}
+    .lead{color:var(--sub);font-size:14.5px;line-height:1.65;margin-bottom:22px;}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:14px;
+      padding:18px 20px;margin-bottom:14px;}
+    .card h3{font-size:15px;margin-bottom:10px;}
+    .opts{display:grid;gap:8px;margin-top:10px;}
+    .opts.g2{grid-template-columns:1fr 1fr;}
+    .opts.g1{grid-template-columns:1fr;}
+    .btn{padding:10px 14px;border-radius:10px;background:#1e3050;color:var(--ink);
+      border:1px solid var(--line);font-size:14px;cursor:pointer;text-align:left;
+      transition:background .15s,border-color .15s;}
+    .btn:hover:not(:disabled){background:#253d63;border-color:var(--accent);}
+    .btn:disabled{opacity:.55;cursor:default;}
+    .btn.correct{background:rgba(39,174,96,.2)!important;border-color:var(--ok)!important;color:#6fe09f;}
+    .btn.wrong{background:rgba(231,76,60,.15)!important;border-color:var(--err)!important;color:#f08080;}
+    .fb{margin-top:10px;font-size:13.5px;padding:10px 14px;border-radius:10px;display:none;}
+    .fb.ok{background:rgba(39,174,96,.12);color:#6fe09f;display:block;}
+    .fb.err{background:rgba(231,76,60,.1);color:#f08080;display:block;}
+    .progress{font-size:13px;color:var(--sub);margin-bottom:16px;}
+    .score-box{background:var(--card);border:1px solid var(--line);border-radius:14px;
+      padding:24px;text-align:center;margin-top:18px;display:none;}
+    .score-box .big{font-size:48px;margin-bottom:8px;}
+    .score-box p{color:var(--sub);font-size:14px;}
+    .foot{text-align:center;font-size:12px;color:#4a5a6a;margin-top:36px;
+      padding-top:14px;border-top:1px solid var(--line);}
+    /* drag styles */
+    .drag-item{padding:10px 14px;background:#1e3050;border:1px solid var(--line);
+      border-radius:10px;cursor:grab;font-size:14px;user-select:none;transition:opacity .15s;}
+    .drag-item:active{cursor:grabbing;opacity:.7;}
+    .drag-item.dragging{opacity:.4;}
+    .drop-zone{min-height:54px;background:rgba(61,139,253,.06);border:2px dashed var(--line);
+      border-radius:10px;padding:8px;display:flex;flex-direction:column;gap:6px;}
+    .drop-zone.over{border-color:var(--accent);background:rgba(61,139,253,.12);}
+    .zone-label{font-size:12px;color:var(--sub);margin-bottom:4px;font-weight:600;}
+
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="index.html">← 목록으로</a>
+  <div class="tag">🤖 1차시 분류</div>
+  <h2>AI는 어떤 데이터를 먹고 자라나요?</h2>
+  <p class="lead">데이터를 드래그해서 AI가 바로 쓸 수 있는 것과 손질이 필요한 것으로 분류해보세요.</p>
+
+  <div class="card">
+    <h3>AI는 어떤 데이터를 먹고 자랄까요?</h3>
+    <p style="font-size:14px;color:var(--sub);margin-bottom:14px">
+      아래 데이터를 AI가 <b style="color:var(--ok)">바로 쓸 수 있는 것</b>과 <b style="color:var(--warn)">손질이 필요한 것</b>으로 분류해보세요.
+    </p>
+    <div id="items-pool" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px;min-height:50px;"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      <div>
+        <div class="zone-label" style="color:var(--ok)">✅ AI가 바로 활용</div>
+        <div class="drop-zone" id="zone-ok" ondragover="dov(event)" ondrop="dop(event,'ok')"></div>
+      </div>
+      <div>
+        <div class="zone-label" style="color:var(--warn)">🔧 손질 후 활용</div>
+        <div class="drop-zone" id="zone-fix" ondragover="dov(event)" ondrop="dop(event,'fix')"></div>
+      </div>
+    </div>
+    <div id="ai-fb" class="fb" style="margin-top:14px;"></div>
+    <button class="btn" style="margin-top:12px;width:100%;background:var(--accent);color:#fff;" onclick="checkAI()">정답 확인</button>
+  </div>
+  <div class="card" style="margin-top:0">
+    <h3>💡 핵심 원칙</h3>
+    <p style="font-size:14px;color:var(--sub);line-height:1.7">
+      <b style="color:var(--ink)">Garbage In, Garbage Out (GIGO)</b><br>
+      쓰레기를 넣으면 쓰레기가 나옵니다. AI가 아무리 똑똑해도 데이터 품질이 나쁘면 결과도 나쁩니다.<br><br>
+      단, <b style="color:var(--ink)">자잘한 실수는 괜찮습니다.</b> 양이 충분하면 AI가 어느 정도 보완합니다.<br>
+      <b style="color:var(--err)">핵심 정보가 틀렸거나</b>, <b style="color:var(--err)">한쪽으로 치우친 데이터</b>는 고쳐지지 않습니다.
+    </p>
+  </div>
+  <script>
+  var data=[
+    {t:"라벨 붙은 정비 이력 DB",z:"ok"},
+    {t:"정비유형·날짜·결과 표준 입력된 엑셀",z:"ok"},
+    {t:"담당자 칸 50% 비어있는 일지",z:"fix"},
+    {t:"무전기/무선기 혼용 데이터",z:"fix"},
+    {t:"센서 정상 수치 시계열",z:"ok"},
+    {t:"수기 메모 스캔 사진",z:"fix"},
+    {t:"날짜형식 제각각 (20260101/2026.1.1)",z:"fix"},
+    {t:"코드화된 고장유형 DB",z:"ok"},
+  ];
+  var pool=document.getElementById('items-pool');
+  data.forEach(function(d,i){
+    var el=document.createElement('div');
+    el.className='drag-item';el.draggable=true;
+    el.textContent=d.t;el.dataset.idx=i;el.dataset.correct=d.z;
+    el.addEventListener('dragstart',function(e){
+      e.dataTransfer.setData('text',i);this.classList.add('dragging');
+    });
+    el.addEventListener('dragend',function(){this.classList.remove('dragging');});
+    pool.appendChild(el);
+  });
+  function dov(e){e.preventDefault();e.currentTarget.classList.add('over');}
+  document.querySelectorAll('.drop-zone').forEach(function(z){
+    z.addEventListener('dragleave',function(){this.classList.remove('over');});
+  });
+  function dop(e,zone){
+    e.preventDefault();
+    var idx=e.dataTransfer.getData('text');
+    var el=document.querySelector('[data-idx="'+idx+'"]');
+    e.currentTarget.classList.remove('over');
+    e.currentTarget.appendChild(el);
+  }
+  function checkAI(){
+    var ok=document.getElementById('zone-ok').querySelectorAll('.drag-item');
+    var fix=document.getElementById('zone-fix').querySelectorAll('.drag-item');
+    var correct=0,total=data.length;
+    ok.forEach(function(el){if(el.dataset.correct==='ok'){correct++;el.style.borderColor='var(--ok)';}else{el.style.borderColor='var(--err)';}});
+    fix.forEach(function(el){if(el.dataset.correct==='fix'){correct++;el.style.borderColor='var(--ok)';}else{el.style.borderColor='var(--err)';}});
+    var fb=document.getElementById('ai-fb');
+    fb.textContent=correct+'/'+(ok.length+fix.length)+'개 정답! '+(correct===total?'완벽합니다 🎉':'빨간 테두리를 확인해보세요.');
+    fb.className='fb '+(correct===total?'ok':'err');
+  }
+  </script>
+
+  <div class="foot">데이터 관리자 기본·실무 교육 · 1차시</div>
+</div>
+
+</body>
+</html>

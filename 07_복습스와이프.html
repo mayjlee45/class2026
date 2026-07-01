@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>1일차 복습</title><style>
+    :root {
+      --bg:#0f1720;--card:#172230;--line:#2a3a4d;--ink:#eaf1f8;
+      --sub:#9fb2c6;--accent:#3d8bfd;--ok:#27ae60;--err:#e74c3c;--warn:#e67e22;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:var(--ink);
+      font-family:Pretendard,"Malgun Gothic","맑은 고딕",system-ui,sans-serif;
+      min-height:100vh;padding:28px 14px;display:flex;justify-content:center;}
+    .wrap{width:100%;max-width:680px;}
+    .back{display:inline-block;margin-bottom:18px;font-size:13px;color:var(--sub);text-decoration:none;}
+    .back:hover{color:var(--ink);}
+    .tag{display:inline-block;font-size:12px;font-weight:700;color:var(--accent);
+      background:rgba(61,139,253,.12);border:1px solid rgba(61,139,253,.3);
+      padding:4px 11px;border-radius:999px;margin-bottom:10px;}
+    h2{font-size:22px;margin-bottom:8px;}
+    .lead{color:var(--sub);font-size:14.5px;line-height:1.65;margin-bottom:22px;}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:14px;
+      padding:18px 20px;margin-bottom:14px;}
+    .card h3{font-size:15px;margin-bottom:10px;}
+    .opts{display:grid;gap:8px;margin-top:10px;}
+    .opts.g2{grid-template-columns:1fr 1fr;}
+    .opts.g1{grid-template-columns:1fr;}
+    .btn{padding:10px 14px;border-radius:10px;background:#1e3050;color:var(--ink);
+      border:1px solid var(--line);font-size:14px;cursor:pointer;text-align:left;
+      transition:background .15s,border-color .15s;}
+    .btn:hover:not(:disabled){background:#253d63;border-color:var(--accent);}
+    .btn:disabled{opacity:.55;cursor:default;}
+    .btn.correct{background:rgba(39,174,96,.2)!important;border-color:var(--ok)!important;color:#6fe09f;}
+    .btn.wrong{background:rgba(231,76,60,.15)!important;border-color:var(--err)!important;color:#f08080;}
+    .fb{margin-top:10px;font-size:13.5px;padding:10px 14px;border-radius:10px;display:none;}
+    .fb.ok{background:rgba(39,174,96,.12);color:#6fe09f;display:block;}
+    .fb.err{background:rgba(231,76,60,.1);color:#f08080;display:block;}
+    .progress{font-size:13px;color:var(--sub);margin-bottom:16px;}
+    .score-box{background:var(--card);border:1px solid var(--line);border-radius:14px;
+      padding:24px;text-align:center;margin-top:18px;display:none;}
+    .score-box .big{font-size:48px;margin-bottom:8px;}
+    .score-box p{color:var(--sub);font-size:14px;}
+    .foot{text-align:center;font-size:12px;color:#4a5a6a;margin-top:36px;
+      padding-top:14px;border-top:1px solid var(--line);}
+    /* drag styles */
+    .drag-item{padding:10px 14px;background:#1e3050;border:1px solid var(--line);
+      border-radius:10px;cursor:grab;font-size:14px;user-select:none;transition:opacity .15s;}
+    .drag-item:active{cursor:grabbing;opacity:.7;}
+    .drag-item.dragging{opacity:.4;}
+    .drop-zone{min-height:54px;background:rgba(61,139,253,.06);border:2px dashed var(--line);
+      border-radius:10px;padding:8px;display:flex;flex-direction:column;gap:6px;}
+    .drop-zone.over{border-color:var(--accent);background:rgba(61,139,253,.12);}
+    .zone-label{font-size:12px;color:var(--sub);margin-bottom:4px;font-weight:600;}
+</style></head>
+<body><div class="wrap">
+<a class="back" href="index.html">← 목록으로</a>
+<div class="tag">🔄 7차시 복습</div><h2>1일차 핵심 개념 복습 카드</h2><p class="lead">카드를 클릭해서 정답을 확인하고 다음으로 넘어가세요.</p>
+
+  <div class="progress" id="sw-prog">1 / 8</div>
+  <div id="sw-card-wrap" style="perspective:1000px"></div>
+  <div id="sw-result" class="score-box"></div>
+  <script>
+  var cards=[
+    {q:"데이터 = ?",a:"관찰·측정·기록으로 남긴 모든 것 (완벽하지 않아도, 디지털이 아니어도 OK)"},
+    {q:"생명주기 6단계 순서는?",a:"생성 → 수집 → 저장 → 활용 → 보존 → 폐기"},
+    {q:"생명주기 두 급소는?",a:"수집 (잘못 모으면 뒤에서 못 고침) & 폐기 (안 지우면 보안 사고)"},
+    {q:"정형 데이터 특징은?",a:"행·열 구조, 기계가 바로 연산 가능 (엑셀·DB 테이블)"},
+    {q:"비정형 데이터 예시 3가지는?",a:"동영상·음성 녹음·이메일 본문·HWP 문서·SNS 게시물 등"},
+    {q:"데이터 품질 4대 기준은?",a:"완전성(빠짐없이) · 유효성(규칙 준수) · 정확성(사실과 일치) · 일관성(표기 통일)"},
+    {q:"메타데이터란?",a:"데이터에 붙이는 설명서. 6필드: 데이터명·생산주체·형식·갱신주기·보안등급·항목정의"},
+    {q:"GIGO란?",a:"Garbage In, Garbage Out — 쓰레기를 넣으면 쓰레기가 나온다"},
+  ];
+  var cur=0;
+  function render(){
+    var prog=document.getElementById('sw-prog');
+    var wrap=document.getElementById('sw-card-wrap');
+    if(cur>=cards.length){
+      wrap.innerHTML='';prog.style.display='none';
+      var res=document.getElementById('sw-result');
+      res.innerHTML='<div class="big">🎊</div><p style="font-size:16px;font-weight:700;margin:8px 0">1일차 핵심 8개 복습 완료!</p><button class="btn" style="margin-top:14px;background:var(--accent);color:#fff" onclick="cur=0;document.getElementById('sw-result').style.display='none';document.getElementById('sw-prog').style.display='block';render()">다시 보기</button>';
+      res.style.display='block';return;
+    }
+    prog.textContent=(cur+1)+' / '+cards.length;
+    var c=cards[cur];
+    wrap.innerHTML='<div class="card" id="flip-card" style="cursor:pointer;text-align:center;padding:32px 20px;min-height:180px;display:flex;flex-direction:column;justify-content:center;align-items:center" onclick="flip()">'
+      +'<div style="font-size:13px;color:var(--sub);margin-bottom:16px">클릭하면 정답 공개</div>'
+      +'<h3 style="font-size:18px;line-height:1.5" id="q-text">'+c.q+'</h3>'
+      +'<div id="a-text" style="display:none;margin-top:16px;font-size:14.5px;color:#6fe09f;line-height:1.6">'+c.a+'</div></div>'
+      +'<div id="nav-btns" style="display:none;display:flex;gap:8px;margin-top:12px">'
+      +'<button class="btn" style="flex:1" onclick="next()">다음 →</button></div>';
+  }
+  function flip(){
+    document.getElementById('a-text').style.display='block';
+    document.getElementById('flip-card').style.background='rgba(39,174,96,.08)';
+    document.getElementById('nav-btns').style.display='flex';
+  }
+  function next(){cur++;render();}
+  render();
+  </script>
+
+<div class="foot">데이터 관리자 기본·실무 교육 · 7차시</div>
+</div></body></html>

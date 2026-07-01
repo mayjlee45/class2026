@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>데이터 관리자 기본·실무 교육 — 실습 포털</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 28px 16px;
+      font-family: -apple-system, "Apple SD Gothic Neo", "맑은 고딕", sans-serif;
+      font-size: 16px;
+      line-height: 1.6;
+      background: #191912;
+      color: #cdc8c2;
+    }
+    h1 { font-size: 24px; margin-bottom: 4px; }
+    .sub { color: #9a9284; font-size: 14px; margin-bottom: 20px; }
+    a.ask {
+      display: block; padding: 14px; margin-bottom: 10px;
+      border-radius: 12px; background: #302a6e;
+      color: #e8e6e3; text-decoration: none; font-size: 15px;
+      transition: background 0.15s;
+    }
+    a.ask:hover { background: #3c3489; }
+    .docs {
+      border: 1px solid #393d40; border-radius: 10px;
+      padding: 12px 14px; margin-bottom: 24px;
+    }
+    .docs a { color: #cdc8c2; text-decoration: none; font-size: 14px; }
+    .docs a:hover { color: #e8e6e3; }
+    .day {
+      font-size: 13px; color: #aea79c;
+      margin: 20px 0 8px; padding-bottom: 4px;
+      border-bottom: 1px solid #2a2c2d;
+    }
+    .row {
+      display: flex; align-items: center; flex-wrap: wrap; gap: 6px;
+      padding: 11px 14px; margin-bottom: 8px;
+      border: 1px solid #393d40; border-radius: 10px;
+      background: #181a1b; transition: background 0.15s;
+    }
+    .row:hover { background: #1e2122; }
+    .num { font-size: 12px; color: #9a9284; width: 40px; flex-shrink: 0; }
+    .ttl { font-size: 15px; font-weight: 500; color: #cdc8c2; min-width: 140px; flex: 1; }
+    a.go {
+      display: inline-block; font-size: 13px; padding: 7px 13px;
+      border-radius: 8px; background: #13382e; color: #ccc8c1;
+      text-decoration: none; white-space: nowrap; transition: background 0.15s;
+    }
+    a.go:hover { background: #1a4a3c; }
+    a.go.ext { background: #1a1a3a; color: #b0acd0; }
+    a.go.ext:hover { background: #252550; }
+    a.go.wrap { background: #2e1f00; color: #d4b98a; }
+    a.go.wrap:hover { background: #3d2a00; }
+    footer {
+      text-align: center; font-size: 13px; color: #6b6660;
+      margin-top: 40px; padding-top: 16px; border-top: 1px solid #2a2c2d;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🧭 데이터 관리자 기본·실무 교육</h1>
+  <!-- TODO: 부제에 기관명 입력 -->
+  <p class="sub"><!-- 기관명 --> · 3일 과정 · 차시를 골라 실습/퀴즈를 진행하세요.</p>
+
+  <!-- TODO: Padlet URL 입력 -->
+  <a class="ask" href="https://padlet.com/TODO_PADLET_URL" target="_blank">
+    ❓ 익명으로 질문 남기기
+  </a>
+
+  <!-- TODO: Google Drive URL 입력 -->
+  <div class="docs">
+    <a href="https://drive.google.com/TODO_DRIVE_FOLDER" target="_blank">
+      📑 강의 자료 · 실습 데이터
+    </a>
+  </div>
+
+  <!-- ────────────────────────────── 1일차 ────────────────────────────── -->
+  <div class="day">1일차 · 데이터란 무엇인가 — 정의·분류·생명주기·수집·품질·메타데이터</div>
+
+  <div class="row">
+    <span class="num">워밍업</span>
+    <span class="ttl">실습 도구 익히기</span>
+    <a class="go wrap" href="워밍업_동물선택.html" target="_blank">좋아하는 동물 ▶</a>
+  </div>
+
+  <div class="row">
+    <span class="num">1차시</span>
+    <span class="ttl">AI 시대의 데이터와 데이터 관리자의 역할</span>
+    <a class="go" href="01a_오너퀴즈.html" target="_blank">오너 퀴즈 ▶</a>
+    <a class="go" href="01b_내가남기는데이터.html" target="_blank">내가 남기는 데이터 ▶</a>
+    <a class="go" href="01c_AI먹이주기.html" target="_blank">AI 먹이 주기 ▶</a>
+  </div>
+
+  <div class="row">
+    <span class="num">2차시</span>
+    <span class="ttl">데이터의 정의와 분류</span>
+    <a class="go" href="02_분류게임.html" target="_blank">분류 게임 ▶</a>
+    <a class="go" href="02b_분류드래그게임.html" target="_blank">드래그 분류 ▶</a>
+    <a class="go" href="02c_데이터타입.html" target="_blank">데이터 타입 ▶</a>
+  </div>
+
+  <div class="row">
+    <span class="num">3차시</span>
+    <span class="ttl">데이터 생명주기</span>
+    <a class="go" href="03_생명주기매칭.html" target="_blank">생명주기 매칭 ▶</a>
+    <a class="go" href="03a_생명주기순서.html" target="_blank">순서 맞히기 ▶</a>
+    <a class="go" href="03b_가치곡선.html" target="_blank">가치곡선 만져보기 ▶</a>
+    <a class="go" href="03d_생명주기예시게임.html" target="_blank">예시 게임 ▶</a>
+  </div>
+
+  <div class="row">
+    <span class="num">4차시</span>
+    <span class="ttl">데이터 수집 실무</span>
+    <a class="go" href="04a_번개복습_1일차.html" target="_blank">번개 복습 ▶</a>
+    <a class="go" href="04b_이상한것찾기.html" target="_blank">이상한 것 찾기 ▶</a>
+    <a class="go" href="04c_내입력습관.html" target="_blank">내 입력 습관 ▶</a>
+    <a class="go" href="04d_수집시뮬레이션.html" target="_blank">수집 시뮬레이션 ▶</a>
+  </div>
+
+  <div class="row">
+    <span class="num">5차시</span>
+    <span class="ttl">데이터 품질 개념과 기준</span>
+    <a class="go" href="05_품질헌트.html" target="_blank">품질 헌트 ▶</a>
+    <a class="go" href="05b_품질비용곡선.html" target="_blank">품질 비용 곡선 ▶</a>
+    <a class="go" href="05c_품질검사관.html" target="_blank">품질 검사관 ▶</a>
+  </div>
+
+  <div class="row">
+    <span class="num">6차시</span>
+    <span class="ttl">데이터 목록화·메타데이터</span>
+    <a class="go" href="06b_메타데이터작성.html" target="_blank">메타데이터 작성 ▶</a>
+    <a class="go wrap" href="06_1일차골든벨.html" target="_blank">🔔 1일차 골든벨 ▶</a>
+  </div>
+
+  <!-- ────────────────────────────── 2일차 ────────────────────────────── -->
+  <div class="day">2일차 · AI와 데이터 처리 — AI 이해·전처리·분석·시각화·노코드 실습</div>
+
+  <div class="row">
+    <span class="num">7차시</span>
+    <span class="ttl">AI는 데이터를 어떻게 쓰나</span>
+    <a class="go" href="07_복습스와이프.html" target="_blank">1일차 복습 ▶</a>
+    <a class="go" href="07b_AI데이터판단.html" target="_blank">AI 데이터 판단 ▶</a>
+    <a class="go" href="07c_패턴게임.html" target="_blank">패턴 게임 ▶</a>
+    <a class="go" href="07d_AI개념잇기.html" target="_blank">AI 개념 잇기 ▶</a>
+    <a class="go ext" href="7차시_실습사이트.html" target="_blank">🧪 실습 사이트 ▶</a>
+  </div>
+
+  <div class="row">
+    <span class="num">8차시</span>
+    <span class="ttl">데이터 전처리와 표준화</span>
+    <a class="go" href="08_결측판단.html" target="_blank">결측 판단 ▶</a>
+    <a class="go" href="08b_데이터클리닝.html" target="_blank">데이터 클리닝 ▶</a>
+  </div>
+
+  <div class="row">
+    <span class="num">9차시</span>
+    <span class="ttl">데이터 분석 개념</span>
+    <a class="go" href="09_복습퀴즈쇼.html" target="_blank">복습 퀴즈쇼 ▶</a>
+    <a class="go" href="09b_기술통계.html" target="_blank">기술통계 계산기 ▶</a>
+  </div>
+
+  <div class="row">
+    <span class="num">10차시</span>
+    <span class="ttl">데이터 시각화 개념</span>
+    <a class="go" href="10_그래프학습.html" target="_blank">그래프 학습 ▶</a>
+    <a class="go" href="10b_안스콤.html" target="_blank">안스콤 콰르텟 ▶</a>
+    <a class="go" href="10c_그래프구성.html" target="_blank">그래프 구성 �채우기 ▶</a>
+    <a class="go" href="10d_그래프읽기.html" target="_blank">그래프 읽기 ▶</a>
+  </div>
+
+  <div class="row">
+    <span class="num">11차시</span>
+    <span class="ttl">전처리 실습 (노코드 — Orange3)</span>
+    <a class="go ext" href="12f_Orange자습가이드.html" target="_blank">🍊 Orange 자습 가이드 ▶</a>
+  </div>
+
+  <div class="row">
+    <span class="num">12차시</span>
+    <span class="ttl">시각화·분석 실습 (노코드 — Orange3)</span>
+    <a class="go" href="12e_2일차관통.html" target="_blank">2일차 관통 실습 ▶</a>
+    <a class="go" href="12g_분석보고서.html" target="_blank">분석 보고서 ▶</a>
+  </div>
+
+  <!-- ────────────────────────────── 3일차 ────────────────────────────── -->
+  <div class="day">3일차 · 생성형 AI 실무 활용 — 프롬프팅·실습·검증·윤리</div>
+
+  <div class="row">
+    <span class="num">13차시</span>
+    <span class="ttl">AI에게 일 시키기 — 프롬프팅 기초</span>
+    <a class="go" href="13_복습_1·2일차.html" target="_blank">1·2일차 복습 ▶</a>
+    <a class="go" href="13_프롬프트고치기.html" target="_blank">프롬프트 고치기 ▶</a>
+  </div>
+
+  <div class="row">
+    <span class="num">14차시</span>
+    <span class="ttl">생성형 AI 활용 시연</span>
+    <!-- 강사 시연 차시 — 포털 활동 없음 -->
+    <span style="font-size:13px; color:#6b6660; padding: 7px 4px;">강사 시연</span>
+  </div>
+
+  <div class="row">
+    <span class="num">15차시</span>
+    <span class="ttl">생성형 AI 실습 ① — 데이터 정리·문서화</span>
+    <a class="go" href="15_실습자료.html" target="_blank">실습 자료 ▶</a>
+  </div>
+
+  <div class="row">
+    <span class="num">16차시</span>
+    <span class="ttl">생성형 AI 실습 ② — 이어 다듬기·활용 카탈로그</span>
+    <a class="go" href="16_활용카탈로그.html" target="_blank">활용 카탈로그 ▶</a>
+  </div>
+
+  <div class="row">
+    <span class="num">17차시</span>
+    <span class="ttl">AI를 믿어도 될까 — 환각·편향·보안</span>
+    <a class="go" href="17_AI판단게임.html" target="_blank">AI 판단 게임 ▶</a>
+    <a class="go" href="17_환각체험.html" target="_blank">환각 체험 ▶</a>
+  </div>
+
+  <div class="row">
+    <span class="num">18차시</span>
+    <span class="ttl">마무리 · 최종 과제</span>
+    <a class="go" href="18_데이터유형테스트.html" target="_blank">데이터 유형 테스트 ▶</a>
+    <a class="go" href="18_미니모의고사.html" target="_blank">미니 모의고사 ▶</a>
+    <a class="go wrap" href="18_최종과제.html" target="_blank">🎯 최종 과제 ▶</a>
+  </div>
+
+  <footer>박지윤 · 데이터 관리자 기본·실무 교육</footer>
+
+</body>
+</html>

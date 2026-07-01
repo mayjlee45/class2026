@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>그래프 읽기</title><style>
+    :root {
+      --bg:#0f1720;--card:#172230;--line:#2a3a4d;--ink:#eaf1f8;
+      --sub:#9fb2c6;--accent:#3d8bfd;--ok:#27ae60;--err:#e74c3c;--warn:#e67e22;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:var(--ink);
+      font-family:Pretendard,"Malgun Gothic","맑은 고딕",system-ui,sans-serif;
+      min-height:100vh;padding:28px 14px;display:flex;justify-content:center;}
+    .wrap{width:100%;max-width:680px;}
+    .back{display:inline-block;margin-bottom:18px;font-size:13px;color:var(--sub);text-decoration:none;}
+    .back:hover{color:var(--ink);}
+    .tag{display:inline-block;font-size:12px;font-weight:700;color:var(--accent);
+      background:rgba(61,139,253,.12);border:1px solid rgba(61,139,253,.3);
+      padding:4px 11px;border-radius:999px;margin-bottom:10px;}
+    h2{font-size:22px;margin-bottom:8px;}
+    .lead{color:var(--sub);font-size:14.5px;line-height:1.65;margin-bottom:22px;}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:14px;
+      padding:18px 20px;margin-bottom:14px;}
+    .card h3{font-size:15px;margin-bottom:10px;}
+    .opts{display:grid;gap:8px;margin-top:10px;}
+    .opts.g2{grid-template-columns:1fr 1fr;}
+    .opts.g1{grid-template-columns:1fr;}
+    .btn{padding:10px 14px;border-radius:10px;background:#1e3050;color:var(--ink);
+      border:1px solid var(--line);font-size:14px;cursor:pointer;text-align:left;
+      transition:background .15s,border-color .15s;}
+    .btn:hover:not(:disabled){background:#253d63;border-color:var(--accent);}
+    .btn:disabled{opacity:.55;cursor:default;}
+    .btn.correct{background:rgba(39,174,96,.2)!important;border-color:var(--ok)!important;color:#6fe09f;}
+    .btn.wrong{background:rgba(231,76,60,.15)!important;border-color:var(--err)!important;color:#f08080;}
+    .fb{margin-top:10px;font-size:13.5px;padding:10px 14px;border-radius:10px;display:none;}
+    .fb.ok{background:rgba(39,174,96,.12);color:#6fe09f;display:block;}
+    .fb.err{background:rgba(231,76,60,.1);color:#f08080;display:block;}
+    .progress{font-size:13px;color:var(--sub);margin-bottom:16px;}
+    .score-box{background:var(--card);border:1px solid var(--line);border-radius:14px;
+      padding:24px;text-align:center;margin-top:18px;display:none;}
+    .score-box .big{font-size:48px;margin-bottom:8px;}
+    .score-box p{color:var(--sub);font-size:14px;}
+    .foot{text-align:center;font-size:12px;color:#4a5a6a;margin-top:36px;
+      padding-top:14px;border-top:1px solid var(--line);}
+    /* drag styles */
+    .drag-item{padding:10px 14px;background:#1e3050;border:1px solid var(--line);
+      border-radius:10px;cursor:grab;font-size:14px;user-select:none;transition:opacity .15s;}
+    .drag-item:active{cursor:grabbing;opacity:.7;}
+    .drag-item.dragging{opacity:.4;}
+    .drop-zone{min-height:54px;background:rgba(61,139,253,.06);border:2px dashed var(--line);
+      border-radius:10px;padding:8px;display:flex;flex-direction:column;gap:6px;}
+    .drop-zone.over{border-color:var(--accent);background:rgba(61,139,253,.12);}
+    .zone-label{font-size:12px;color:var(--sub);margin-bottom:4px;font-weight:600;}
+</style></head>
+<body><div class="wrap">
+<a class="back" href="index.html">← 목록으로</a>
+<div class="tag">👁️ 10차시</div><h2>그래프 읽기 실습</h2><p class="lead">정비 데이터 막대그래프를 보고 질문에 답하세요.</p>
+<div class="card"><h3>그래프를 보고 답하세요</h3>
+<canvas id="rc" width="640" height="240" style="width:100%;border-radius:10px;background:#0d1820;margin-bottom:14px;"></canvas>
+</div><div id="rd-qs"></div>
+<script>
+var cv=document.getElementById('rc'),ctx=cv.getContext('2d'),W=cv.width,H=cv.height;
+var data=[{l:"정기",v:145},{l:"수시",v:89},{l:"긴급",v:23}];
+var colors=['#3d8bfd','#6fe09f','#fdbc40'];
+ctx.strokeStyle='#2a3a4d';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(50,20);ctx.lineTo(50,H-40);ctx.lineTo(W-20,H-40);ctx.stroke();
+data.forEach(function(d,i){
+  var x=80+i*160,bh=(H-65)*(d.v/160),y=H-40-bh;
+  ctx.fillStyle=colors[i];ctx.fillRect(x,y,80,bh);
+  ctx.fillStyle='#9fb2c6';ctx.font='12px sans-serif';ctx.fillText(d.l,x+20,H-20);ctx.fillText(d.v,x+25,y-5);
+});
+ctx.fillText('건수',8,35);
+var qs=[
+  {q:"가장 많은 정비유형은?",opts:["수시","긴급","정기"],a:2,exp:"정기 145건으로 최다."},
+  {q:"긴급 정비는 정기의 약 몇%?",opts:["약 5%","약 16%","약 50%"],a:1,exp:"23/145 ≈ 16%."},
+  {q:"이 그래프로 알 수 없는 것은?",opts:["정비유형별 건수","소요시간 평균","수시+긴급 합계"],a:1,exp:"소요시간 정보는 이 그래프에 없습니다."},
+];
+var c=document.getElementById('rd-qs');
+qs.forEach(function(q,i){
+  var div=document.createElement('div');div.className='card';div.style.marginBottom='14px';
+  var opts=q.opts.map(function(o,oi){return '<button class="btn" data-qi="'+i+'" data-val="'+oi+'" onclick="pickRD(this,'+i+','+oi+','+q.a+',''+q.exp.replace(/'/g,"'")+'')">'+o+'</button>';}).join('');
+  div.innerHTML='<h3 style="font-size:14.5px;margin-bottom:10px">Q'+(i+1)+'. '+q.q+'</h3><div style="display:flex;gap:6px;flex-wrap:wrap">'+opts+'</div><div class="rdfb-'+i+' fb"></div>';
+  c.appendChild(div);
+});
+function pickRD(btn,qi,val,a,exp){document.querySelectorAll('[data-qi="'+qi+'"]').forEach(function(b){b.disabled=true;});var fb=document.querySelector('.rdfb-'+qi);if(val===a){btn.classList.add('correct');fb.textContent='✅ '+exp;fb.className='rdfb-'+qi+' fb ok';}else{btn.classList.add('wrong');document.querySelector('[data-qi="'+qi+'"][data-val="'+a+'"]').classList.add('correct');fb.textContent='❌ '+exp;fb.className='rdfb-'+qi+' fb err';}}
+</script>
+<div class="foot">데이터 관리자 기본·실무 교육 · 10차시</div>
+</div></body></html>

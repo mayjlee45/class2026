@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>1일차 골든벨</title><style>
+    :root {
+      --bg:#0f1720;--card:#172230;--line:#2a3a4d;--ink:#eaf1f8;
+      --sub:#9fb2c6;--accent:#3d8bfd;--ok:#27ae60;--err:#e74c3c;--warn:#e67e22;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:var(--ink);
+      font-family:Pretendard,"Malgun Gothic","맑은 고딕",system-ui,sans-serif;
+      min-height:100vh;padding:28px 14px;display:flex;justify-content:center;}
+    .wrap{width:100%;max-width:680px;}
+    .back{display:inline-block;margin-bottom:18px;font-size:13px;color:var(--sub);text-decoration:none;}
+    .back:hover{color:var(--ink);}
+    .tag{display:inline-block;font-size:12px;font-weight:700;color:var(--accent);
+      background:rgba(61,139,253,.12);border:1px solid rgba(61,139,253,.3);
+      padding:4px 11px;border-radius:999px;margin-bottom:10px;}
+    h2{font-size:22px;margin-bottom:8px;}
+    .lead{color:var(--sub);font-size:14.5px;line-height:1.65;margin-bottom:22px;}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:14px;
+      padding:18px 20px;margin-bottom:14px;}
+    .card h3{font-size:15px;margin-bottom:10px;}
+    .opts{display:grid;gap:8px;margin-top:10px;}
+    .opts.g2{grid-template-columns:1fr 1fr;}
+    .opts.g1{grid-template-columns:1fr;}
+    .btn{padding:10px 14px;border-radius:10px;background:#1e3050;color:var(--ink);
+      border:1px solid var(--line);font-size:14px;cursor:pointer;text-align:left;
+      transition:background .15s,border-color .15s;}
+    .btn:hover:not(:disabled){background:#253d63;border-color:var(--accent);}
+    .btn:disabled{opacity:.55;cursor:default;}
+    .btn.correct{background:rgba(39,174,96,.2)!important;border-color:var(--ok)!important;color:#6fe09f;}
+    .btn.wrong{background:rgba(231,76,60,.15)!important;border-color:var(--err)!important;color:#f08080;}
+    .fb{margin-top:10px;font-size:13.5px;padding:10px 14px;border-radius:10px;display:none;}
+    .fb.ok{background:rgba(39,174,96,.12);color:#6fe09f;display:block;}
+    .fb.err{background:rgba(231,76,60,.1);color:#f08080;display:block;}
+    .progress{font-size:13px;color:var(--sub);margin-bottom:16px;}
+    .score-box{background:var(--card);border:1px solid var(--line);border-radius:14px;
+      padding:24px;text-align:center;margin-top:18px;display:none;}
+    .score-box .big{font-size:48px;margin-bottom:8px;}
+    .score-box p{color:var(--sub);font-size:14px;}
+    .foot{text-align:center;font-size:12px;color:#4a5a6a;margin-top:36px;
+      padding-top:14px;border-top:1px solid var(--line);}
+    /* drag styles */
+    .drag-item{padding:10px 14px;background:#1e3050;border:1px solid var(--line);
+      border-radius:10px;cursor:grab;font-size:14px;user-select:none;transition:opacity .15s;}
+    .drag-item:active{cursor:grabbing;opacity:.7;}
+    .drag-item.dragging{opacity:.4;}
+    .drop-zone{min-height:54px;background:rgba(61,139,253,.06);border:2px dashed var(--line);
+      border-radius:10px;padding:8px;display:flex;flex-direction:column;gap:6px;}
+    .drop-zone.over{border-color:var(--accent);background:rgba(61,139,253,.12);}
+    .zone-label{font-size:12px;color:var(--sub);margin-bottom:4px;font-weight:600;}
+</style></head>
+<body><div class="wrap">
+<a class="back" href="index.html">← 목록으로</a>
+<div class="tag">🔔 6차시 마무리</div><h2>1일차 골든벨</h2><p class="lead">1일차 핵심 내용 6문제. 제한 없음 — 천천히 생각하고 도전하세요!</p>
+
+  <div class="progress" id="gb-prog">1 / 6</div>
+  <div id="gb-q-area"></div>
+  <div id="gb-result" class="score-box">
+    <div class="big" id="gb-emoji">🎉</div>
+    <div id="gb-score-text" style="font-size:20px;font-weight:700;margin-bottom:8px"></div>
+    <p id="gb-msg" style="color:var(--sub);font-size:14px"></p>
+    <button class="btn" style="margin-top:16px;background:var(--accent);color:#fff" onclick="restart()">다시 도전</button>
+  </div>
+  <script>
+  var qs=[
+    {q:"데이터 생명주기의 두 가지 '급소'는?",
+     opts:["수집과 저장","수집과 폐기","저장과 활용","생성과 폐기"],
+     a:1,exp:"수집 (잘못 모으면 뒤에서 못 고침) · 폐기 (안 지우면 보안 사고)"},
+    {q:"데이터 품질 4대 기준이 아닌 것은?",
+     opts:["완전성","유효성","일관성","가시성"],
+     a:3,exp:"4대 기준: 완전성·유효성·정확성·일관성. 가시성은 해당 없음."},
+    {q:"메타데이터 6필드에 포함되지 않는 것은?",
+     opts:["데이터명","생산 주체","가격·비용","항목 정의(데이터 사전)"],
+     a:2,exp:"6필드: 데이터명·생산주체·형식·갱신주기·보안등급/접근권한·항목정의"},
+    {q:"'완료인데 소요시간 0분'은 어느 품질 기준 위반인가?",
+     opts:["완전성","유효성","정확성","일관성"],
+     a:2,exp:"형식 규칙은 통과하지만 현실과 불일치 = 정확성 위반"},
+    {q:"시의성 데이터에 대한 올바른 설명은?",
+     opts:["쌓을수록 가치가 높아진다","그때만 가치가 폭발, 시기 지나면 급감","비정형 데이터만 해당된다","AI 학습에 가장 좋다"],
+     a:1,exp:"시의성 데이터: 실시간 경보·기상처럼 특정 시점에 가치 집중"},
+    {q:"'같은 장비를 무전기/무선기로 혼용'은 어느 품질 기준 위반인가?",
+     opts:["완전성","유효성","정확성","일관성"],
+     a:3,exp:"같은 대상을 다르게 표기 = 일관성 위반"},
+  ];
+  var cur=0,correct=0;
+  function render(){
+    var area=document.getElementById('gb-q-area');
+    var prog=document.getElementById('gb-prog');
+    if(cur>=qs.length){
+      area.style.display='none';prog.style.display='none';
+      var res=document.getElementById('gb-result');res.style.display='block';
+      var emoji=correct>=5?'🏆':correct>=4?'🥇':correct>=3?'😊':'📚';
+      document.getElementById('gb-emoji').textContent=emoji;
+      document.getElementById('gb-score-text').textContent=correct+'/'+qs.length+'점';
+      document.getElementById('gb-msg').textContent=correct===6?'완벽합니다! 1일차 내용을 완전히 마스터했습니다!':correct>=4?'훌륭합니다! 틀린 문제를 다시 확인해보세요.':'1일차 내용을 다시 한번 복습해보세요.';
+      return;
+    }
+    prog.textContent=(cur+1)+' / '+qs.length;
+    var q=qs[cur];
+    var opts=q.opts.map(function(o,i){
+      return '<button class="btn" onclick="pick('+i+')" style="text-align:left;width:100%;margin-bottom:8px">'+['①','②','③','④'][i]+' '+o+'</button>';
+    }).join('');
+    area.innerHTML='<div class="card"><h3 style="font-size:16px;margin-bottom:16px">Q'+(cur+1)+'. '+q.q+'</h3>'+opts+'<div id="qfb" class="fb"></div></div>';
+  }
+  function pick(i){
+    var q=qs[cur];
+    var btns=document.querySelectorAll('.btn');btns.forEach(function(b){b.disabled=true;});
+    var fb=document.getElementById('qfb');
+    if(i===q.a){correct++;btns[i].classList.add('correct');fb.textContent='✅ '+q.exp;fb.className='fb ok';}
+    else{btns[i].classList.add('wrong');btns[q.a].classList.add('correct');fb.textContent='❌ '+q.exp;fb.className='fb err';}
+    setTimeout(function(){cur++;render();},1800);
+  }
+  function restart(){cur=0;correct=0;document.getElementById('gb-result').style.display='none';document.getElementById('gb-q-area').style.display='block';document.getElementById('gb-prog').style.display='block';render();}
+  render();
+  </script>
+
+<div class="foot">데이터 관리자 기본·실무 교육 · 6차시</div>
+</div></body></html>

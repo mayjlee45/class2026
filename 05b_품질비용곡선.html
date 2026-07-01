@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>품질 비용 곡선</title><style>
+    :root {
+      --bg:#0f1720;--card:#172230;--line:#2a3a4d;--ink:#eaf1f8;
+      --sub:#9fb2c6;--accent:#3d8bfd;--ok:#27ae60;--err:#e74c3c;--warn:#e67e22;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:var(--ink);
+      font-family:Pretendard,"Malgun Gothic","맑은 고딕",system-ui,sans-serif;
+      min-height:100vh;padding:28px 14px;display:flex;justify-content:center;}
+    .wrap{width:100%;max-width:680px;}
+    .back{display:inline-block;margin-bottom:18px;font-size:13px;color:var(--sub);text-decoration:none;}
+    .back:hover{color:var(--ink);}
+    .tag{display:inline-block;font-size:12px;font-weight:700;color:var(--accent);
+      background:rgba(61,139,253,.12);border:1px solid rgba(61,139,253,.3);
+      padding:4px 11px;border-radius:999px;margin-bottom:10px;}
+    h2{font-size:22px;margin-bottom:8px;}
+    .lead{color:var(--sub);font-size:14.5px;line-height:1.65;margin-bottom:22px;}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:14px;
+      padding:18px 20px;margin-bottom:14px;}
+    .card h3{font-size:15px;margin-bottom:10px;}
+    .opts{display:grid;gap:8px;margin-top:10px;}
+    .opts.g2{grid-template-columns:1fr 1fr;}
+    .opts.g1{grid-template-columns:1fr;}
+    .btn{padding:10px 14px;border-radius:10px;background:#1e3050;color:var(--ink);
+      border:1px solid var(--line);font-size:14px;cursor:pointer;text-align:left;
+      transition:background .15s,border-color .15s;}
+    .btn:hover:not(:disabled){background:#253d63;border-color:var(--accent);}
+    .btn:disabled{opacity:.55;cursor:default;}
+    .btn.correct{background:rgba(39,174,96,.2)!important;border-color:var(--ok)!important;color:#6fe09f;}
+    .btn.wrong{background:rgba(231,76,60,.15)!important;border-color:var(--err)!important;color:#f08080;}
+    .fb{margin-top:10px;font-size:13.5px;padding:10px 14px;border-radius:10px;display:none;}
+    .fb.ok{background:rgba(39,174,96,.12);color:#6fe09f;display:block;}
+    .fb.err{background:rgba(231,76,60,.1);color:#f08080;display:block;}
+    .progress{font-size:13px;color:var(--sub);margin-bottom:16px;}
+    .score-box{background:var(--card);border:1px solid var(--line);border-radius:14px;
+      padding:24px;text-align:center;margin-top:18px;display:none;}
+    .score-box .big{font-size:48px;margin-bottom:8px;}
+    .score-box p{color:var(--sub);font-size:14px;}
+    .foot{text-align:center;font-size:12px;color:#4a5a6a;margin-top:36px;
+      padding-top:14px;border-top:1px solid var(--line);}
+    /* drag styles */
+    .drag-item{padding:10px 14px;background:#1e3050;border:1px solid var(--line);
+      border-radius:10px;cursor:grab;font-size:14px;user-select:none;transition:opacity .15s;}
+    .drag-item:active{cursor:grabbing;opacity:.7;}
+    .drag-item.dragging{opacity:.4;}
+    .drop-zone{min-height:54px;background:rgba(61,139,253,.06);border:2px dashed var(--line);
+      border-radius:10px;padding:8px;display:flex;flex-direction:column;gap:6px;}
+    .drop-zone.over{border-color:var(--accent);background:rgba(61,139,253,.12);}
+    .zone-label{font-size:12px;color:var(--sub);margin-bottom:4px;font-weight:600;}
+</style></head>
+<body><div class="wrap">
+<a class="back" href="index.html">← 목록으로</a>
+<div class="tag">📉 5차시 인터랙티브</div><h2>최적 품질 수준 찾기</h2><p class="lead">슬라이더로 결함 허용 수준을 조절하면서 예방·실패·총비용 변화를 확인하세요.</p>
+
+  <div class="card">
+    <h3>최적 품질 수준 찾기</h3>
+    <p style="font-size:13.5px;color:var(--sub);margin-bottom:14px">
+      결함 허용 수준 슬라이더를 조절하면서 비용 변화를 확인하세요. 총비용이 가장 낮은 지점을 찾아보세요!
+    </p>
+    <div style="margin-bottom:12px">
+      <span style="font-size:13px;color:var(--sub)">결함 허용 수준: <span id="q-val">50</span>%</span><br>
+      <small style="color:#4a5a6a">← 0%: 완벽 추구 &nbsp;&nbsp; 100%: 방치 →</small>
+      <input type="range" id="q-slider" min="0" max="100" value="50" style="width:100%;margin:8px 0;accent-color:var(--accent)">
+    </div>
+    <canvas id="qcost-canvas" width="640" height="240" style="width:100%;border-radius:10px;background:#0d1820;"></canvas>
+    <div style="display:flex;gap:14px;justify-content:center;margin-top:10px;font-size:13px;flex-wrap:wrap">
+      <span><span style="color:#ff8c8c">■</span> 예방 비용 (완벽할수록 증가)</span>
+      <span><span style="color:#fdbc40">■</span> 실패 비용 (방치할수록 증가)</span>
+      <span><span style="color:#6fe09f">■</span> 총비용</span>
+    </div>
+  </div>
+  <div class="card" id="insight-box">
+    <div id="insight-text" style="font-size:13.5px;color:var(--sub);line-height:1.7"></div>
+  </div>
+  <script>
+  var slider=document.getElementById('q-slider');
+  var canvas=document.getElementById('qcost-canvas');
+  var ctx=canvas.getContext('2d');
+  function prevention(x){return Math.pow((100-x)/100,1.5)*90;}
+  function failure(x){return Math.pow(x/100,1.5)*90;}
+  function total(x){return prevention(x)+failure(x);}
+  function draw(t){
+    var W=canvas.width,H=canvas.height;
+    ctx.clearRect(0,0,W,H);
+    ctx.strokeStyle='#2a3a4d';ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(50,15);ctx.lineTo(50,H-35);ctx.lineTo(W-15,H-35);ctx.stroke();
+    ctx.fillStyle='#6b7a8a';ctx.font='11px sans-serif';
+    ctx.fillText('비용',10,30);ctx.fillText('결함허용',W-60,H-10);
+    function drawLine(fn,color){
+      ctx.strokeStyle=color;ctx.lineWidth=2.5;ctx.beginPath();
+      for(var x=0;x<=100;x++){
+        var px=50+(W-65)*(x/100);
+        var py=(H-35)-((H-55)*(fn(x)/100));
+        if(x===0) ctx.moveTo(px,py);else ctx.lineTo(px,py);
+      }
+      ctx.stroke();
+    }
+    drawLine(prevention,'#ff8c8c');
+    drawLine(failure,'#fdbc40');
+    drawLine(total,'#6fe09f');
+    // optimal point (min total around 50)
+    var optX=50,minT=200;
+    for(var x=0;x<=100;x++){var tv=total(x);if(tv<minT){minT=tv;optX=x;}}
+    var opx=50+(W-65)*(optX/100);
+    var opy=(H-35)-((H-55)*(minT/100));
+    ctx.strokeStyle='rgba(255,255,255,.2)';ctx.lineWidth=1;ctx.setLineDash([4,4]);
+    ctx.beginPath();ctx.moveTo(opx,15);ctx.lineTo(opx,H-35);ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle='#6fe09f';ctx.beginPath();ctx.arc(opx,opy,6,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#9fb2c6';ctx.font='11px sans-serif';ctx.fillText('최적점',opx+4,opy-8);
+    // current position
+    var cpx=50+(W-65)*(t/100);
+    ctx.strokeStyle='rgba(61,139,253,.7)';ctx.lineWidth=1.5;ctx.setLineDash([4,4]);
+    ctx.beginPath();ctx.moveTo(cpx,15);ctx.lineTo(cpx,H-35);ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle='#3d8bfd';ctx.beginPath();ctx.arc(cpx,(H-35)-((H-55)*(total(t)/100)),5,0,Math.PI*2);ctx.fill();
+  }
+  function update(){
+    var t=parseInt(slider.value);
+    document.getElementById('q-val').textContent=t;
+    draw(t);
+    var ins=document.getElementById('insight-text');
+    var p=prevention(t).toFixed(0),f=failure(t).toFixed(0),tot=total(t).toFixed(0);
+    var msg='';
+    if(t<20) msg='<b style="color:#ff8c8c">예방 비용이 매우 높습니다.</b> 완벽을 추구할수록 예방 비용이 폭발적으로 증가합니다. 현실에서 완벽한 품질은 불가능합니다.';
+    else if(t>80) msg='<b style="color:#fdbc40">실패 비용이 위험 수준입니다.</b> 품질 문제를 방치할수록 나중에 100배의 비용이 발생합니다.';
+    else if(t>=35&&t<=65) msg='✅ <b style="color:#6fe09f">최적 구간</b>입니다! 예방과 실패 비용의 합이 최소화되는 효율적 품질 수준입니다.';
+    else msg='총비용을 줄이려면 슬라이더를 40~60% 구간으로 이동해보세요.';
+    ins.innerHTML='예방 비용: '+p+' | 실패 비용: '+f+' | <b style="color:#6fe09f">총비용: '+tot+'</b><br>'+msg;
+  }
+  slider.addEventListener('input',update);
+  canvas.width=640;canvas.height=240;update();
+  </script>
+
+<div class="foot">데이터 관리자 기본·실무 교육 · 5차시</div>
+</div></body></html>

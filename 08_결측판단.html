@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>결측 판단</title><style>
+    :root {
+      --bg:#0f1720;--card:#172230;--line:#2a3a4d;--ink:#eaf1f8;
+      --sub:#9fb2c6;--accent:#3d8bfd;--ok:#27ae60;--err:#e74c3c;--warn:#e67e22;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:var(--ink);
+      font-family:Pretendard,"Malgun Gothic","맑은 고딕",system-ui,sans-serif;
+      min-height:100vh;padding:28px 14px;display:flex;justify-content:center;}
+    .wrap{width:100%;max-width:680px;}
+    .back{display:inline-block;margin-bottom:18px;font-size:13px;color:var(--sub);text-decoration:none;}
+    .back:hover{color:var(--ink);}
+    .tag{display:inline-block;font-size:12px;font-weight:700;color:var(--accent);
+      background:rgba(61,139,253,.12);border:1px solid rgba(61,139,253,.3);
+      padding:4px 11px;border-radius:999px;margin-bottom:10px;}
+    h2{font-size:22px;margin-bottom:8px;}
+    .lead{color:var(--sub);font-size:14.5px;line-height:1.65;margin-bottom:22px;}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:14px;
+      padding:18px 20px;margin-bottom:14px;}
+    .card h3{font-size:15px;margin-bottom:10px;}
+    .opts{display:grid;gap:8px;margin-top:10px;}
+    .opts.g2{grid-template-columns:1fr 1fr;}
+    .opts.g1{grid-template-columns:1fr;}
+    .btn{padding:10px 14px;border-radius:10px;background:#1e3050;color:var(--ink);
+      border:1px solid var(--line);font-size:14px;cursor:pointer;text-align:left;
+      transition:background .15s,border-color .15s;}
+    .btn:hover:not(:disabled){background:#253d63;border-color:var(--accent);}
+    .btn:disabled{opacity:.55;cursor:default;}
+    .btn.correct{background:rgba(39,174,96,.2)!important;border-color:var(--ok)!important;color:#6fe09f;}
+    .btn.wrong{background:rgba(231,76,60,.15)!important;border-color:var(--err)!important;color:#f08080;}
+    .fb{margin-top:10px;font-size:13.5px;padding:10px 14px;border-radius:10px;display:none;}
+    .fb.ok{background:rgba(39,174,96,.12);color:#6fe09f;display:block;}
+    .fb.err{background:rgba(231,76,60,.1);color:#f08080;display:block;}
+    .progress{font-size:13px;color:var(--sub);margin-bottom:16px;}
+    .score-box{background:var(--card);border:1px solid var(--line);border-radius:14px;
+      padding:24px;text-align:center;margin-top:18px;display:none;}
+    .score-box .big{font-size:48px;margin-bottom:8px;}
+    .score-box p{color:var(--sub);font-size:14px;}
+    .foot{text-align:center;font-size:12px;color:#4a5a6a;margin-top:36px;
+      padding-top:14px;border-top:1px solid var(--line);}
+    /* drag styles */
+    .drag-item{padding:10px 14px;background:#1e3050;border:1px solid var(--line);
+      border-radius:10px;cursor:grab;font-size:14px;user-select:none;transition:opacity .15s;}
+    .drag-item:active{cursor:grabbing;opacity:.7;}
+    .drag-item.dragging{opacity:.4;}
+    .drop-zone{min-height:54px;background:rgba(61,139,253,.06);border:2px dashed var(--line);
+      border-radius:10px;padding:8px;display:flex;flex-direction:column;gap:6px;}
+    .drop-zone.over{border-color:var(--accent);background:rgba(61,139,253,.12);}
+    .zone-label{font-size:12px;color:var(--sub);margin-bottom:4px;font-weight:600;}
+</style></head>
+<body><div class="wrap">
+<a class="back" href="index.html">← 목록으로</a>
+<div class="tag">🕳️ 8차시 퀴즈</div><h2>결측값 처리 판단</h2><p class="lead">상황별로 '이 빈칸, 어떻게 처리할까?' 판단해보세요. 정답은 맥락에 따라 다릅니다.</p>
+
+  <div id="missing-qs"></div>
+  <script>
+  var qs=[
+    {scenario:"10,000건 중 3건의 '비고' 칸이 비어 있다.",
+     question:"이 결측값을 어떻게 처리할까요?",
+     opts:["즉시 재수집한다","비고는 선택 항목이므로 그대로 분석","결측 표시 후 분석에서 제외","전체 데이터를 폐기"],
+     correct:1,hint:"0.03% 결측 — 비고가 선택 항목이라면 분석에 큰 영향 없음. 단, 비고가 필수 정보라면 담당자 확인."},
+    {scenario:"'비고' 칸이 40% 비어 있다.",
+     question:"가장 합리적인 처리 방법은?",
+     opts:["그대로 쓴다","담당자에게 이유 확인 후 처리 방향 결정","평균값으로 대체","열(컬럼) 자체를 삭제"],
+     correct:1,hint:"40%는 무시할 수 없는 수준. 왜 비어 있는지 파악이 먼저입니다."},
+    {scenario:"특정 야간 교대조의 데이터만 연속으로 누락되어 있다.",
+     question:"이것은 단순 결측인가요, 아닌가요?",
+     opts:["단순 결측 — 그대로 제거","구조적 편향 가능성 — 원인 파악이 필수","평균으로 채운다","AI가 알아서 처리"],
+     correct:1,hint:"특정 그룹에 편중된 결측은 편향 신호입니다. 단순 제거하면 야간 패턴을 놓칩니다."},
+    {scenario:"센서 오류로 하루치 데이터(288개 행)가 통째로 없다.",
+     question:"어떻게 처리해야 할까요?",
+     opts:["이전 날 데이터로 복사해서 채운다","결측 기간을 표시하고 원인(센서 오류) 기록","삭제 후 분석","인접 값의 평균으로 모두 채운다"],
+     correct:1,hint:"대규모 구조적 결측은 '없는 것'으로 표시하고 원인을 메타데이터에 기록하는 것이 원칙."},
+    {scenario:"소요시간 칸에 일부 '미확인'이라는 텍스트가 입력되어 있다.",
+     question:"이것은 결측인가, 오류인가?",
+     opts:["결측으로 처리 (NaN)","오류로 처리 후 담당자 확인","그대로 분석에 사용","'0'으로 변환"],
+     correct:0,hint:"'미확인' = 사실상 결측. 숫자 필드에 텍스트가 들어온 것은 유효성 오류이기도 하지만, 값이 없다는 의미이므로 결측 처리."},
+  ];
+  var container=document.getElementById('missing-qs');
+  qs.forEach(function(q,i){
+    var div=document.createElement('div');div.className='card';div.style.marginBottom='14px';
+    var opts=q.opts.map(function(o,oi){
+      return '<button class="btn ms-btn" data-qi="'+i+'" data-val="'+oi+'" onclick="pickMS(this,'+i+','+oi+','+q.correct+',''+q.hint.replace(/'/g,'\'')+'')" style="text-align:left;width:100%;margin-bottom:6px;font-size:13px">'+o+'</button>';
+    }).join('');
+    div.innerHTML='<p style="font-size:12.5px;background:rgba(255,255,255,.04);padding:8px 12px;border-radius:8px;color:var(--sub);margin-bottom:10px">📋 '+q.scenario+'</p>'
+      +'<h3 style="font-size:14.5px;margin-bottom:10px">'+q.question+'</h3>'+opts
+      +'<div class="ms-fb-'+i+' fb"></div>';
+    container.appendChild(div);
+  });
+  function pickMS(btn,qi,val,correct,hint){
+    document.querySelectorAll('[data-qi="'+qi+'"]').forEach(function(b){b.disabled=true;});
+    var fb=document.querySelector('.ms-fb-'+qi);
+    if(val===correct){btn.classList.add('correct');fb.textContent='✅ '+hint;fb.className='ms-fb-'+qi+' fb ok';}
+    else{btn.classList.add('wrong');document.querySelector('[data-qi="'+qi+'"][data-val="'+correct+'"]').classList.add('correct');fb.textContent='❌ '+hint;fb.className='ms-fb-'+qi+' fb err';}
+  }
+  </script>
+
+<div class="foot">데이터 관리자 기본·실무 교육 · 8차시</div>
+</div></body></html>

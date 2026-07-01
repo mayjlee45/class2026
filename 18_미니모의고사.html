@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>미니 모의고사</title><style>
+    :root {
+      --bg:#0f1720;--card:#172230;--line:#2a3a4d;--ink:#eaf1f8;
+      --sub:#9fb2c6;--accent:#3d8bfd;--ok:#27ae60;--err:#e74c3c;--warn:#e67e22;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:var(--ink);
+      font-family:Pretendard,"Malgun Gothic","맑은 고딕",system-ui,sans-serif;
+      min-height:100vh;padding:28px 14px;display:flex;justify-content:center;}
+    .wrap{width:100%;max-width:680px;}
+    .back{display:inline-block;margin-bottom:18px;font-size:13px;color:var(--sub);text-decoration:none;}
+    .back:hover{color:var(--ink);}
+    .tag{display:inline-block;font-size:12px;font-weight:700;color:var(--accent);
+      background:rgba(61,139,253,.12);border:1px solid rgba(61,139,253,.3);
+      padding:4px 11px;border-radius:999px;margin-bottom:10px;}
+    h2{font-size:22px;margin-bottom:8px;}
+    .lead{color:var(--sub);font-size:14.5px;line-height:1.65;margin-bottom:22px;}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:14px;
+      padding:18px 20px;margin-bottom:14px;}
+    .card h3{font-size:15px;margin-bottom:10px;}
+    .opts{display:grid;gap:8px;margin-top:10px;}
+    .opts.g2{grid-template-columns:1fr 1fr;}
+    .opts.g1{grid-template-columns:1fr;}
+    .btn{padding:10px 14px;border-radius:10px;background:#1e3050;color:var(--ink);
+      border:1px solid var(--line);font-size:14px;cursor:pointer;text-align:left;
+      transition:background .15s,border-color .15s;}
+    .btn:hover:not(:disabled){background:#253d63;border-color:var(--accent);}
+    .btn:disabled{opacity:.55;cursor:default;}
+    .btn.correct{background:rgba(39,174,96,.2)!important;border-color:var(--ok)!important;color:#6fe09f;}
+    .btn.wrong{background:rgba(231,76,60,.15)!important;border-color:var(--err)!important;color:#f08080;}
+    .fb{margin-top:10px;font-size:13.5px;padding:10px 14px;border-radius:10px;display:none;}
+    .fb.ok{background:rgba(39,174,96,.12);color:#6fe09f;display:block;}
+    .fb.err{background:rgba(231,76,60,.1);color:#f08080;display:block;}
+    .progress{font-size:13px;color:var(--sub);margin-bottom:16px;}
+    .score-box{background:var(--card);border:1px solid var(--line);border-radius:14px;
+      padding:24px;text-align:center;margin-top:18px;display:none;}
+    .score-box .big{font-size:48px;margin-bottom:8px;}
+    .score-box p{color:var(--sub);font-size:14px;}
+    .foot{text-align:center;font-size:12px;color:#4a5a6a;margin-top:36px;
+      padding-top:14px;border-top:1px solid var(--line);}
+    /* drag styles */
+    .drag-item{padding:10px 14px;background:#1e3050;border:1px solid var(--line);
+      border-radius:10px;cursor:grab;font-size:14px;user-select:none;transition:opacity .15s;}
+    .drag-item:active{cursor:grabbing;opacity:.7;}
+    .drag-item.dragging{opacity:.4;}
+    .drop-zone{min-height:54px;background:rgba(61,139,253,.06);border:2px dashed var(--line);
+      border-radius:10px;padding:8px;display:flex;flex-direction:column;gap:6px;}
+    .drop-zone.over{border-color:var(--accent);background:rgba(61,139,253,.12);}
+    .zone-label{font-size:12px;color:var(--sub);margin-bottom:4px;font-weight:600;}
+</style></head>
+<body><div class="wrap">
+<a class="back" href="index.html">← 목록으로</a>
+<div class="tag">📝 18차시 모의고사</div><h2>3일 과정 미니 모의고사</h2><p class="lead">3일간 배운 전 과정 핵심 8문제. 기록 없이, 가볍게!</p>
+
+  <div class="progress" id="mock-prog">1 / 8</div>
+  <div id="mock-area"></div>
+  <div id="mock-result" class="score-box"></div>
+  <script>
+  var qs=[
+    {q:"데이터 품질 4대 기준 중 '비어 있다'에 해당하는 것은?",opts:["유효성","완전성","정확성","일관성"],a:1,exp:"완전성: 빠진 값이 있는가? 빈 칸 = 완전성 위반."},
+    {q:"AI에 절대 올리면 안 되는 것은?",opts:["회의록 텍스트","공개된 통계","개인정보·실제 업무 데이터","영어 문서"],a:2,exp:"프롬프트에 입력한 내용은 외부 서버로 전송됩니다. 개인정보·실데이터 금지!"},
+    {q:"메타데이터를 한마디로 설명하면?",opts:["데이터를 저장하는 폴더","데이터에 붙이는 설명서","AI 학습 데이터","분석 결과"],a:1,exp:"메타데이터 = 데이터에 붙이는 설명서. 처음 보는 사람도 이해할 수 있게."},
+    {q:"쓰레기를 넣으면?",opts:["좋은 결과가 나온다","AI가 알아서 고친다","쓰레기가 나온다","분석이 안 된다"],a:2,exp:"GIGO: Garbage In, Garbage Out. 입력 품질이 결과 품질을 결정합니다."},
+    {q:"전처리에서 '원본 불변 원칙'이란?",opts:["원본 파일을 절대 열지 않는다","수정 시 원본 보존, 복사본에서만 작업","원본은 AI만 접근","원본 파일명에 '원본' 표시"],a:1,exp:"원본을 항상 백업하고, 전처리는 복사본에서만!"},
+    {q:"같은 통계값(평균·분산)이어도 분포가 다를 수 있음을 보여주는 사례는?",opts:["GIGO","안스콤 콰르텟","박스플롯","IQR"],a:1,exp:"안스콤 콰르텟: 4개 데이터셋이 통계는 같지만 시각화하면 완전히 다릅니다."},
+    {q:"AI가 그럴듯하게 없는 정보를 만들어내는 현상은?",opts:["편향(Bias)","환각(Hallucination)","과적합(Overfitting)","군집화(Clustering)"],a:1,exp:"환각: AI가 '모른다'고 하지 않고 그럴듯한 정보를 지어내는 현상."},
+    {q:"데이터 생명주기에서 '보안 사고'와 가장 관련된 급소는?",opts:["생성","수집","저장","폐기"],a:3,exp:"폐기가 급소! 기한 지난 데이터를 안 지우면 보안 사고 위험. 완전 삭제 필수."},
+  ];
+  var cur=0,correct=0;
+  function render(){
+    var prog=document.getElementById('mock-prog'),area=document.getElementById('mock-area');
+    if(cur>=qs.length){area.style.display='none';prog.style.display='none';
+      var f=document.getElementById('mock-result');f.style.display='block';
+      var e=correct>=7?'🏆':correct>=6?'🥇':correct>=5?'😊':'📚';
+      f.innerHTML='<div class="big">'+e+'</div><div style="font-size:22px;font-weight:700;margin:8px 0">'+correct+'/'+qs.length+' 점</div><p style="font-size:14px;color:var(--sub)">'+(['완벽합니다! 3일 과정 마스터!','훌륭합니다!','좋습니다. 틀린 문제를 확인해보세요.','다시 복습해보세요!'][correct>=7?0:correct>=6?1:correct>=5?2:3])+'</p><button class="btn" style="margin-top:14px;background:var(--accent);color:#fff" onclick="cur=0;correct=0;document.getElementById('mock-result').style.display='none';document.getElementById('mock-area').style.display='block';document.getElementById('mock-prog').style.display='block';render()">다시 도전</button>';
+      return;}
+    prog.textContent=(cur+1)+' / '+qs.length;
+    var q=qs[cur];
+    area.innerHTML='<div class="card"><h3 style="font-size:16px;margin-bottom:16px">Q'+(cur+1)+'. '+q.q+'</h3>'+q.opts.map(function(o,i){return '<button class="btn" onclick="pick('+i+')" style="text-align:left;width:100%;margin-bottom:8px">'+['①','②','③','④'][i]+' '+o+'</button>';}).join('')+'<div id="qfb" class="fb"></div></div>';
+  }
+  function pick(i){var q=qs[cur];document.querySelectorAll('.btn').forEach(function(b){b.disabled=true;});if(i===q.a){correct++;document.querySelectorAll('.btn')[i].classList.add('correct');document.getElementById('qfb').textContent='✅ '+q.exp;document.getElementById('qfb').className='fb ok';}else{document.querySelectorAll('.btn')[i].classList.add('wrong');document.querySelectorAll('.btn')[q.a].classList.add('correct');document.getElementById('qfb').textContent='❌ '+q.exp;document.getElementById('qfb').className='fb err';}setTimeout(function(){cur++;render();},1800);}
+  render();
+  </script>
+
+<div class="foot">데이터 관리자 기본·실무 교육 · 18차시</div>
+</div></body></html>

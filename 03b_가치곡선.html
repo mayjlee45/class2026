@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>가치곡선 만져보기</title>
+  <style>
+    :root {
+      --bg:#0f1720;--card:#172230;--line:#2a3a4d;--ink:#eaf1f8;
+      --sub:#9fb2c6;--accent:#3d8bfd;--ok:#27ae60;--err:#e74c3c;--warn:#e67e22;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:var(--ink);
+      font-family:Pretendard,"Malgun Gothic","맑은 고딕",system-ui,sans-serif;
+      min-height:100vh;padding:28px 14px;display:flex;justify-content:center;}
+    .wrap{width:100%;max-width:680px;}
+    .back{display:inline-block;margin-bottom:18px;font-size:13px;color:var(--sub);text-decoration:none;}
+    .back:hover{color:var(--ink);}
+    .tag{display:inline-block;font-size:12px;font-weight:700;color:var(--accent);
+      background:rgba(61,139,253,.12);border:1px solid rgba(61,139,253,.3);
+      padding:4px 11px;border-radius:999px;margin-bottom:10px;}
+    h2{font-size:22px;margin-bottom:8px;}
+    .lead{color:var(--sub);font-size:14.5px;line-height:1.65;margin-bottom:22px;}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:14px;
+      padding:18px 20px;margin-bottom:14px;}
+    .card h3{font-size:15px;margin-bottom:10px;}
+    .opts{display:grid;gap:8px;margin-top:10px;}
+    .opts.g2{grid-template-columns:1fr 1fr;}
+    .opts.g1{grid-template-columns:1fr;}
+    .btn{padding:10px 14px;border-radius:10px;background:#1e3050;color:var(--ink);
+      border:1px solid var(--line);font-size:14px;cursor:pointer;text-align:left;
+      transition:background .15s,border-color .15s;}
+    .btn:hover:not(:disabled){background:#253d63;border-color:var(--accent);}
+    .btn:disabled{opacity:.55;cursor:default;}
+    .btn.correct{background:rgba(39,174,96,.2)!important;border-color:var(--ok)!important;color:#6fe09f;}
+    .btn.wrong{background:rgba(231,76,60,.15)!important;border-color:var(--err)!important;color:#f08080;}
+    .fb{margin-top:10px;font-size:13.5px;padding:10px 14px;border-radius:10px;display:none;}
+    .fb.ok{background:rgba(39,174,96,.12);color:#6fe09f;display:block;}
+    .fb.err{background:rgba(231,76,60,.1);color:#f08080;display:block;}
+    .progress{font-size:13px;color:var(--sub);margin-bottom:16px;}
+    .score-box{background:var(--card);border:1px solid var(--line);border-radius:14px;
+      padding:24px;text-align:center;margin-top:18px;display:none;}
+    .score-box .big{font-size:48px;margin-bottom:8px;}
+    .score-box p{color:var(--sub);font-size:14px;}
+    .foot{text-align:center;font-size:12px;color:#4a5a6a;margin-top:36px;
+      padding-top:14px;border-top:1px solid var(--line);}
+    /* drag styles */
+    .drag-item{padding:10px 14px;background:#1e3050;border:1px solid var(--line);
+      border-radius:10px;cursor:grab;font-size:14px;user-select:none;transition:opacity .15s;}
+    .drag-item:active{cursor:grabbing;opacity:.7;}
+    .drag-item.dragging{opacity:.4;}
+    .drop-zone{min-height:54px;background:rgba(61,139,253,.06);border:2px dashed var(--line);
+      border-radius:10px;padding:8px;display:flex;flex-direction:column;gap:6px;}
+    .drop-zone.over{border-color:var(--accent);background:rgba(61,139,253,.12);}
+    .zone-label{font-size:12px;color:var(--sub);margin-bottom:4px;font-weight:600;}
+
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="index.html">← 목록으로</a>
+  <div class="tag">📈 3차시 인터랙티브</div>
+  <h2>데이터 가치 곡선 체험</h2>
+  <p class="lead">슬라이더를 움직여 시의성 데이터와 축적형 데이터의 가치 변화를 비교해보세요.</p>
+
+  <div class="card">
+    <h3>데이터 유형에 따른 가치 변화</h3>
+    <p style="font-size:13.5px;color:var(--sub);margin-bottom:14px">시간 슬라이더를 움직여보세요. 두 유형의 가치가 어떻게 달라지는지 확인하세요.</p>
+    <div style="text-align:center;margin-bottom:12px">
+      <span style="font-size:13px;color:var(--sub)">시간 경과</span><br>
+      <input type="range" id="t-slider" min="0" max="100" value="0" style="width:100%;margin:8px 0;accent-color:var(--accent)">
+      <span id="t-label" style="font-size:13px;color:var(--sub)">초기 (수집 직후)</span>
+    </div>
+    <canvas id="curve-canvas" width="640" height="260" style="width:100%;border-radius:10px;background:#0d1820;"></canvas>
+    <div style="display:flex;gap:20px;justify-content:center;margin-top:10px;font-size:13px">
+      <span>⚡ <span style="color:#ff8c8c">시의성 데이터</span> (실시간 경보·기상)</span>
+      <span>📈 <span style="color:#6fe09f">축적형 데이터</span> (정비 이력·패턴)</span>
+    </div>
+  </div>
+  <div class="card" id="insight" style="font-size:13.5px;color:var(--sub);line-height:1.7"></div>
+  <script>
+  var slider=document.getElementById('t-slider');
+  var canvas=document.getElementById('curve-canvas');
+  var ctx=canvas.getContext('2d');
+  var labels=["초기 (수집 직후)","1일 경과","1주 경과","1개월 경과","6개월 경과","1년 이상"];
+  function draw(t){
+    var W=canvas.width,H=canvas.height;
+    ctx.clearRect(0,0,W,H);
+    // axes
+    ctx.strokeStyle='#2a3a4d';ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(50,20);ctx.lineTo(50,H-40);ctx.lineTo(W-20,H-40);ctx.stroke();
+    ctx.fillStyle='#9fb2c6';ctx.font='12px sans-serif';
+    ctx.fillText('가치',10,30);ctx.fillText('시간',W-30,H-20);
+    // time line
+    var tx=50+(W-70)*(t/100);
+    ctx.strokeStyle='rgba(61,139,253,.5)';ctx.lineWidth=1.5;ctx.setLineDash([4,4]);
+    ctx.beginPath();ctx.moveTo(tx,20);ctx.lineTo(tx,H-40);ctx.stroke();
+    ctx.setLineDash([]);
+    // curves
+    function pts(fn){
+      var arr=[];
+      for(var x=0;x<=100;x+=2){
+        var px=50+(W-70)*(x/100);
+        var py=(H-40)-((H-70)*fn(x/100));
+        arr.push([px,py]);
+      }
+      return arr;
+    }
+    function timely(x){return Math.max(0,Math.exp(-x*4));}  // 급감
+    function accum(x){return Math.min(0.95,x*1.1);}          // 완만 상승
+    function drawCurve(pts,color){
+      ctx.strokeStyle=color;ctx.lineWidth=2.5;ctx.beginPath();
+      pts.forEach(function(p,i){if(i===0)ctx.moveTo(p[0],p[1]);else ctx.lineTo(p[0],p[1]);});
+      ctx.stroke();
+      // dot at t
+      var idx=Math.min(pts.length-1,Math.round((t/100)*(pts.length-1)));
+      ctx.beginPath();ctx.arc(pts[idx][0],pts[idx][1],5,0,Math.PI*2);
+      ctx.fillStyle=color;ctx.fill();
+    }
+    drawCurve(pts(timely),'#ff8c8c');
+    drawCurve(pts(accum),'#6fe09f');
+    // cross point label
+    ctx.fillStyle='#fdbc40';ctx.font='11px sans-serif';
+    var crossX=50+(W-70)*(0.22);
+    ctx.fillText('↑ 교차점',crossX+4,H-80);
+  }
+  function update(){
+    var t=parseInt(slider.value);
+    document.getElementById('t-label').textContent=labels[Math.round(t/20)];
+    draw(t);
+    var ins=document.getElementById('insight');
+    if(t<15) ins.innerHTML='⚡ <b style="color:#ff8c8c">시의성 데이터</b>의 가치가 가장 높은 순간입니다. 실시간 경보·기상 정보처럼 지금 이 순간의 활용이 핵심입니다.';
+    else if(t<35) ins.innerHTML='⚡ 시의성 데이터의 가치가 급격히 하락하고 있습니다. 📈 <b style="color:#6fe09f">축적형 데이터</b>는 이제 막 쌓이기 시작했습니다.';
+    else if(t<55) ins.innerHTML='📊 <b style="color:#fdbc40">두 곡선이 교차하는 구간</b>입니다. 시의성 데이터는 거의 소진되고, 축적형 데이터의 분석 가치가 올라오기 시작합니다.';
+    else ins.innerHTML='📈 <b style="color:#6fe09f">축적형 데이터</b>가 높은 가치를 유지합니다. 정비 이력·고장 패턴처럼 쌓일수록 AI 학습 재료로서의 가치가 높아집니다.';
+  }
+  slider.addEventListener('input',update);
+  canvas.width=640;canvas.height=260;
+  update();
+  </script>
+
+  <div class="foot">데이터 관리자 기본·실무 교육 · 3차시</div>
+</div>
+
+</body>
+</html>
