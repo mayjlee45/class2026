@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>데이터 타입 맞히기 (2차시)</title>
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: #1a1f2e;
+      color: #d1d5db;
+      font-family: 'Pretendard', 'Noto Sans KR', sans-serif;
+      font-size: 16px;
+      line-height: 1.7;
+      min-height: 100vh;
+      padding: 48px 24px 80px;
+    }
+
+    .container {
+      max-width: 780px;
+      margin: 0 auto;
+    }
+
+    /* 제목 */
+    h1 {
+      font-size: 26px;
+      font-weight: 800;
+      color: #f1f3f7;
+      letter-spacing: -0.5px;
+      margin-bottom: 6px;
+    }
+
+    .subtitle {
+      font-size: 14px;
+      color: #7a8499;
+      margin-bottom: 28px;
+    }
+
+    .subtitle em {
+      color: #9ab8f0;
+      font-style: normal;
+      font-weight: 600;
+    }
+
+    /* 점수 + 힌트 행 */
+    .score-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 24px;
+    }
+
+    .score {
+      font-size: 15px;
+      color: #b0bbcc;
+      font-weight: 600;
+    }
+
+    .score span {
+      color: #f1f3f7;
+      font-size: 18px;
+    }
+
+    .hint {
+      font-size: 12px;
+      color: #5a6580;
+      text-align: right;
+    }
+
+    /* 문항 카드 */
+    .card {
+      background-color: #21283a;
+      border: 1px solid #2e3a50;
+      border-radius: 12px;
+      padding: 18px 20px;
+      margin-bottom: 14px;
+    }
+
+    .card.correct {
+      border-color: #2e6a3a;
+      background-color: #1a2e20;
+    }
+
+    .card.wrong {
+      border-color: #6a2a1e;
+      background-color: #2e1a14;
+    }
+
+    .q-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #c8d3e6;
+      margin-bottom: 3px;
+    }
+
+    .q-example {
+      font-size: 13px;
+      color: #5a6e90;
+      margin-bottom: 14px;
+    }
+
+    /* 선택 버튼 그룹 */
+    .btn-group {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .btn-group button {
+      flex: 1;
+      min-width: 70px;
+      padding: 10px 8px;
+      background-color: #2a3348;
+      border: 1px solid #3a4a65;
+      border-radius: 8px;
+      color: #a8b8d8;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+    }
+
+    .btn-group button:hover:not(:disabled) {
+      background-color: #33405a;
+      border-color: #4a5a7a;
+      color: #d0dcf0;
+    }
+
+    .btn-group button:disabled {
+      cursor: default;
+      opacity: 0.4;
+    }
+
+    /* 피드백 */
+    .feedback {
+      display: none;
+      gap: 8px;
+      margin-top: 12px;
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      line-height: 1.75;
+    }
+
+    .feedback.show {
+      display: flex;
+      align-items: flex-start;
+    }
+
+    .feedback.ok {
+      background-color: #1e3a28;
+      border: 1px solid #2a5a38;
+      color: #80d898;
+    }
+
+    .feedback.ng {
+      background-color: #3a1a14;
+      border: 1px solid #6a2a20;
+      color: #e88080;
+    }
+
+    .feedback .icon {
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    /* 완료 배너 */
+    .finish-banner {
+      display: none;
+      background-color: #1c2638;
+      border: 1px solid #2a3a55;
+      border-left: 4px solid #4a7adb;
+      border-radius: 12px;
+      padding: 22px 28px;
+      margin-bottom: 28px;
+      text-align: center;
+    }
+
+    .finish-banner.show {
+      display: block;
+    }
+
+    .finish-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: #f1f3f7;
+      margin-bottom: 6px;
+    }
+
+    .finish-sub {
+      font-size: 14px;
+      color: #6a8aaa;
+    }
+
+    /* 다시 하기 */
+    .retry-btn {
+      display: block;
+      margin: 0 auto;
+      padding: 11px 32px;
+      background-color: #252b3b;
+      border: 1px solid #3a4258;
+      border-radius: 8px;
+      color: #a0aabf;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.2s, color 0.2s;
+      margin-top: 28px;
+    }
+
+    .retry-btn:hover {
+      background-color: #2e3650;
+      color: #d0d8ea;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <h1>📊 데이터 타입 맞히기</h1>
+  <p class="subtitle">2차시 · 정비일지 표의 각 <em>칸(컬럼)</em>이 어떤 타입인지 골라보세요. 고르면 바로 정답이 나옵니다.</p>
+
+  <div class="score-row">
+    <div class="score">점수 <span id="scoreNum">0</span> / <span id="totalNum">6</span></div>
+    <div class="hint">수치=계산되는 숫자 · 범주=정해진 몇 종류 · 텍스트=자유로운 글 · 시계열=시간 순서</div>
+  </div>
+
+  <div id="quizArea"></div>
+
+  <div class="finish-banner" id="finishBanner">
+    <div class="finish-title">🎉 끝! <span id="finalScore"></span> 정답</div>
+    <div class="finish-sub" id="finalMsg"></div>
+  </div>
+
+  <button class="retry-btn" onclick="init()">다시 하기</button>
+
+</div>
+
+<script>
+  /* ── 문항 데이터 ─────────────────────────────────────────────── */
+  const QUESTIONS = [
+    {
+      title: "소요시간(분)",
+      example: "예: 90, 60, 45",
+      answer: "수치",
+      okMsg: "정답! 더하고 평균 낼 수 있는 숫자 → 수치형. 기계 눈엔 int(정수). 소수점이 붙으면 float(실수).",
+      ngMsg: (sel) => `정답은 수치 — 더하고 평균 낼 수 있는 숫자 → 수치형. 기계 눈엔 int(정수). 소수점이 붙으면 float(실수).`
+    },
+    {
+      title: "정비유형",
+      example: "예: 정기 / 수시 / 긴급",
+      answer: "범주",
+      okMsg: "정답! 정해진 몇 가지 중 하나 → 범주형. 기계 눈엔 string(문자)로 저장된 정해진 값들.",
+      ngMsg: (sel) => `정답은 범주 — 정해진 몇 가지 중 하나 → 범주형. 기계 눈엔 string(문자)로 저장된 정해진 값들.`
+    },
+    {
+      title: "고장증상",
+      example: "예: '수신 감도 저하'",
+      answer: "텍스트",
+      okMsg: "정답! 자유롭게 적은 글 → 텍스트형. 기계 눈엔 string(문자).",
+      ngMsg: (sel) => `정답은 텍스트 — 자유롭게 적은 글 → 텍스트형. 기계 눈엔 string(문자).`
+    },
+    {
+      title: "정비일자",
+      example: "예: 2026-03-18",
+      answer: "시계열",
+      okMsg: "정답! 시간 순서가 있는 날짜 → 시계열. 기계 눈엔 datetime(날짜·시간).",
+      ngMsg: (sel) => `정답은 시계열 — 시간 순서가 있는 날짜 → 시계열. 기계 눈엔 datetime(날짜·시간).`
+    },
+    {
+      title: "부품교체여부",
+      example: "예: Y / N",
+      answer: "범주",
+      okMsg: "정답! 예·아니오 두 값 중 하나 → 범주형. 기계 눈엔 bool(참·거짓).",
+      ngMsg: (sel) => `정답은 범주 — 예·아니오 두 값 중 하나 → 범주형. 기계 눈엔 bool(참·거짓).`
+    },
+    {
+      title: "⚠️ 관리번호",
+      example: "예: 1, 2, 3 …",
+      answer: "식별자",
+      okMsg: "정답! 함정! 숫자처럼 생겼지만 더하거나 평균 내면 의미가 없음 → 계산하는 수치(int)가 아니라 '식별자'(이름표). 학번·군번과 같음. '숫자라고 다 수치 아니다'.",
+      ngMsg: (sel) => `정답은 식별자 — 함정! 숫자처럼 생겼지만 더하거나 평균 내면 의미가 없음 → 계산하는 수치(int)가 아니라 '식별자'(이름표). 학번·군번과 같음. '숫자라고 다 수치 아니다'.`
+    }
+  ];
+
+  const TYPE_OPTIONS = ["수치", "범주", "텍스트", "시계열", "식별자"];
+
+  const FINISH_MSGS = {
+    6: "완벽해요! 데이터 타입 마스터 🎯",
+    5: "숫자처럼 생겼다고 다 '수치'가 아니라는 것, 기억!",
+    4: "대부분 맞혔어요. 헷갈린 항목 다시 확인해보세요.",
+    3: "절반! 범주·텍스트·식별자 차이를 다시 살펴보세요.",
+    0: "처음이라면 괜찮아요. 틀린 이유를 읽어보세요."
+  };
+
+  function getFinishMsg(score) {
+    if (score === 6) return FINISH_MSGS[6];
+    if (score === 5) return FINISH_MSGS[5];
+    if (score >= 4) return FINISH_MSGS[4];
+    if (score >= 3) return FINISH_MSGS[3];
+    return FINISH_MSGS[0];
+  }
+
+  /* ── 상태 ────────────────────────────────────────────────────── */
+  let score = 0;
+  let answered = 0;
+
+  /* ── 초기화 ──────────────────────────────────────────────────── */
+  function init() {
+    score = 0;
+    answered = 0;
+
+    document.getElementById('scoreNum').textContent = '0';
+    document.getElementById('totalNum').textContent = QUESTIONS.length;
+    document.getElementById('finishBanner').classList.remove('show');
+
+    const area = document.getElementById('quizArea');
+    area.innerHTML = '';
+
+    QUESTIONS.forEach((q, i) => {
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.id = `card-${i}`;
+
+      const btnHTML = TYPE_OPTIONS.map(t =>
+        `<button onclick="answer(${i}, '${t}')">${t}</button>`
+      ).join('');
+
+      card.innerHTML = `
+        <div class="q-title">${i + 1}. ${q.title}</div>
+        <div class="q-example">${q.example}</div>
+        <div class="btn-group" id="btns-${i}">${btnHTML}</div>
+        <div class="feedback" id="fb-${i}">
+          <span class="icon"></span>
+          <span class="msg"></span>
+        </div>
+      `;
+
+      area.appendChild(card);
+    });
+  }
+
+  /* ── 답변 처리 ───────────────────────────────────────────────── */
+  function answer(idx, selected) {
+    const q = QUESTIONS[idx];
+    const card = document.getElementById(`card-${idx}`);
+    const btns = document.getElementById(`btns-${idx}`);
+    const fb   = document.getElementById(`fb-${idx}`);
+
+    /* 이미 답변한 경우 무시 */
+    if (card.classList.contains('correct') || card.classList.contains('wrong')) return;
+
+    btns.querySelectorAll('button').forEach(b => b.disabled = true);
+
+    const isCorrect = selected === q.answer;
+
+    if (isCorrect) {
+      score++;
+      card.classList.add('correct');
+      fb.querySelector('.icon').textContent = '✅';
+      fb.querySelector('.msg').textContent = q.okMsg;
+      fb.classList.add('show', 'ok');
+    } else {
+      card.classList.add('wrong');
+      fb.querySelector('.icon').textContent = '❌';
+      fb.querySelector('.msg').textContent = q.ngMsg(selected);
+      fb.classList.add('show', 'ng');
+    }
+
+    answered++;
+    document.getElementById('scoreNum').textContent = score;
+
+    if (answered === QUESTIONS.length) {
+      setTimeout(showFinish, 300);
+    }
+  }
+
+  /* ── 완료 화면 ───────────────────────────────────────────────── */
+  function showFinish() {
+    const banner = document.getElementById('finishBanner');
+    document.getElementById('finalScore').textContent = `${score} / ${QUESTIONS.length}`;
+    document.getElementById('finalMsg').textContent = getFinishMsg(score);
+    banner.classList.add('show');
+    banner.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  /* ── 시작 ────────────────────────────────────────────────────── */
+  init();
+</script>
+</body>
+</html>

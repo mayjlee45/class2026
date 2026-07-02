@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>퀴즈 · 데이터의 '오너'는?</title>
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: #1a1f2e;
+      color: #d1d5db;
+      font-family: 'Pretendard', 'Noto Sans KR', sans-serif;
+      font-size: 16px;
+      line-height: 1.7;
+      min-height: 100vh;
+      padding: 48px 24px 80px;
+    }
+
+    .container {
+      max-width: 780px;
+      margin: 0 auto;
+    }
+
+    /* 태그 배지 */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background-color: #252b3b;
+      border: 1px solid #3a4258;
+      color: #a0aabf;
+      font-size: 13px;
+      padding: 5px 14px;
+      border-radius: 999px;
+      margin-bottom: 20px;
+    }
+
+    /* 제목 */
+    h1 {
+      font-size: 28px;
+      font-weight: 800;
+      color: #f1f3f7;
+      letter-spacing: -0.5px;
+      margin-bottom: 24px;
+      line-height: 1.4;
+    }
+
+    /* 시나리오 박스 */
+    .scenario {
+      background-color: #21283a;
+      border: 1px solid #2e3a50;
+      border-radius: 12px;
+      padding: 20px 24px;
+      margin-bottom: 20px;
+      color: #b0bbcc;
+      font-size: 15px;
+      line-height: 1.85;
+    }
+
+    .scenario strong {
+      color: #e2e8f0;
+      font-weight: 700;
+    }
+
+    /* 안내 문구 */
+    .guide {
+      font-size: 14px;
+      color: #7a8499;
+      margin-bottom: 28px;
+    }
+
+    .guide strong {
+      color: #a8b4cc;
+      font-weight: 600;
+    }
+
+    /* 선택지 버튼 */
+    .choices {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 32px;
+    }
+
+    .choice-btn {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      width: 100%;
+      background-color: #21283a;
+      border: 1px solid #2e3a50;
+      border-radius: 12px;
+      padding: 18px 20px;
+      cursor: pointer;
+      text-align: left;
+      transition: border-color 0.2s, background-color 0.2s;
+      position: relative;
+    }
+
+    .choice-btn:hover:not(:disabled) {
+      border-color: #4a5568;
+      background-color: #273040;
+    }
+
+    .choice-btn:disabled {
+      cursor: default;
+    }
+
+    .choice-num {
+      flex-shrink: 0;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background-color: #2d3650;
+      border: 1px solid #3d4a65;
+      color: #8899b8;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 1px;
+      font-weight: 600;
+    }
+
+    .choice-content {
+      flex: 1;
+    }
+
+    .choice-label {
+      color: #c8d3e6;
+      font-size: 15px;
+      font-weight: 500;
+      display: block;
+    }
+
+    .choice-explain {
+      display: none;
+      margin-top: 8px;
+      font-size: 14px;
+      color: #8899b8;
+      line-height: 1.7;
+    }
+
+    .choice-explain .explain-bold {
+      font-weight: 700;
+    }
+
+    .choice-tag {
+      position: absolute;
+      top: 50%;
+      right: 18px;
+      transform: translateY(-50%);
+      font-size: 12px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 999px;
+      display: none;
+    }
+
+    /* 오답 스타일 */
+    .choice-btn.wrong {
+      background-color: #2e1f18;
+      border-color: #5a3020;
+    }
+
+    .choice-btn.wrong .choice-num {
+      background-color: #5a3020;
+      border-color: #7a4030;
+      color: #e8a080;
+    }
+
+    .choice-btn.wrong .choice-label {
+      color: #e8a080;
+    }
+
+    .choice-btn.wrong .choice-explain {
+      display: block;
+      color: #b07060;
+    }
+
+    .choice-btn.wrong .choice-tag {
+      display: block;
+      background-color: #c0441c;
+      color: #fff;
+    }
+
+    /* 정답 스타일 */
+    .choice-btn.correct {
+      background-color: #1a2f1a;
+      border-color: #2e5a2e;
+    }
+
+    .choice-btn.correct .choice-num {
+      background-color: #2e5a2e;
+      border-color: #3e7a3e;
+      color: #80e880;
+    }
+
+    .choice-btn.correct .choice-label {
+      color: #80e880;
+    }
+
+    .choice-btn.correct .choice-explain {
+      display: block;
+      color: #60b860;
+    }
+
+    .choice-btn.correct .choice-tag {
+      display: block;
+      background-color: #2e8b2e;
+      color: #fff;
+    }
+
+    /* 선택 안 됐지만 답 공개된 나머지 */
+    .choice-btn.revealed {
+      background-color: #1e2535;
+      border-color: #2a3550;
+    }
+
+    .choice-btn.revealed .choice-explain {
+      display: block;
+    }
+
+    /* 해설 박스 */
+    .explanation {
+      display: none;
+      background-color: #1c2638;
+      border: 1px solid #2a3a55;
+      border-left: 4px solid #4a7adb;
+      border-radius: 12px;
+      padding: 24px 28px;
+      margin-bottom: 28px;
+    }
+
+    .explanation.show {
+      display: block;
+    }
+
+    .explanation h2 {
+      font-size: 20px;
+      font-weight: 800;
+      color: #e2e8f0;
+      margin-bottom: 14px;
+    }
+
+    .explanation p {
+      font-size: 15px;
+      color: #8899b8;
+      line-height: 1.85;
+      margin-bottom: 10px;
+    }
+
+    .explanation p:last-child {
+      margin-bottom: 0;
+    }
+
+    .explanation .highlight-red {
+      color: #e07050;
+      font-weight: 700;
+    }
+
+    .explanation .highlight-blue {
+      color: #5a9adb;
+      font-weight: 700;
+    }
+
+    .explanation .highlight-green {
+      color: #5aba7a;
+      font-weight: 700;
+    }
+
+    /* 다시 풀기 버튼 */
+    .retry-btn {
+      display: none;
+      background-color: #252b3b;
+      border: 1px solid #3a4258;
+      border-radius: 8px;
+      color: #a0aabf;
+      font-size: 14px;
+      padding: 10px 20px;
+      cursor: pointer;
+      margin-top: 18px;
+      transition: background-color 0.2s, color 0.2s;
+    }
+
+    .retry-btn:hover {
+      background-color: #2e3650;
+      color: #d0d8ea;
+    }
+
+    .retry-btn.show {
+      display: inline-block;
+    }
+
+    /* 푸터 */
+    footer {
+      text-align: center;
+      color: #4a5470;
+      font-size: 13px;
+      margin-top: 40px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <div class="badge">🧩 혼자 풀어보기</div>
+
+    <h1>이 데이터의 '오너(결정 권한자)'는 누구일까요?</h1>
+
+    <div class="scenario">
+      어느 통신대의 <strong>장비 정비 데이터</strong>가 있습니다. 점검 날짜, 정비 내용, 담당자, 부품 교체 이력이 기록되어 있습니다.<br />
+      이 데이터에 대한 <strong>'오너'</strong>, 즉 어떻게 쓰고·누가 접근하고·언제 폐기할지를 <strong>결정할 권한</strong>을 가진 사람은 누구일까요?
+    </div>
+
+    <p class="guide">손들 필요 없습니다. 자리에서 조용히 하나 골라보세요. 정답보다 <strong>'왜 그런지'</strong>가 중요합니다.</p>
+
+    <div class="choices" id="choices">
+      <!-- ① -->
+      <button class="choice-btn" data-index="0" onclick="select(0)">
+        <span class="choice-num">①</span>
+        <div class="choice-content">
+          <span class="choice-label">부대에서 가장 높은 지휘관</span>
+          <div class="choice-explain">
+            <span class="explain-bold">함정입니다.</span> 가장 높은 사람 ≠ 오너. 모든 결정이 위로 올라가면 병목이 생겨 데이터가 방치됩니다.
+          </div>
+        </div>
+        <span class="choice-tag">오답</span>
+      </button>
+
+      <!-- ② -->
+      <button class="choice-btn" data-index="1" onclick="select(1)">
+        <span class="choice-num">②</span>
+        <div class="choice-content">
+          <span class="choice-label">정비 내용을 매일 기록하는 담당자</span>
+          <div class="choice-explain">
+            <span class="explain-bold">스튜어드입니다.</span> 매일 데이터를 돌보는 사람 — 바로 여러분의 자리죠. 중요하지만, '결정 권한자'인 오너와는 역할이 다릅니다.
+          </div>
+        </div>
+        <span class="choice-tag">오답</span>
+      </button>
+
+      <!-- ③ -->
+      <button class="choice-btn" data-index="2" onclick="select(2)">
+        <span class="choice-num">③</span>
+        <div class="choice-content">
+          <span class="choice-label">해당 정비 업무를 책임지고 결정하는 현장 책임자</span>
+          <div class="choice-explain">
+            <span class="explain-bold">정답 — 오너입니다.</span> 그 데이터를 실제로 잘 알고, 결정 권한을 가진 '가장 가까운' 책임자.
+          </div>
+        </div>
+        <span class="choice-tag">정답</span>
+      </button>
+
+      <!-- ④ -->
+      <button class="choice-btn" data-index="3" onclick="select(3)">
+        <span class="choice-num">④</span>
+        <div class="choice-content">
+          <span class="choice-label">서버·시스템을 관리하는 전산 담당자</span>
+          <div class="choice-explain">
+            <span class="explain-bold">커스터디언입니다.</span> 데이터를 안전하게 보관·관리하는 기술 담당 — 보관은 하지만 결정권자는 아닙니다.
+          </div>
+        </div>
+        <span class="choice-tag">오답</span>
+      </button>
+    </div>
+
+    <!-- 해설 -->
+    <div class="explanation" id="explanation">
+      <h2>오너 = 가장 가까운 책임자</h2>
+      <p>
+        <span class="highlight-red">오너 ≠ 가장 높은 사람.</span>
+        오너는 그 데이터에 대한 결정 권한을 가진,
+        <span class="highlight-blue">가장 가까운 책임자</span>입니다.
+      </p>
+      <p>
+        왜일까요? 정비 데이터 한 칸 고치는 것까지 전부 윗선 결재를 받아야 한다면, 아무것도 제때 결정하지 못합니다.
+        그래서 결정 권한은 그 일을 가장 잘 아는, <strong>현장에 가까운 책임자</strong>에게 있어야 데이터가 살아 움직입니다.
+      </p>
+      <p>
+        그리고 그 오너 옆에서 <span class="highlight-green">데이터를 매일 살려내는 사람</span> — 그게 바로 여러분,
+        <span class="highlight-green">스튜어드</span>입니다.
+      </p>
+      <button class="retry-btn show" id="retryBtn" onclick="retry()">다시 풀기</button>
+    </div>
+
+    <footer>데이터 관리자 기본·실무 교육 · 1차시</footer>
+  </div>
+
+  <script>
+    const CORRECT_INDEX = 2; // ③번이 정답
+    let answered = false;
+
+    function select(idx) {
+      if (answered) return;
+      answered = true;
+
+      const buttons = document.querySelectorAll('.choice-btn');
+
+      buttons.forEach((btn, i) => {
+        btn.disabled = true;
+
+        if (i === CORRECT_INDEX) {
+          btn.classList.add('correct');
+        } else if (i === idx) {
+          btn.classList.add('wrong');
+        } else {
+          btn.classList.add('revealed');
+          // 선택 안 된 오답도 설명 표시
+          btn.querySelector('.choice-explain').style.display = 'block';
+          btn.querySelector('.choice-tag').style.display = 'block';
+          btn.querySelector('.choice-tag').style.color = '#8899b8';
+          btn.querySelector('.choice-tag').style.background = 'transparent';
+          btn.querySelector('.choice-tag').style.border = '1px solid #3a4a65';
+        }
+      });
+
+      document.getElementById('explanation').classList.add('show');
+    }
+
+    function retry() {
+      answered = false;
+
+      const buttons = document.querySelectorAll('.choice-btn');
+      buttons.forEach(btn => {
+        btn.disabled = false;
+        btn.className = 'choice-btn';
+
+        const tag = btn.querySelector('.choice-tag');
+        tag.style.color = '';
+        tag.style.background = '';
+        tag.style.border = '';
+      });
+
+      document.getElementById('explanation').classList.remove('show');
+    }
+  </script>
+</body>
+</html>
