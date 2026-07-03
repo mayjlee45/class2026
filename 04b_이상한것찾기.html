@@ -6,141 +6,383 @@
   <title>이상한 것 찾기</title>
   <style>
     :root {
-      --bg:#0f1720;--card:#172230;--line:#2a3a4d;--ink:#eaf1f8;
-      --sub:#9fb2c6;--accent:#3d8bfd;--ok:#27ae60;--err:#e74c3c;--warn:#e67e22;
+      --bg: #0f1720;
+      --card: #172230;
+      --line: #2a3a4d;
+      --ink: #eaf1f8;
+      --sub: #9fb2c6;
+      --accent: #3d8bfd;
+      --ok: #27ae60;
+      --err: #e74c3c;
+      --warn: #e67e22;
     }
-    *{box-sizing:border-box;margin:0;padding:0;}
-    body{background:var(--bg);color:var(--ink);
-      font-family:Pretendard,"Malgun Gothic","맑은 고딕",system-ui,sans-serif;
-      min-height:100vh;padding:28px 14px;display:flex;justify-content:center;}
-    .wrap{width:100%;max-width:680px;}
-    .back{display:inline-block;margin-bottom:18px;font-size:13px;color:var(--sub);text-decoration:none;}
-    .back:hover{color:var(--ink);}
-    .tag{display:inline-block;font-size:12px;font-weight:700;color:var(--accent);
-      background:rgba(61,139,253,.12);border:1px solid rgba(61,139,253,.3);
-      padding:4px 11px;border-radius:999px;margin-bottom:10px;}
-    h2{font-size:22px;margin-bottom:8px;}
-    .lead{color:var(--sub);font-size:14.5px;line-height:1.65;margin-bottom:22px;}
-    .card{background:var(--card);border:1px solid var(--line);border-radius:14px;
-      padding:18px 20px;margin-bottom:14px;}
-    .card h3{font-size:15px;margin-bottom:10px;}
-    .opts{display:grid;gap:8px;margin-top:10px;}
-    .opts.g2{grid-template-columns:1fr 1fr;}
-    .opts.g1{grid-template-columns:1fr;}
-    .btn{padding:10px 14px;border-radius:10px;background:#1e3050;color:var(--ink);
-      border:1px solid var(--line);font-size:14px;cursor:pointer;text-align:left;
-      transition:background .15s,border-color .15s;}
-    .btn:hover:not(:disabled){background:#253d63;border-color:var(--accent);}
-    .btn:disabled{opacity:.55;cursor:default;}
-    .btn.correct{background:rgba(39,174,96,.2)!important;border-color:var(--ok)!important;color:#6fe09f;}
-    .btn.wrong{background:rgba(231,76,60,.15)!important;border-color:var(--err)!important;color:#f08080;}
-    .fb{margin-top:10px;font-size:13.5px;padding:10px 14px;border-radius:10px;display:none;}
-    .fb.ok{background:rgba(39,174,96,.12);color:#6fe09f;display:block;}
-    .fb.err{background:rgba(231,76,60,.1);color:#f08080;display:block;}
-    .progress{font-size:13px;color:var(--sub);margin-bottom:16px;}
-    .score-box{background:var(--card);border:1px solid var(--line);border-radius:14px;
-      padding:24px;text-align:center;margin-top:18px;display:none;}
-    .score-box .big{font-size:48px;margin-bottom:8px;}
-    .score-box p{color:var(--sub);font-size:14px;}
-    .foot{text-align:center;font-size:12px;color:#4a5a6a;margin-top:36px;
-      padding-top:14px;border-top:1px solid var(--line);}
-    /* drag styles */
-    .drag-item{padding:10px 14px;background:#1e3050;border:1px solid var(--line);
-      border-radius:10px;cursor:grab;font-size:14px;user-select:none;transition:opacity .15s;}
-    .drag-item:active{cursor:grabbing;opacity:.7;}
-    .drag-item.dragging{opacity:.4;}
-    .drop-zone{min-height:54px;background:rgba(61,139,253,.06);border:2px dashed var(--line);
-      border-radius:10px;padding:8px;display:flex;flex-direction:column;gap:6px;}
-    .drop-zone.over{border-color:var(--accent);background:rgba(61,139,253,.12);}
-    .zone-label{font-size:12px;color:var(--sub);margin-bottom:4px;font-weight:600;}
 
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--ink);
+      font-family: Pretendard, "Malgun Gothic", "맑은 고딕", system-ui, sans-serif;
+      min-height: 100vh;
+      padding: 28px 14px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .wrap {
+      width: 100%;
+      max-width: 680px;
+    }
+
+    .back {
+      display: inline-block;
+      margin-bottom: 18px;
+      font-size: 13px;
+      color: var(--sub);
+      text-decoration: none;
+    }
+
+    .back:hover {
+      color: var(--ink);
+    }
+
+    .tag {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--accent);
+      background: rgba(61, 139, 253, .12);
+      border: 1px solid rgba(61, 139, 253, .3);
+      padding: 4px 11px;
+      border-radius: 999px;
+      margin-bottom: 10px;
+    }
+
+    h2 {
+      font-size: 22px;
+      margin-bottom: 8px;
+    }
+
+    .lead {
+      color: var(--sub);
+      font-size: 14.5px;
+      line-height: 1.65;
+      margin-bottom: 22px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 18px 20px;
+      margin-bottom: 14px;
+    }
+
+    .card h3 {
+      font-size: 15px;
+      margin-bottom: 10px;
+    }
+
+    .opts {
+      display: grid;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .opts.g2 { grid-template-columns: 1fr 1fr; }
+    .opts.g1 { grid-template-columns: 1fr; }
+
+    .btn {
+      padding: 10px 14px;
+      border-radius: 10px;
+      background: #1e3050;
+      color: var(--ink);
+      border: 1px solid var(--line);
+      font-size: 14px;
+      cursor: pointer;
+      text-align: left;
+      transition: background .15s, border-color .15s;
+    }
+
+    .btn:hover:not(:disabled) {
+      background: #253d63;
+      border-color: var(--accent);
+    }
+
+    .btn:disabled {
+      opacity: .55;
+      cursor: default;
+    }
+
+    .btn.correct {
+      background: rgba(39, 174, 96, .2) !important;
+      border-color: var(--ok) !important;
+      color: #6fe09f;
+    }
+
+    .btn.wrong {
+      background: rgba(231, 76, 60, .15) !important;
+      border-color: var(--err) !important;
+      color: #f08080;
+    }
+
+    .fb {
+      margin-top: 10px;
+      font-size: 13.5px;
+      padding: 10px 14px;
+      border-radius: 10px;
+      display: none;
+    }
+
+    .fb.ok {
+      background: rgba(39, 174, 96, .12);
+      color: #6fe09f;
+      display: block;
+    }
+
+    .fb.err {
+      background: rgba(231, 76, 60, .1);
+      color: #f08080;
+      display: block;
+    }
+
+    .progress {
+      font-size: 13px;
+      color: var(--sub);
+      margin-bottom: 16px;
+    }
+
+    .score-box {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 24px;
+      text-align: center;
+      margin-top: 18px;
+      display: none;
+    }
+
+    .score-box .big {
+      font-size: 48px;
+      margin-bottom: 8px;
+    }
+
+    .score-box p {
+      color: var(--sub);
+      font-size: 14px;
+    }
+
+    .foot {
+      text-align: center;
+      font-size: 12px;
+      color: #4a5a6a;
+      margin-top: 36px;
+      padding-top: 14px;
+      border-top: 1px solid var(--line);
+    }
+
+    /* drag styles */
+    .drag-item {
+      padding: 10px 14px;
+      background: #1e3050;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      cursor: grab;
+      font-size: 14px;
+      user-select: none;
+      transition: opacity .15s;
+    }
+
+    .drag-item:active {
+      cursor: grabbing;
+      opacity: .7;
+    }
+
+    .drag-item.dragging {
+      opacity: .4;
+    }
+
+    .drop-zone {
+      min-height: 54px;
+      background: rgba(61, 139, 253, .06);
+      border: 2px dashed var(--line);
+      border-radius: 10px;
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .drop-zone.over {
+      border-color: var(--accent);
+      background: rgba(61, 139, 253, .12);
+    }
+
+    .zone-label {
+      font-size: 12px;
+      color: var(--sub);
+      margin-bottom: 4px;
+      font-weight: 600;
+    }
   </style>
 </head>
 <body>
-<div class="wrap">
-  <a class="back" href="index.html">← 목록으로</a>
-  <div class="tag">🔍 4차시 실습</div>
-  <h2>정비일지에서 이상한 칸 찾기</h2>
-  <p class="lead">표에서 이상한 칸을 직접 클릭해 찾아보세요. 총 5가지 이상 항목이 숨어 있습니다.</p>
+  <div class="wrap">
+    <a class="back" href="index.html">← 목록으로</a>
+    <div class="tag">🔍 4차시 실습</div>
+    <h2>정비일지에서 이상한 칸 찾기</h2>
+    <p class="lead">표에서 이상한 칸을 직접 클릭해 찾아보세요. 총 5가지 이상 항목이 숨어 있습니다.</p>
 
-  <div class="card">
-    <h3>정비일지에서 이상한 칸을 클릭하세요</h3>
-    <p style="font-size:13.5px;color:var(--sub);margin-bottom:14px">
-      아래 표에서 형식이나 값이 이상한 칸을 클릭해보세요. 총 5개의 이상 항목이 있습니다.
-    </p>
-    <div style="overflow-x:auto">
-    <table id="log-table" style="width:100%;border-collapse:collapse;font-size:13px;min-width:540px">
-      <thead>
-        <tr style="background:#1e3050;color:var(--sub)">
-          <th style="padding:8px 10px;border:1px solid var(--line)">정비일자</th>
-          <th style="padding:8px 10px;border:1px solid var(--line)">담당자</th>
-          <th style="padding:8px 10px;border:1px solid var(--line)">정비유형</th>
-          <th style="padding:8px 10px;border:1px solid var(--line)">소요시간(분)</th>
-          <th style="padding:8px 10px;border:1px solid var(--line)">결과코드</th>
-          <th style="padding:8px 10px;border:1px solid var(--line)">고장증상</th>
-        </tr>
-      </thead>
-      <tbody id="log-body"></tbody>
-    </table>
+    <div class="card">
+      <h3>정비일지에서 이상한 칸을 클릭하세요</h3>
+      <p style="font-size: 13.5px; color: var(--sub); margin-bottom: 14px">
+        아래 표에서 형식이나 값이 이상한 칸을 클릭해보세요. 총 5개의 이상 항목이 있습니다.
+      </p>
+      <div style="overflow-x: auto">
+        <table id="log-table" style="width: 100%; border-collapse: collapse; font-size: 13px; min-width: 540px">
+          <thead>
+            <tr style="background: #1e3050; color: var(--sub)">
+              <th style="padding: 8px 10px; border: 1px solid var(--line)">정비일자</th>
+              <th style="padding: 8px 10px; border: 1px solid var(--line)">담당자</th>
+              <th style="padding: 8px 10px; border: 1px solid var(--line)">정비유형</th>
+              <th style="padding: 8px 10px; border: 1px solid var(--line)">소요시간(분)</th>
+              <th style="padding: 8px 10px; border: 1px solid var(--line)">결과코드</th>
+              <th style="padding: 8px 10px; border: 1px solid var(--line)">고장증상</th>
+            </tr>
+          </thead>
+          <tbody id="log-body"></tbody>
+        </table>
+      </div>
+      <div style="margin-top: 12px; font-size: 13px">
+        발견: <span id="found-count" style="color: var(--accent); font-weight: 700">0</span>/5
+      </div>
+      <div id="hunt-fb" class="fb" style="margin-top: 10px"></div>
     </div>
-    <div style="margin-top:12px;font-size:13px">
-      발견: <span id="found-count" style="color:var(--accent);font-weight:700">0</span>/5
+
+    <div class="card" id="hint-card" style="display: none; font-size: 13px; color: var(--sub); line-height: 1.8">
+      <b style="color: var(--ink)">💡 발견한 이상 항목 해설</b>
+      <div id="hint-list" style="margin-top: 8px"></div>
     </div>
-    <div id="hunt-fb" class="fb" style="margin-top:10px"></div>
-  </div>
-  <div class="card" id="hint-card" style="display:none;font-size:13px;color:var(--sub);line-height:1.8">
-    <b style="color:var(--ink)">💡 발견한 이상 항목 해설</b>
-    <div id="hint-list" style="margin-top:8px"></div>
-  </div>
-  <script>
-  var rows=[
-    {date:"2026-01-15",담당자:"홍길동",유형:"정기",시간:"45",코드:"A",증상:"정상 점검 완료"},
-    {date:"03/18/2026",담당자:"",유형:"수시",시간:"30",코드:"B",증상:"냉각팬 이상",err:[{col:"date",hint:"날짜 형식이 다릅니다 (03/18/2026 vs 2026-01-15). 일관성 위반!"},{col:"담당자",hint:"담당자 칸이 비어 있습니다. 완전성 위반!"}]},
-    {date:"2026-02-01",담당자:"박민수",유형:"긴급",시간:"-30",코드:"C",증상:"엔진 과열",err:[{col:"시간",hint:"소요시간이 음수(-30분)입니다. 유효성 위반!"}]},
-    {date:"2026-02-14",담당자:"이영희",유형:"정기",시간:"0",코드:"D",증상:"완료",err:[{col:"코드",hint:"코드 'D'는 허용값(A·B·C)을 벗어납니다. 유효성 위반!"},{col:"시간",hint:"'완료'인데 소요시간이 0분입니다. 정확성 위반!"}]},
-    {date:"2026-03-05",담당자:"김철수",유형:"수시",시간:"60",코드:"B",증상:"무선기 점검",err:[{col:"증상",hint:"'무선기'(다른 행에서는 '무전기' 표기). 일관성 위반!"}]},
-    {date:"2026-03-20",담당자:"정다운",유형:"정기",시간:"25",코드:"A",증상:"무전기 점검 완료"},
-  ];
-  var found=0,foundSet=new Set();
-  var allErrors=[];
-  rows.forEach(function(r,ri){
-    if(r.err) r.err.forEach(function(e){allErrors.push({ri:ri,col:e.col,hint:e.hint});});
-  });
-  var colKeys=["date","담당자","유형","시간","코드","증상"];
-  var colLabels={"date":"정비일자","담당자":"담당자","유형":"정비유형","시간":"소요시간","코드":"결과코드","증상":"고장증상"};
-  var body=document.getElementById('log-body');
-  rows.forEach(function(row,ri){
-    var tr=document.createElement('tr');
-    colKeys.forEach(function(col){
-      var td=document.createElement('td');
-      var errInfo=row.err&&row.err.find(function(e){return e.col===col;});
-      td.textContent=row[col]||'(없음)';
-      td.style.cssText='padding:8px 10px;border:1px solid var(--line);cursor:'+(errInfo?'pointer':'default')+';transition:background .15s;';
-      if(errInfo){
-        td.title='클릭해서 확인하세요';
-        td.onclick=function(){
-          var key=ri+'-'+col;
-          if(foundSet.has(key)) return;
-          foundSet.add(key);found++;
-          this.style.background='rgba(231,76,60,.2)';this.style.color='#f08080';this.style.borderColor='var(--err)';
-          document.getElementById('found-count').textContent=found;
-          var hl=document.getElementById('hint-list');
-          var p=document.createElement('p');p.textContent='• '+errInfo.hint;hl.appendChild(p);
-          document.getElementById('hint-card').style.display='block';
-          if(found===allErrors.length){
-            var fb=document.getElementById('hunt-fb');
-            fb.textContent='🎉 모든 이상 항목을 발견했습니다!';fb.className='fb ok';
+
+    <script>
+      var rows = [
+        {
+          date: "2026-01-15", 담당자: "홍길동", 유형: "정기",
+          시간: "45", 코드: "A", 증상: "정상 점검 완료"
+        },
+        {
+          date: "03/18/2026", 담당자: "", 유형: "수시",
+          시간: "30", 코드: "B", 증상: "냉각팬 이상",
+          err: [
+            { col: "date",  hint: "날짜 형식이 다릅니다 (03/18/2026 vs 2026-01-15). 일관성 위반!" },
+            { col: "담당자", hint: "담당자 칸이 비어 있습니다. 완전성 위반!" }
+          ]
+        },
+        {
+          date: "2026-02-01", 담당자: "박민수", 유형: "긴급",
+          시간: "-30", 코드: "C", 증상: "엔진 과열",
+          err: [
+            { col: "시간", hint: "소요시간이 음수(-30분)입니다. 유효성 위반!" }
+          ]
+        },
+        {
+          date: "2026-02-14", 담당자: "이영희", 유형: "정기",
+          시간: "0", 코드: "D", 증상: "완료",
+          err: [
+            { col: "코드", hint: "코드 'D'는 허용값(A·B·C)을 벗어납니다. 유효성 위반!" },
+            { col: "시간", hint: "'완료'인데 소요시간이 0분입니다. 정확성 위반!" }
+          ]
+        },
+        {
+          date: "2026-03-05", 담당자: "김철수", 유형: "수시",
+          시간: "60", 코드: "B", 증상: "무선기 점검",
+          err: [
+            { col: "증상", hint: "'무선기'(다른 행에서는 '무전기' 표기). 일관성 위반!" }
+          ]
+        },
+        {
+          date: "2026-03-20", 담당자: "정다운", 유형: "정기",
+          시간: "25", 코드: "A", 증상: "무전기 점검 완료"
+        },
+      ];
+
+      var found = 0;
+      var foundSet = new Set();
+      var allErrors = [];
+
+      rows.forEach(function (r, ri) {
+        if (r.err) {
+          r.err.forEach(function (e) {
+            allErrors.push({ ri: ri, col: e.col, hint: e.hint });
+          });
+        }
+      });
+
+      var colKeys   = ["date", "담당자", "유형", "시간", "코드", "증상"];
+      var colLabels = {
+        date: "정비일자", 담당자: "담당자", 유형: "정비유형",
+        시간: "소요시간", 코드: "결과코드", 증상: "고장증상"
+      };
+
+      var body = document.getElementById('log-body');
+
+      rows.forEach(function (row, ri) {
+        var tr = document.createElement('tr');
+
+        colKeys.forEach(function (col) {
+          var td = document.createElement('td');
+          var errInfo = row.err && row.err.find(function (e) { return e.col === col; });
+
+          td.textContent = row[col] || '(없음)';
+          td.style.cssText =
+            'padding: 8px 10px;' +
+            'border: 1px solid var(--line);' +
+            'cursor: ' + (errInfo ? 'pointer' : 'default') + ';' +
+            'transition: background .15s;';
+
+          if (errInfo) {
+            td.title = '클릭해서 확인하세요';
+
+            td.onclick = function () {
+              var key = ri + '-' + col;
+              if (foundSet.has(key)) return;
+
+              foundSet.add(key);
+              found++;
+
+              this.style.background   = 'rgba(231,76,60,.2)';
+              this.style.color        = '#f08080';
+              this.style.borderColor  = 'var(--err)';
+
+              document.getElementById('found-count').textContent = found;
+
+              var hl = document.getElementById('hint-list');
+              var p  = document.createElement('p');
+              p.textContent = '• ' + errInfo.hint;
+              hl.appendChild(p);
+
+              document.getElementById('hint-card').style.display = 'block';
+
+              if (found === allErrors.length) {
+                var fb = document.getElementById('hunt-fb');
+                fb.textContent = '🎉 모든 이상 항목을 발견했습니다!';
+                fb.className = 'fb ok';
+              }
+            };
           }
-        };
-      }
-      tr.appendChild(td);
-    });
-    body.appendChild(tr);
-  });
-  </script>
 
-  <div class="foot">데이터 관리자 기본·실무 교육 · 4차시</div>
-</div>
+          tr.appendChild(td);
+        });
 
+        body.appendChild(tr);
+      });
+    </script>
+
+    <div class="foot">데이터 관리자 기본·실무 교육 · 4차시</div>
+  </div>
 </body>
 </html>

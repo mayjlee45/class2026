@@ -6,126 +6,409 @@
   <title>수집 시뮬레이션</title>
   <style>
     :root {
-      --bg:#0f1720;--card:#172230;--line:#2a3a4d;--ink:#eaf1f8;
-      --sub:#9fb2c6;--accent:#3d8bfd;--ok:#27ae60;--err:#e74c3c;--warn:#e67e22;
+      --bg: #0f1720;
+      --card: #172230;
+      --line: #2a3a4d;
+      --ink: #eaf1f8;
+      --sub: #9fb2c6;
+      --accent: #3d8bfd;
+      --ok: #27ae60;
+      --err: #e74c3c;
+      --warn: #e67e22;
     }
-    *{box-sizing:border-box;margin:0;padding:0;}
-    body{background:var(--bg);color:var(--ink);
-      font-family:Pretendard,"Malgun Gothic","맑은 고딕",system-ui,sans-serif;
-      min-height:100vh;padding:28px 14px;display:flex;justify-content:center;}
-    .wrap{width:100%;max-width:680px;}
-    .back{display:inline-block;margin-bottom:18px;font-size:13px;color:var(--sub);text-decoration:none;}
-    .back:hover{color:var(--ink);}
-    .tag{display:inline-block;font-size:12px;font-weight:700;color:var(--accent);
-      background:rgba(61,139,253,.12);border:1px solid rgba(61,139,253,.3);
-      padding:4px 11px;border-radius:999px;margin-bottom:10px;}
-    h2{font-size:22px;margin-bottom:8px;}
-    .lead{color:var(--sub);font-size:14.5px;line-height:1.65;margin-bottom:22px;}
-    .card{background:var(--card);border:1px solid var(--line);border-radius:14px;
-      padding:18px 20px;margin-bottom:14px;}
-    .card h3{font-size:15px;margin-bottom:10px;}
-    .opts{display:grid;gap:8px;margin-top:10px;}
-    .opts.g2{grid-template-columns:1fr 1fr;}
-    .opts.g1{grid-template-columns:1fr;}
-    .btn{padding:10px 14px;border-radius:10px;background:#1e3050;color:var(--ink);
-      border:1px solid var(--line);font-size:14px;cursor:pointer;text-align:left;
-      transition:background .15s,border-color .15s;}
-    .btn:hover:not(:disabled){background:#253d63;border-color:var(--accent);}
-    .btn:disabled{opacity:.55;cursor:default;}
-    .btn.correct{background:rgba(39,174,96,.2)!important;border-color:var(--ok)!important;color:#6fe09f;}
-    .btn.wrong{background:rgba(231,76,60,.15)!important;border-color:var(--err)!important;color:#f08080;}
-    .fb{margin-top:10px;font-size:13.5px;padding:10px 14px;border-radius:10px;display:none;}
-    .fb.ok{background:rgba(39,174,96,.12);color:#6fe09f;display:block;}
-    .fb.err{background:rgba(231,76,60,.1);color:#f08080;display:block;}
-    .progress{font-size:13px;color:var(--sub);margin-bottom:16px;}
-    .score-box{background:var(--card);border:1px solid var(--line);border-radius:14px;
-      padding:24px;text-align:center;margin-top:18px;display:none;}
-    .score-box .big{font-size:48px;margin-bottom:8px;}
-    .score-box p{color:var(--sub);font-size:14px;}
-    .foot{text-align:center;font-size:12px;color:#4a5a6a;margin-top:36px;
-      padding-top:14px;border-top:1px solid var(--line);}
-    /* drag styles */
-    .drag-item{padding:10px 14px;background:#1e3050;border:1px solid var(--line);
-      border-radius:10px;cursor:grab;font-size:14px;user-select:none;transition:opacity .15s;}
-    .drag-item:active{cursor:grabbing;opacity:.7;}
-    .drag-item.dragging{opacity:.4;}
-    .drop-zone{min-height:54px;background:rgba(61,139,253,.06);border:2px dashed var(--line);
-      border-radius:10px;padding:8px;display:flex;flex-direction:column;gap:6px;}
-    .drop-zone.over{border-color:var(--accent);background:rgba(61,139,253,.12);}
-    .zone-label{font-size:12px;color:var(--sub);margin-bottom:4px;font-weight:600;}
 
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--ink);
+      font-family: Pretendard, "Malgun Gothic", "맑은 고딕", system-ui, sans-serif;
+      min-height: 100vh;
+      padding: 28px 14px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .wrap {
+      width: 100%;
+      max-width: 680px;
+    }
+
+    .back {
+      display: inline-block;
+      margin-bottom: 18px;
+      font-size: 13px;
+      color: var(--sub);
+      text-decoration: none;
+    }
+
+    .back:hover {
+      color: var(--ink);
+    }
+
+    .tag {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--accent);
+      background: rgba(61, 139, 253, .12);
+      border: 1px solid rgba(61, 139, 253, .3);
+      padding: 4px 11px;
+      border-radius: 999px;
+      margin-bottom: 10px;
+    }
+
+    h2 {
+      font-size: 22px;
+      margin-bottom: 8px;
+    }
+
+    .lead {
+      color: var(--sub);
+      font-size: 14.5px;
+      line-height: 1.65;
+      margin-bottom: 22px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 18px 20px;
+      margin-bottom: 14px;
+    }
+
+    .card h3 {
+      font-size: 15px;
+      margin-bottom: 10px;
+    }
+
+    .opts {
+      display: grid;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .opts.g2 { grid-template-columns: 1fr 1fr; }
+    .opts.g1 { grid-template-columns: 1fr; }
+
+    .btn {
+      padding: 10px 14px;
+      border-radius: 10px;
+      background: #1e3050;
+      color: var(--ink);
+      border: 1px solid var(--line);
+      font-size: 14px;
+      cursor: pointer;
+      text-align: left;
+      transition: background .15s, border-color .15s;
+    }
+
+    .btn:hover:not(:disabled) {
+      background: #253d63;
+      border-color: var(--accent);
+    }
+
+    .btn:disabled {
+      opacity: .55;
+      cursor: default;
+    }
+
+    .btn.correct {
+      background: rgba(39, 174, 96, .2) !important;
+      border-color: var(--ok) !important;
+      color: #6fe09f;
+    }
+
+    .btn.wrong {
+      background: rgba(231, 76, 60, .15) !important;
+      border-color: var(--err) !important;
+      color: #f08080;
+    }
+
+    .fb {
+      margin-top: 10px;
+      font-size: 13.5px;
+      padding: 10px 14px;
+      border-radius: 10px;
+      display: none;
+    }
+
+    .fb.ok {
+      background: rgba(39, 174, 96, .12);
+      color: #6fe09f;
+      display: block;
+    }
+
+    .fb.err {
+      background: rgba(231, 76, 60, .1);
+      color: #f08080;
+      display: block;
+    }
+
+    .progress {
+      font-size: 13px;
+      color: var(--sub);
+      margin-bottom: 16px;
+    }
+
+    .score-box {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 24px;
+      text-align: center;
+      margin-top: 18px;
+      display: none;
+    }
+
+    .score-box .big {
+      font-size: 48px;
+      margin-bottom: 8px;
+    }
+
+    .score-box p {
+      color: var(--sub);
+      font-size: 14px;
+    }
+
+    .foot {
+      text-align: center;
+      font-size: 12px;
+      color: #4a5a6a;
+      margin-top: 36px;
+      padding-top: 14px;
+      border-top: 1px solid var(--line);
+    }
+
+    /* drag styles */
+    .drag-item {
+      padding: 10px 14px;
+      background: #1e3050;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      cursor: grab;
+      font-size: 14px;
+      user-select: none;
+      transition: opacity .15s;
+    }
+
+    .drag-item:active {
+      cursor: grabbing;
+      opacity: .7;
+    }
+
+    .drag-item.dragging {
+      opacity: .4;
+    }
+
+    .drop-zone {
+      min-height: 54px;
+      background: rgba(61, 139, 253, .06);
+      border: 2px dashed var(--line);
+      border-radius: 10px;
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .drop-zone.over {
+      border-color: var(--accent);
+      background: rgba(61, 139, 253, .12);
+    }
+
+    .zone-label {
+      font-size: 12px;
+      color: var(--sub);
+      margin-bottom: 4px;
+      font-weight: 600;
+    }
   </style>
 </head>
 <body>
-<div class="wrap">
-  <a class="back" href="index.html">← 목록으로</a>
-  <div class="tag">🎯 4차시 시뮬레이션</div>
-  <h2>데이터 수집 시뮬레이션</h2>
-  <p class="lead">실제 수집 상황에서 올바른 선택을 해보세요. 4단계 시나리오입니다.</p>
+  <div class="wrap">
+    <a class="back" href="index.html">← 목록으로</a>
+    <div class="tag">🎯 4차시 시뮬레이션</div>
+    <h2>데이터 수집 시뮬레이션</h2>
+    <p class="lead">실제 수집 상황에서 올바른 선택을 해보세요. 4단계 시나리오입니다.</p>
 
-  <div id="sim-area"></div>
-  <script>
-  var steps=[
-    {title:"상황 발생",icon:"⚙️",
-     desc:"현장에서 장비 점검이 완료되었습니다. 정비일지에 결과를 기록해야 합니다.",
-     choices:[
-       {label:"정해진 양식에 빠짐없이 입력한다",outcome:"good",msg:"✅ 올바른 선택! 표준 양식을 사용하면 이후 분석이 쉬워집니다."},
-       {label:"메모장에 대충 적어두고 나중에 옮긴다",outcome:"warn",msg:"⚠️ 나중에 잊거나 분실 위험이 있습니다. 바로 정식 양식에 입력하세요."},
-       {label:"기억으로만 두고 나중에 채운다",outcome:"bad",msg:"❌ 기억은 왜곡됩니다. 즉시 기록이 원칙!"},
-     ]},
-    {title:"담당자 칸",icon:"👤",
-     desc:"정비일지의 '담당자' 칸을 어떻게 채울까요?",
-     choices:[
-       {label:"내 이름과 사번을 정확히 입력한다",outcome:"good",msg:"✅ 추적 가능한 데이터가 됩니다. 책임 소재가 명확해집니다."},
-       {label:"'김 중사'처럼 약식으로만 쓴다",outcome:"warn",msg:"⚠️ 동명이인이 있을 경우 혼동 위험. 사번이나 전체 이름 권장."},
-       {label:"비워둔다 (나중에 채우면 되니까)",outcome:"bad",msg:"❌ 완전성 위반! 담당자가 없으면 문제 발생 시 추적 불가."},
-     ]},
-    {title:"날짜 형식",icon:"📅",
-     desc:"날짜를 입력할 때 어떤 형식을 쓸까요?",
-     choices:[
-       {label:"팀에서 정한 표준 형식 (예: 2026-03-15)으로 입력",outcome:"good",msg:"✅ 표준 형식은 집계·분석 시 오류를 막습니다."},
-       {label:"오늘 기분에 따라 (2026.3.15 또는 3/15/26 등)",outcome:"bad",msg:"❌ 일관성 위반! 나중에 정렬·집계할 때 오류 발생."},
-       {label:"'어제'처럼 상대적으로만 기록",outcome:"bad",msg:"❌ 나중에 언제인지 알 수 없습니다. 절대 날짜를 사용하세요."},
-     ]},
-    {title:"수집 완료",icon:"✅",
-     desc:"데이터 수집을 마쳤습니다. 저장 전 마지막 확인!",
-     choices:[
-       {label:"메타데이터(데이터 설명서)도 함께 작성하고 저장",outcome:"good",msg:"✅ 완벽합니다! 데이터 + 설명서가 함께 있어야 나중에 다른 사람도 이해할 수 있습니다."},
-       {label:"일단 저장하고 설명은 나중에 붙인다",outcome:"warn",msg:"⚠️ 설명 없이 저장하면 나중에 '이게 뭐였더라?' 상황이 생깁니다."},
-       {label:"그냥 바탕화면 아무 폴더에 저장",outcome:"bad",msg:"❌ 관리 불가 상태로 저장. 공용 저장소·정해진 경로에 저장하세요."},
-     ]},
-  ];
-  var cur=0,score=0;
-  function render(){
-    var sa=document.getElementById('sim-area');
-    sa.innerHTML='';
-    if(cur>=steps.length){
-      sa.innerHTML='<div class="card" style="text-align:center"><div style="font-size:48px;margin-bottom:12px">'+(score>=3?'🏆':'📊')+'</div><h3>시뮬레이션 완료</h3><p style="font-size:14px;color:var(--sub);margin-top:8px">'+score+'/'+steps.length+'번 올바른 선택 — '+(score===steps.length?'완벽한 수집 절차입니다!':score>=2?'좋습니다! 빨간 항목을 다시 확인해보세요.':'수집 단계 원칙을 다시 한번 복습해보세요.')+'</p><button class="btn" style="margin-top:14px;background:var(--accent);color:#fff" onclick="cur=0;score=0;render()">다시 하기</button></div>';
-      return;
-    }
-    var s=steps[cur];
-    var prog='<div class="progress">'+cur+'/'+steps.length+' 진행</div>';
-    var choicesHtml=s.choices.map(function(c,ci){
-      return '<button class="btn" style="text-align:left;width:100%;margin-bottom:6px" onclick="pick('+ci+')">'+c.label+'</button>';
-    }).join('');
-    sa.innerHTML=prog+'<div class="card"><div style="font-size:36px;margin-bottom:10px">'+s.icon+'</div><h3>'+s.title+'</h3><p style="font-size:14px;color:var(--sub);margin:10px 0 16px;line-height:1.6">'+s.desc+'</p>'+choicesHtml+'<div id="step-fb" class="fb"></div></div>';
-  }
-  function pick(ci){
-    var s=steps[cur];
-    var c=s.choices[ci];
-    if(c.outcome==='good') score++;
-    var btns=document.querySelectorAll('.btn');
-    btns.forEach(function(b){b.disabled=true;});
-    var fb=document.getElementById('step-fb');
-    fb.textContent=c.msg;
-    fb.className='fb '+(c.outcome==='good'?'ok':'err');
-    setTimeout(function(){cur++;render();},1800);
-  }
-  render();
-  </script>
+    <div id="sim-area"></div>
 
-  <div class="foot">데이터 관리자 기본·실무 교육 · 4차시</div>
-</div>
+    <script>
+      var steps = [
+        {
+          title: "상황 발생",
+          icon: "⚙️",
+          desc: "현장에서 장비 점검이 완료되었습니다. 정비일지에 결과를 기록해야 합니다.",
+          choices: [
+            {
+              label:   "정해진 양식에 빠짐없이 입력한다",
+              outcome: "good",
+              msg:     "✅ 올바른 선택! 표준 양식을 사용하면 이후 분석이 쉬워집니다."
+            },
+            {
+              label:   "메모장에 대충 적어두고 나중에 옮긴다",
+              outcome: "warn",
+              msg:     "⚠️ 나중에 잊거나 분실 위험이 있습니다. 바로 정식 양식에 입력하세요."
+            },
+            {
+              label:   "기억으로만 두고 나중에 채운다",
+              outcome: "bad",
+              msg:     "❌ 기억은 왜곡됩니다. 즉시 기록이 원칙!"
+            },
+          ]
+        },
+        {
+          title: "담당자 칸",
+          icon: "👤",
+          desc: "정비일지의 '담당자' 칸을 어떻게 채울까요?",
+          choices: [
+            {
+              label:   "내 이름과 사번을 정확히 입력한다",
+              outcome: "good",
+              msg:     "✅ 추적 가능한 데이터가 됩니다. 책임 소재가 명확해집니다."
+            },
+            {
+              label:   "'김 중사'처럼 약식으로만 쓴다",
+              outcome: "warn",
+              msg:     "⚠️ 동명이인이 있을 경우 혼동 위험. 사번이나 전체 이름 권장."
+            },
+            {
+              label:   "비워둔다 (나중에 채우면 되니까)",
+              outcome: "bad",
+              msg:     "❌ 완전성 위반! 담당자가 없으면 문제 발생 시 추적 불가."
+            },
+          ]
+        },
+        {
+          title: "날짜 형식",
+          icon: "📅",
+          desc: "날짜를 입력할 때 어떤 형식을 쓸까요?",
+          choices: [
+            {
+              label:   "팀에서 정한 표준 형식 (예: 2026-03-15)으로 입력",
+              outcome: "good",
+              msg:     "✅ 표준 형식은 집계·분석 시 오류를 막습니다."
+            },
+            {
+              label:   "오늘 기분에 따라 (2026.3.15 또는 3/15/26 등)",
+              outcome: "bad",
+              msg:     "❌ 일관성 위반! 나중에 정렬·집계할 때 오류 발생."
+            },
+            {
+              label:   "'어제'처럼 상대적으로만 기록",
+              outcome: "bad",
+              msg:     "❌ 나중에 언제인지 알 수 없습니다. 절대 날짜를 사용하세요."
+            },
+          ]
+        },
+        {
+          title: "수집 완료",
+          icon: "✅",
+          desc: "데이터 수집을 마쳤습니다. 저장 전 마지막 확인!",
+          choices: [
+            {
+              label:   "메타데이터(데이터 설명서)도 함께 작성하고 저장",
+              outcome: "good",
+              msg:     "✅ 완벽합니다! 데이터 + 설명서가 함께 있어야 나중에 다른 사람도 이해할 수 있습니다."
+            },
+            {
+              label:   "일단 저장하고 설명은 나중에 붙인다",
+              outcome: "warn",
+              msg:     "⚠️ 설명 없이 저장하면 나중에 '이게 뭐였더라?' 상황이 생깁니다."
+            },
+            {
+              label:   "그냥 바탕화면 아무 폴더에 저장",
+              outcome: "bad",
+              msg:     "❌ 관리 불가 상태로 저장. 공용 저장소·정해진 경로에 저장하세요."
+            },
+          ]
+        },
+      ];
 
+      var cur   = 0;
+      var score = 0;
+
+      function render() {
+        var sa = document.getElementById('sim-area');
+        sa.innerHTML = '';
+
+        // 모든 단계 완료
+        if (cur >= steps.length) {
+          var emoji      = score >= 3 ? '🏆' : '📊';
+          var resultMsg  = score === steps.length
+            ? '완벽한 수집 절차입니다!'
+            : score >= 2
+              ? '좋습니다! 빨간 항목을 다시 확인해보세요.'
+              : '수집 단계 원칙을 다시 한번 복습해보세요.';
+
+          sa.innerHTML =
+            '<div class="card" style="text-align: center">' +
+              '<div style="font-size: 48px; margin-bottom: 12px">' + emoji + '</div>' +
+              '<h3>시뮬레이션 완료</h3>' +
+              '<p style="font-size: 14px; color: var(--sub); margin-top: 8px">' +
+                score + '/' + steps.length + '번 올바른 선택 — ' + resultMsg +
+              '</p>' +
+              '<button class="btn" style="margin-top: 14px; background: var(--accent); color: #fff"' +
+                ' onclick="cur=0; score=0; render()">다시 하기</button>' +
+            '</div>';
+          return;
+        }
+
+        var s = steps[cur];
+
+        var choicesHtml = s.choices.map(function (c, ci) {
+          return (
+            '<button class="btn"' +
+            ' style="text-align: left; width: 100%; margin-bottom: 6px"' +
+            ' onclick="pick(' + ci + ')">' +
+            c.label +
+            '</button>'
+          );
+        }).join('');
+
+        sa.innerHTML =
+          '<div class="progress">' + cur + '/' + steps.length + ' 진행</div>' +
+          '<div class="card">' +
+            '<div style="font-size: 36px; margin-bottom: 10px">' + s.icon + '</div>' +
+            '<h3>' + s.title + '</h3>' +
+            '<p style="font-size: 14px; color: var(--sub); margin: 10px 0 16px; line-height: 1.6">' +
+              s.desc +
+            '</p>' +
+            choicesHtml +
+            '<div id="step-fb" class="fb"></div>' +
+          '</div>';
+      }
+
+      function pick(ci) {
+        var s = steps[cur];
+        var c = s.choices[ci];
+
+        if (c.outcome === 'good') score++;
+
+        document.querySelectorAll('.btn').forEach(function (b) {
+          b.disabled = true;
+        });
+
+        var fb = document.getElementById('step-fb');
+        fb.textContent = c.msg;
+        fb.className   = 'fb ' + (c.outcome === 'good' ? 'ok' : 'err');
+
+        setTimeout(function () {
+          cur++;
+          render();
+        }, 1800);
+      }
+
+      render();
+    </script>
+
+    <div class="foot">데이터 관리자 기본·실무 교육 · 4차시</div>
+  </div>
 </body>
 </html>
