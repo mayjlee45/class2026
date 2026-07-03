@@ -1,31 +1,27 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>품질 기준 분류 (5차시)</title>
 <style>
   * { box-sizing:border-box; margin:0; padding:0; }
-  body { font-family:-apple-system,"Apple SD Gothic Neo","맑은 고딕",sans-serif; background:#1a1a1a; color:#e8e6e0; line-height:1.6; max-width:740px; margin:0 auto; padding:24px 16px; }
+  body { font-family:-apple-system,"Apple SD Gothic Neo","맑은 고딕",sans-serif; background:#FAFAF8; color:#2C2C2A; line-height:1.6; max-width:740px; margin:0 auto; padding:24px 16px; }
   h1 { font-size:22px; font-weight:600; margin-bottom:6px; }
-  .sub { font-size:14px; color:#9a9890; margin-bottom:18px; }
-  .sub b { color:#e8e6e0; }
-  .bar { display:flex; gap:12px; align-items:center; margin-bottom:18px; background:#2a2820; border-radius:10px; padding:12px 16px; font-size:13px; color:#9a9890; flex-wrap:wrap; }
-  .bar b { font-size:20px; color:#e8e6e0; }
-  .card { background:#242220; border:1px solid #3a3830; border-radius:12px; padding:16px; margin-bottom:12px; }
-  .q { font-size:15px; margin-bottom:4px; }
-  .q b { color:#e05050; }
-  .hint { font-size:13px; color:#6a6860; margin-bottom:12px; }
+  .sub { font-size:14px; color:#5F5E5A; margin-bottom:18px; }
+  .bar { display:flex; gap:12px; align-items:center; margin-bottom:18px; background:#F1EFE8; border-radius:10px; padding:12px 16px; font-size:13px; color:#5F5E5A; }
+  .bar b { font-size:20px; color:#2C2C2A; }
+  .card { background:#fff; border:1px solid #E6E3DA; border-radius:12px; padding:16px; margin-bottom:12px; }
+  .q { font-size:15px; margin-bottom:4px; } .q b { color:#A32D2D; }
+  .hint { font-size:13px; color:#888780; margin-bottom:12px; }
   .btns { display:flex; gap:8px; flex-wrap:wrap; }
-  .btns button { flex:1; min-width:80px; padding:10px; border:1px solid #3a3830; background:#2e2c28; border-radius:8px; font-size:14px; cursor:pointer; font-family:inherit; color:#e8e6e0; transition:background .15s; }
-  .btns button:hover { background:#3a3830; }
+  .btns button { flex:1; min-width:80px; padding:10px; border:1px solid #CFC9BC; background:#fff; border-radius:8px; font-size:14px; cursor:pointer; font-family:inherit; color:#2C2C2A; }
+  .btns button:hover { background:#F1EFE8; }
   .fb { margin-top:12px; padding:12px; border-radius:8px; font-size:14px; display:none; }
-  .fb.ok { background:#1a3528; color:#6ddcaa; border:1px solid #2a5040; }
-  .fb.no { background:#3a1a18; color:#e08080; border:1px solid #5a2a28; }
-  .card.done .btns { display:none; }
-  .card.done .fb { display:block; }
-  .done-msg { text-align:center; background:#252040; color:#a0a0f0; border-radius:12px; padding:20px; font-size:16px; margin-top:8px; display:none; border:1px solid #3a3868; }
-  .reset { display:block; margin:16px auto 0; padding:8px 18px; border:1px solid #3a3830; background:#2e2c28; border-radius:8px; font-size:13px; cursor:pointer; color:#9a9890; font-family:inherit; }
-  .reset:hover { background:#3a3830; }
+  .fb.ok { background:#E1F5EE; color:#085041; } .fb.no { background:#FAEAE6; color:#8A2A1A; }
+  .card.done .btns { display:none; } .card.done .fb { display:block; }
+  .done-msg { text-align:center; background:#EEEDFE; color:#3C3489; border-radius:12px; padding:20px; font-size:16px; margin-top:8px; display:none; }
+  .reset { display:block; margin:16px auto 0; padding:8px 18px; border:1px solid #CFC9BC; background:#fff; border-radius:8px; font-size:13px; cursor:pointer; color:#5F5E5A; }
 </style>
 </head>
 <body>
@@ -41,48 +37,69 @@
 
 <script>
 const ITEMS = [
-  { desc:"담당자 칸이 <b>비어 있다</b>",                                          type:"완전성", why:"있어야 할 값이 비었음 → 완전성." },
-  { desc:"정비결과 칸이 <b>비어 있다</b>",                                         type:"완전성", why:"있어야 할 값이 비었음 → 완전성." },
-  { desc:"소요시간이 <b>-30분</b>",                                              type:"유효성", why:"범위(음수 불가) 규칙 위반 → <b>유효성</b>. ※ '정확성'은 형식은 맞는데 사실이 다른 경우(예: 실제 60분을 6분으로 적음)예요. -30은 형식부터 불가능한 값이라 유효성으로 잡습니다." },
-  { desc:"정비유형코드가 <b>'D'</b> (허용값 A/B/C)",                                type:"유효성", why:"허용값 규칙 위반 → 유효성." },
-  { desc:"같은 장비ID인데 <b>'무전기'와 '무선기'</b>로 다르게 적힘",                      type:"일관성", why:"데이터끼리 충돌 → 일관성." },
-  { desc:"부품교체여부가 <b>'예'</b> (다른 행은 Y/N)",                               type:"일관성", why:"표기 불일치 → 일관성." },
-  { desc:"정비일자가 <b>2027-03-01</b> (교육연도는 2026)",                           type:"정확성", why:"형식은 정상이나 현실과 다름 → 정확성. 사람이 대조해야 잡힘." },
-  { desc:"정비결과 '완료'인데 <b>소요시간 0분</b>",                                   type:"정확성", why:"규칙은 통과했지만 사실상 오류 → 정확성." },
+  { desc:"담당자 칸이 <b>비어 있다</b>", type:"완전성", why:"있어야 할 값이 비었음 → 완전성." },
+  { desc:"정비결과 칸이 <b>비어 있다</b>", type:"완전성", why:"있어야 할 값이 비었음 → 완전성." },
+  { desc:"소요시간이 <b>-30분</b>", type:"유효성", why:"범위(음수 불가) 규칙 위반 → <b>유효성</b>. ※ '정확성'은 형식은 맞는데 사실이 다른 경우(예: 실제 60분을 6분으로 적음)예요. -30은 형식부터 불가능한 값이라 유효성으로 잡습니다." },
+  { desc:"정비유형코드가 <b>'D'</b> (허용값 A/B/C)", type:"유효성", why:"허용값 규칙 위반 → 유효성." },
+  { desc:"같은 장비ID인데 <b>'무전기'와 '무선기'</b>로 다르게 적힘", type:"일관성", why:"데이터끼리 충돌 → 일관성." },
+  { desc:"부품교체여부가 <b>'예'</b> (다른 행은 Y/N)", type:"일관성", why:"표기 불일치 → 일관성." },
+  { desc:"정비일자가 <b>2027-03-01</b> (교육연도는 2026)", type:"정확성", why:"형식은 정상이나 현실과 다름 → 정확성. 사람이 대조해야 잡힘." },
+  { desc:"정비결과 '완료'인데 <b>소요시간 0분</b>", type:"정확성", why:"규칙은 통과했지만 사실상 오류 → 정확성." },
 ];
 
 const CATS = ["완전성","유효성","일관성","정확성"];
 
-function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function shuffle(a) {
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
 
-let score=0, done=0;
+let score = 0, done = 0;
 
-function init(){
-  score=0; done=0;
-  document.getElementById("score").textContent=0;
-  document.getElementById("total").textContent=ITEMS.length;
-  document.getElementById("doneMsg").style.display="none";
-  const w=document.getElementById("cards"); w.innerHTML="";
-  shuffle(ITEMS).forEach((it,i)=>{
-    const c=document.createElement("div"); c.className="card";
-    c.innerHTML='<div class="q">'+（i+1）+'。 '+it.desc+'</div><div class="hint">어떤 품질 기준 위반일까요?</div><div class="btns">'+
-      CATS.map(x=>'<button onclick="answer('+i+',\''+x+'\',this)">'+x+'</button>').join('')+
-      '</div><div class="fb" id="fb'+i+'"></div>';
+function init() {
+  score = 0; done = 0;
+  shuffle(ITEMS);
+  document.getElementById("score").textContent = 0;
+  document.getElementById("total").textContent = ITEMS.length;
+  document.getElementById("doneMsg").style.display = "none";
+  const w = document.getElementById("cards");
+  w.innerHTML = "";
+  ITEMS.forEach((it, i) => {
+    const c = document.createElement("div");
+    c.className = "card";
+    c.innerHTML =
+      '<div class="q">' + (i + 1) + '. ' + it.desc + '</div>' +
+      '<div class="hint">어떤 품질 기준 위반일까요?</div>' +
+      '<div class="btns">' +
+        CATS.map(x => '<button onclick="answer(' + i + ',\'' + x + '\',this)">' + x + '</button>').join('') +
+      '</div>' +
+      '<div class="fb" id="fb' + i + '"></div>';
     w.appendChild(c);
   });
 }
 
-function answer(i,pick,btn){
-  const it=ITEMS[i]; const card=btn.closest(".card"); const fb=document.getElementById("fb"+i);
-  const ok=pick===it.type; if(ok)score++; document.getElementById("score").textContent=score;
-  fb.className="fb "+(ok?"ok":"no");
-  fb.innerHTML=(ok?"✅ 정답! ":"❌ 정답은 <b>"+it.type+"</b> — ")+it.why;
-  card.classList.add("done"); done++;
-  if(done===ITEMS.length){
-    const m=document.getElementById("doneMsg"); m.style.display="block";
-    m.innerHTML="🎉 완료! <b>"+score+" / "+ITEMS.length+"</b> 정답<br><span style='font-size:13px'>유효성은 규칙이, 정확성은 사람이 잡는다 — 꼭 기억!</span>";
+function answer(i, pick, btn) {
+  const it = ITEMS[i];
+  const card = btn.closest(".card");
+  const fb = document.getElementById("fb" + i);
+  const ok = pick === it.type;
+  if (ok) score++;
+  document.getElementById("score").textContent = score;
+  fb.className = "fb " + (ok ? "ok" : "no");
+  fb.innerHTML = (ok ? "✅ 정답! " : "❌ 정답은 <b>" + it.type + "</b> — ") + it.why;
+  card.classList.add("done");
+  done++;
+  if (done === ITEMS.length) {
+    const m = document.getElementById("doneMsg");
+    m.style.display = "block";
+    m.innerHTML = "🎉 끝! <b>" + score + " / " + ITEMS.length + "</b> 정답<br>" +
+      "<span style='font-size:13px'>유효성은 기계가, 정확성은 사람이 잡는다 — 그게 관리자 임무!</span>";
   }
 }
+
 init();
 </script>
 </body>
