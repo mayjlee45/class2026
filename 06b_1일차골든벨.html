@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>1일차 골든벨 (6차시)</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, "Apple SD Gothic Neo", "맑은 고딕", sans-serif;
+    background: #FAFAF8; color: #2C2C2A; line-height: 1.55; max-width: 720px; margin: 0 auto; padding: 24px 16px; }
+  h1 { font-size: 22px; font-weight: 600; margin-bottom: 4px; }
+  .sub { font-size: 14px; color: #5F5E5A; margin-bottom: 16px; }
+  .bar-wrap { background: #F1EFE8; border-radius: 999px; height: 12px; overflow: hidden; margin-bottom: 6px; }
+  .bar { height: 100%; width: 0%; background: #534AB7; border-radius: 999px; transition: width .4s ease; }
+  .meta { display: flex; justify-content: space-between; font-size: 12px; color: #888780; margin-bottom: 20px; }
+  .card { background: #fff; border: 1px solid #E6E3DA; border-radius: 14px; padding: 26px 22px; }
+  .qnum { font-size: 13px; color: #7F77DD; font-weight: 600; margin-bottom: 8px; }
+  .q { font-size: 20px; font-weight: 600; margin-bottom: 20px; line-height: 1.4; }
+  .opts { display: flex; flex-direction: column; gap: 10px; }
+  .opts button { padding: 14px 16px; border: 1px solid #CFC9BC; background: #fff; border-radius: 10px;
+    font-size: 16px; cursor: pointer; font-family: inherit; color: #2C2C2A; text-align: left; transition: .15s; }
+  .opts button:hover { background: #F1EFE8; }
+  .opts button.correct { background: #E1F5EE; border-color: #1D9E75; color: #085041; font-weight: 600; }
+  .opts button.wrong { background: #FAEAE6; border-color: #D85A30; color: #8A2A1A; }
+  .fb { margin-top: 16px; font-size: 14px; min-height: 22px; color: #5F5E5A; }
+  .next { margin-top: 16px; padding: 12px 22px; border: none; background: #534AB7; color: #fff;
+    border-radius: 10px; font-size: 15px; cursor: pointer; font-family: inherit; display: none; }
+  .end { text-align: center; padding: 30px 20px; }
+  .stamp { display: inline-block; border: 3px solid #1D9E75; color: #0F6E56; border-radius: 14px;
+    padding: 14px 22px; font-size: 19px; font-weight: 700; transform: rotate(-6deg); margin-bottom: 16px; }
+  .score { font-size: 30px; font-weight: 700; color: #3C3489; margin: 8px 0; }
+  .cat { font-size: 52px; margin-top: 14px; }
+  .retry { margin-top: 18px; padding: 10px 20px; border: 1px solid #CFC9BC; background: #fff;
+    border-radius: 10px; font-size: 14px; cursor: pointer; font-family: inherit; color: #5F5E5A; }
+</style>
+</head>
+<body>
+  <h1>🔔 1일차 골든벨</h1>
+  <p class="sub">6차시 · 오늘 배운 1일차 핵심 6문제. 반복한 내용이라 다 맞히실 거예요!</p>
+
+  <div class="bar-wrap"><div class="bar" id="bar"></div></div>
+  <div class="meta"><span id="prog">0 / 6</span><span>점수 <b id="score">0</b></span></div>
+
+  <div id="stage"></div>
+
+<script>
+const QUIZ = [
+  {
+    q: "기록되거나 전달 가능하게 남긴 것은 모두 무엇일까요?",
+    opts: ["데이터", "비밀", "소문"],
+    a: 0,
+    why: "관찰·측정·기록으로 남긴 건 전부 데이터예요. (1차시)"
+  },
+  {
+    q: "칸이 딱 정해져 모든 행이 같은 형식인 데이터는?",
+    opts: ["비정형", "정형", "반정형"],
+    a: 1,
+    why: "엑셀 표처럼 칸이 고정된 건 정형. (2차시)"
+  },
+  {
+    q: "데이터 생명주기에서 '망치면 뒤에서 못 고치는' 급소 단계는?",
+    opts: ["보존", "활용", "수집"],
+    a: 2,
+    why: "수집에서 잘못 모으면 끝까지 갑니다. (3·4차시)"
+  },
+  {
+    q: "\"사라지는 건 데이터의 가치가 아니라 ___ 이다.\"",
+    opts: ["맥락", "용량", "속도"],
+    a: 0,
+    why: "값은 멀쩡해도 읽을 열쇠(맥락)가 사라지면 못 살려요. (3차시)"
+  },
+  {
+    q: "품질 4대 기준 중 '빈칸이 있다'는 무엇 위반?",
+    opts: ["유효성", "완전성", "일관성"],
+    a: 1,
+    why: "비어 있으면 완전성. 채웠는데 규칙 위반이면 유효성. (5차시)"
+  },
+  {
+    q: "데이터에 붙이는 '설명서'를 뜻하는 말은?",
+    opts: ["빅데이터", "데이터베이스", "메타데이터"],
+    a: 2,
+    why: "이게 무슨 데이터인지 적어둔 설명서 = 메타데이터. (6차시)"
+  },
+];
+
+let idx = 0, score = 0;
+const stage = document.getElementById("stage");
+
+function renderQ() {
+  const item = QUIZ[idx];
+  document.getElementById("bar").style.width = (idx / QUIZ.length * 100) + "%";
+  document.getElementById("prog").textContent = idx + " / " + QUIZ.length;
+  let html = '<div class="card"><div class="qnum">Q' + (idx + 1) + '</div><div class="q">' + item.q + '</div><div class="opts">';
+  item.opts.forEach((o, i) => html += '<button onclick="answer(' + i + ')">' + o + '</button>');
+  html += '</div><div class="fb" id="fb"></div><button class="next" id="next" onclick="nextQ()">다음 →</button></div>';
+  stage.innerHTML = html;
+}
+
+function answer(i) {
+  const item = QUIZ[idx];
+  const btns = stage.querySelectorAll(".opts button");
+  btns.forEach(b => b.disabled = true);
+  if (i === item.a) {
+    btns[i].classList.add("correct");
+    score++;
+    document.getElementById("score").textContent = score;
+    document.getElementById("fb").innerHTML = "✅ 정답! " + item.why;
+  } else {
+    btns[i].classList.add("wrong");
+    btns[item.a].classList.add("correct");
+    document.getElementById("fb").innerHTML = "정답은 <b>" + item.opts[item.a] + "</b> — " + item.why;
+  }
+  document.getElementById("next").style.display = "inline-block";
+  document.getElementById("next").textContent = (idx === QUIZ.length - 1) ? "결과 보기 →" : "다음 →";
+}
+
+function nextQ() {
+  idx++;
+  if (idx < QUIZ.length) renderQ();
+  else renderEnd();
+}
+
+function renderEnd() {
+  document.getElementById("bar").style.width = "100%";
+  document.getElementById("prog").textContent = QUIZ.length + " / " + QUIZ.length;
+  let msg = score === 6 ? "전부 정답! 완벽해요 👏" : score >= 4 ? "잘하셨어요!" : "괜찮아요, 1일차 복습 끝!";
+  stage.innerHTML =
+    '<div class="card end">'
+    + '<div class="stamp">데이터 관리자 · 1일차 수료</div>'
+    + '<div class="score">' + score + ' / 6</div>'
+    + '<div style="font-size:15px;color:#5F5E5A;">' + msg + '</div>'
+    + '<div class="cat">🐱</div>'
+    + '<button class="retry" onclick="restart()">다시 하기</button></div>';
+}
+
+function restart() {
+  idx = 0;
+  score = 0;
+  document.getElementById("score").textContent = 0;
+  renderQ();
+}
+
+renderQ();
+</script>
+</body>
+</html>

@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>메타데이터 작성 실습 (6차시)</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,"Apple SD Gothic Neo","맑은 고딕",sans-serif;background:#FAFAF8;color:#2C2C2A;
+    line-height:1.55;max-width:860px;margin:0 auto;padding:24px 16px 60px}
+  h1{font-size:22px;font-weight:600;margin-bottom:4px}
+  .sub{font-size:14px;color:#5F5E5A;margin-bottom:16px}
+  .sub b{color:#2C2C2A}
+  .stagetag{display:inline-block;background:#534AB7;color:#fff;font-size:12.5px;font-weight:700;padding:4px 11px;border-radius:999px;margin-bottom:8px}
+  .panel{background:#fff;border:1px solid #E6E3DA;border-radius:12px;padding:16px;margin-bottom:16px}
+  .ph{font-size:13px;font-weight:700;color:#534AB7;margin-bottom:10px}
+  .ctx{background:#F4F1FB;border:1px solid #DAD2F0;border-radius:10px;padding:13px 15px;font-size:13.5px;line-height:1.65;margin-bottom:12px}
+  .ctx b{color:#3C3489}
+  .xls{overflow-x:auto}
+  table{border-collapse:collapse;font-size:12.5px;min-width:600px;width:100%}
+  th,td{border:1px solid #D9D5C8;padding:6px 8px;text-align:center;white-space:nowrap}
+  thead th{background:#217346;color:#fff;font-weight:600}
+  tbody tr:nth-child(even){background:#F4F8F4}
+  td.code{font-weight:800;color:#B5491F;background:#FBEFE7}
+  .note{font-size:12px;color:#8A8578;margin-top:6px}
+  .field{margin-bottom:11px}
+  .field label{display:block;font-size:13.5px;font-weight:700;margin-bottom:5px}
+  .field label .no{display:inline-block;width:20px;height:20px;background:#534AB7;color:#fff;border-radius:6px;text-align:center;line-height:20px;font-size:12px;margin-right:6px}
+  .field .star{color:#B5491F;font-size:12px;margin-left:4px}
+  .field input,.field textarea{width:100%;border:1px solid #CFC9BC;border-radius:8px;padding:9px 11px;font-size:14px;font-family:inherit;background:#fff;color:#2C2C2A}
+  .field textarea{min-height:60px;resize:vertical}
+  .field.key label{color:#B5491F}
+  .field.done input,.field.done textarea{border-color:#1FA971;background:#F2FBF6}
+  .bar{height:10px;background:#EDEAE0;border-radius:999px;overflow:hidden;margin:4px 0 14px}
+  .bar>span{display:block;height:100%;width:0;background:linear-gradient(90deg,#534AB7,#1FA971);transition:width .3s}
+  .btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+  .btns button{padding:11px 18px;border:1px solid #CFC9BC;background:#fff;border-radius:8px;font-size:14px;cursor:pointer;font-family:inherit}
+  .btns button.go{background:#534AB7;color:#fff;border-color:#534AB7;font-weight:700}
+  .btns button.next{background:#217346;color:#fff;border-color:#217346;font-weight:700;display:none}
+  .btns button.next.show{display:inline-block}
+  .person{display:none;margin-top:16px;background:#fff;border:1px solid #E6E3DA;border-radius:12px;padding:16px}
+  .person.show{display:block;animation:fade .3s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  .person .head{display:flex;gap:12px;align-items:center;margin-bottom:10px}
+  .person .face{font-size:38px}
+  .person .bubble{flex:1;background:#F1EFE8;border-radius:12px;border-top-left-radius:4px;padding:10px 13px;font-size:14.5px;font-weight:600}
+  .checks .row{display:flex;gap:8px;align-items:flex-start;font-size:13.5px;padding:5px 0;border-top:1px solid #F0EDE3}
+  .checks .row .ic{flex:0 0 auto;font-weight:800}
+  .checks .row.ok .ic{color:#1FA971} .checks .row.no .ic{color:#B5491F}
+  .checks .row .why{color:#8A8578;font-size:12.5px;margin-left:4px}
+  .model{display:none;margin-top:14px;background:#EEF6F1;border:1px solid #BFE3D0;border-radius:12px;padding:14px}
+  .model.show{display:block}
+  .model h3{font-size:14px;color:#085041;margin-bottom:8px}
+  .model .m{font-size:13.5px;margin:5px 0;line-height:1.5}
+  .model .m b{color:#085041}
+  #stage2{display:none}
+  #stage2.show{display:block}
+  .free{width:100%;min-height:150px;border:1px solid #CFC9BC;border-radius:8px;padding:12px;font-size:14px;font-family:inherit;line-height:1.6}
+  .freehint{font-size:12.5px;color:#8A8578;margin:6px 0 10px}
+  #stage3{display:none} #stage3.show{display:block}
+  .meta-list{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}
+  .mrow{display:flex;gap:10px;align-items:center;background:#fff;border:1px solid #E6E3DA;border-radius:8px;padding:9px 12px;cursor:pointer;font-size:13.5px}
+  .mrow:hover{border-color:#534AB7;background:#F7F5FE}
+  .mrow.active{border-color:#534AB7;background:#EEEDFE}
+  .mrow .k{font-weight:700;flex:0 0 150px}
+  .mrow .v{color:#5F5E5A}
+  .mrow.alg .k{color:#B5491F}
+  .explain{display:none;background:#F4F1FB;border:1px solid #DAD2F0;border-radius:10px;padding:12px 14px;font-size:13.5px;line-height:1.65;margin-bottom:12px}
+  .explain.show{display:block;animation:fade .3s ease}
+  .explain b{color:#3C3489}
+  .d3 .alg{background:#FBE3D6;color:#B5491F;font-weight:700;border-radius:4px;padding:0 2px}
+  .d3 td.lit{outline:3px solid #534AB7;background:#EEEDFE !important}
+  .d3 th.lit{outline:3px solid #FFD24D;background:#2E2769 !important;color:#fff !important}
+  .d3 .alg.lit{outline:2px solid #B5491F;background:#FCD3BE !important}
+</style>
+</head>
+<body>
+  <h1>📝 메타데이터(설명서) 작성 실습</h1>
+  <p class="sub">데이터를 <b>처음 보는 사람도 바로 쓸 수 있게</b> 설명서(메타데이터)를 작성합니다. 2단계로 진행해요.</p>
+
+  <!-- ===== STAGE 1 ===== -->
+  <span class="stagetag">1단계 · 맥락을 읽고 채우기</span>
+  <div class="panel">
+    <div class="ph">📊 데이터 ①: 차량 운행일지 (일부)</div>
+    <div class="xls">
+      <table>
+        <thead><tr><th>운행번호</th><th>운행일자</th><th>차량번호</th><th>운행구분</th><th>출발지</th><th>도착지</th><th>운행거리(km)</th><th>운전자</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>2026-03-04</td><td>12가3456</td><td class="code">A</td><td>본부</td><td>정비창</td><td>18</td><td>김운행</td></tr>
+          <tr><td>2</td><td>2026-03-05</td><td>34나7890</td><td class="code">B</td><td>본부</td><td>훈련장</td><td>42</td><td>이수송</td></tr>
+          <tr><td>3</td><td>2026-03-06</td><td>12가3456</td><td class="code">C</td><td>본부</td><td>의무대</td><td>7</td><td>김운행</td></tr>
+          <tr><td>4</td><td>2026-03-07</td><td>56다1234</td><td class="code">A</td><td>정비창</td><td>본부</td><td>18</td><td>박정비</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="note">표만 봐선 '운행구분 <b style="color:#B5491F">A·B·C</b>'가 무슨 뜻인지 알 수 없죠? 아래 <b>배경 설명</b>에서 단서를 찾으세요.</div>
+  </div>
+
+  <div class="panel">
+    <div class="ph">🗒️ 배경 설명 (이걸 읽고 메타데이터를 유추하세요)</div>
+    <div class="ctx">
+      이 표는 <b>○○부대 수송반</b>이 관리하는 <b>2026년 차량 운행일지</b>입니다.
+      차량이 운행될 때마다 담당자가 입력하며(작성: 이수송, 최종 수정: 김운행),
+      <b>엑셀 파일(컬럼 8개, 현재 약 200행)</b>으로 보관됩니다.
+      운행구분은 <b>A=일반, B=훈련, C=긴급</b>을 뜻합니다.
+      대외비라 <b>수송반 승인자만</b> 열람할 수 있습니다.
+    </div>
+
+    <div class="ph">✍️ 메타데이터 6필드 — 배경 설명을 보고 채우세요</div>
+    <div class="bar"><span id="bar"></span></div>
+    <div class="field" data-f><label><span class="no">1</span>데이터명</label><input id="f1" placeholder="무엇에 대한 데이터인가요?"></div>
+    <div class="field" data-f><label><span class="no">2</span>생산 주체</label><input id="f2" placeholder="누가 만들고 관리하나요?"></div>
+    <div class="field" data-f><label><span class="no">3</span>형식</label><input id="f3" placeholder="파일 형태·구조·규모는?"></div>
+    <div class="field" data-f><label><span class="no">4</span>갱신 주기</label><input id="f4" placeholder="얼마나 자주 갱신되나요?"></div>
+    <div class="field" data-f><label><span class="no">5</span>보안등급 · 접근권한</label><input id="f5" placeholder="등급과 열람 권한은?"></div>
+    <div class="field key" data-f><label><span class="no">6</span>항목 정의 (데이터 사전)<span class="star">★ 가장 중요</span></label>
+      <textarea id="f6" placeholder="각 칸의 뜻 — 특히 '운행구분' 코드의 의미를 적으세요"></textarea></div>
+
+    <div class="btns">
+      <button class="go" id="handBtn">🧑‍💼 새 담당자에게 인계하기</button>
+      <button id="modelBtn">모범답안 보기</button>
+      <button class="next" id="nextBtn">2단계로 ▶</button>
+    </div>
+  </div>
+
+  <div class="person" id="person">
+    <div class="head"><div class="face" id="pface">🧑‍💼</div><div class="bubble" id="pbubble"></div></div>
+    <div class="checks" id="checks"></div>
+  </div>
+
+  <div class="model" id="model">
+    <h3>✅ 1단계 모범답안 (배경 설명에서 유추)</h3>
+    <div class="m"><b>데이터명</b>: 2026년 ○○부대 차량 운행일지</div>
+    <div class="m"><b>생산 주체</b>: 수송반 (작성 이수송 / 최종 수정 김운행)</div>
+    <div class="m"><b>형식</b>: xlsx · 8개 컬럼 · 약 200행</div>
+    <div class="m"><b>갱신 주기</b>: 차량 운행 발생 시 수시</div>
+    <div class="m"><b>보안등급·접근권한</b>: 대외비 / 수송반 승인자만 열람</div>
+    <div class="m"><b>항목 정의</b>: 운행구분 <b>A=일반, B=훈련, C=긴급</b> · 운행거리=km · 차량번호=차량 등록번호</div>
+  </div>
+
+  <!-- ===== STAGE 2 ===== -->
+  <div id="stage2">
+    <span class="stagetag" style="background:#217346">2단계 · 이번엔 스스로! (채점 없음)</span>
+    <div class="panel">
+      <div class="ph">📊 데이터 ②: 급식 일지 (일부)</div>
+      <div class="xls">
+        <table>
+          <thead><tr><th>일자</th><th>끼니구분</th><th>메뉴</th><th>식수인원</th><th>잔반량(kg)</th><th>작성자</th></tr></thead>
+          <tbody>
+            <tr><td>2026-03-04</td><td class="code">B</td><td>북엇국 외</td><td>312</td><td>14</td><td>최취사</td></tr>
+            <tr><td>2026-03-04</td><td class="code">L</td><td>제육볶음 외</td><td>340</td><td>9</td><td>최취사</td></tr>
+            <tr><td>2026-03-04</td><td class="code">D</td><td>된장찌개 외</td><td>305</td><td>21</td><td>한배식</td></tr>
+            <tr><td>2026-03-05</td><td class="code">B</td><td>미역국 외</td><td>318</td><td>12</td><td>한배식</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="ctx" style="margin-top:12px">
+        이 표는 <b>○○부대 취사반</b>의 <b>2026년 급식 일지</b>입니다. 매 끼니 배식 인원·메뉴·잔반량을
+        취사병이 기록하며, <b>식수 인원 정산과 위생 점검</b>에 씁니다.
+        끼니구분은 <b>B=조식, L=중식, D=석식</b>입니다. 종이 대장과 엑셀을 함께 쓰고 월 단위로 보관하며,
+        위생 규정상 일정 기간 보존 후 폐기합니다.
+      </div>
+
+      <div class="ph">✍️ 이 데이터를 어떻게 인계하시겠어요?</div>
+      <div class="freehint">이번엔 칸을 안 드립니다. <b>어떤 항목이 필요할지 스스로 떠올려</b>, 설명서를 자유롭게 적어보세요. (채점하지 않습니다 — 다 적은 뒤 모범답안과 비교)</div>
+      <textarea class="free" id="free" placeholder="예: 데이터명 — … / 생산 주체 — … / 형식 — … / 갱신 주기 — … / 보안·보존 — … / 항목 정의 — 끼니구분 B/L/D = …"></textarea>
+      <div class="btns">
+        <button class="go" id="model2Btn">모범답안 보기</button>
+        <button class="next show" id="next2Btn">3단계 · 실제 데이터로 ▶</button>
+      </div>
+
+      <div class="model" id="model2">
+        <h3>✅ 2단계 모범답안 (예시)</h3>
+        <div class="m"><b>데이터명</b>: 2026년 ○○부대 급식 일지</div>
+        <div class="m"><b>생산 주체</b>: 취사반 (취사병 작성)</div>
+        <div class="m"><b>형식</b>: 종이 대장 + xlsx · 6개 컬럼 · 월 단위 누적</div>
+        <div class="m"><b>갱신 주기</b>: 매 끼니(1일 3회)</div>
+        <div class="m"><b>보안등급·보존</b>: 위생 규정상 일정 기간 보존 후 폐기</div>
+        <div class="m"><b>항목 정의</b>: 끼니구분 <b>B=조식, L=중식, D=석식</b> · 식수인원=배식 인원 · 잔반량=kg</div>
+        <div class="m" style="margin-top:8px;color:#5F5E5A">→ 칸을 안 줘도 이 6가지가 자연스럽게 떠올랐다면, 메타데이터를 체화한 거예요!</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== STAGE 3 ===== -->
+  <div id="stage3">
+    <span class="stagetag" style="background:#B5491F">3단계 · 실제 데이터로 보기 (인터랙티브)</span>
+    <div class="panel d3">
+      <div class="ph">📂 실제 공개 데이터: 「국방부_육군훈련소 식단정보」 (data.go.kr · 2022-04)</div>
+      <p class="freehint">아래 <b>메타데이터 항목을 클릭</b>하면, 그게 실제 데이터의 어느 부분을 설명하는지 표에 표시됩니다. ⚠️ 항목은 꼭 눌러보세요.</p>
+      <div class="meta-list" id="metaList">
+        <div class="mrow" data-t="" data-x="name"><span class="k">데이터명</span><span class="v">국방부_육군훈련소 식단정보</span></div>
+        <div class="mrow" data-t="" data-x="org"><span class="k">제공기관·관리부서</span><span class="v">국방부 / 육군본부</span></div>
+        <div class="mrow" data-t="row" data-x="fmt"><span class="k">형식</span><span class="v">CSV · 전체 2,646행</span></div>
+        <div class="mrow" data-t="" data-x="upd"><span class="k">갱신 주기</span><span class="v">수시(자동 갱신)</span></div>
+        <div class="mrow" data-t="header" data-x="col"><span class="k">항목(컬럼)</span><span class="v">날짜·조식·열량·중식·…</span></div>
+        <div class="mrow alg" data-t="alg" data-x="alg"><span class="k">⚠️ 알레르기 코드 (05)(17)</span><span class="v">메타데이터에 정의 없음 — 꼭 클릭!</span></div>
+      </div>
+      <div class="explain" id="explain"></div>
+      <div class="xls">
+        <table id="d3tbl">
+          <thead><tr><th>날짜</th><th>조식</th><th>조식열량</th><th>중식</th><th>중식열량</th><th>석식</th><th>석식열량</th></tr></thead>
+          <tbody>
+            <tr><td>2022-04-01</td><td>밥</td><td>363kcal</td><td>밥</td><td>363kcal</td><td>현미밥</td><td>399.3kcal</td></tr>
+            <tr><td>2022-04-01</td><td>오징어국<span class="alg">(05)</span><span class="alg">(17)</span></td><td>46.7kcal</td><td>순두부백탕<span class="alg">(05)</span><span class="alg">(09)</span><span class="alg">(17)</span></td><td>105.7kcal</td><td>감자양파찌개<span class="alg">(05)</span><span class="alg">(06)</span></td><td>86.8kcal</td></tr>
+            <tr><td>2022-04-01</td><td>소떡소떡<span class="alg">(06)</span><span class="alg">(10)</span><span class="alg">(13)</span></td><td>289.3kcal</td><td>쇠고기불고기<span class="alg">(05)</span><span class="alg">(06)</span><span class="alg">(16)</span></td><td>313.2kcal</td><td>느타리버섯볶음<span class="alg">(05)</span><span class="alg">(06)</span></td><td>61.1kcal</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="note">※ 실제 「국방부_육군훈련소 식단정보」 2022-04 자료. 메뉴 옆 괄호 숫자가 알레르기 코드입니다.</div>
+    </div>
+  </div>
+
+  <p class="sub" style="margin-top:8px">데이터 관리자 기본·실무 교육 · 6차시</p>
+
+<script>
+(function(){
+  const FIELDS=[
+    {id:'f1',name:'데이터명'},
+    {id:'f2',name:'생산 주체'},
+    {id:'f3',name:'형식'},
+    {id:'f4',name:'갱신 주기'},
+    {id:'f5',name:'보안등급·접근권한'},
+    {id:'f6',name:'항목 정의',key:true},
+  ];
+  const $=id=>document.getElementById(id);
+  const val=id=>$(id).value.trim();
+
+  function updateBar(){
+    const filled=FIELDS.filter(f=>val(f.id).length>0).length;
+    $('bar').style.width=(filled/FIELDS.length*100)+'%';
+    FIELDS.forEach(f=>$(f.id).closest('.field').classList.toggle('done', val(f.id).length>0));
+  }
+  FIELDS.forEach(f=>$(f.id).addEventListener('input',updateBar));
+
+  function keyHasMeaning(v){
+    const t=v.replace(/\s/g,'');
+    const hasWord=/일반|훈련|긴급/.test(t);
+    const hasAB=/A/.test(t)&&/B/.test(t)&&/C/.test(t);
+    return v.length>0 && (hasWord||hasAB);
+  }
+
+  function hand(){
+    const checks=$('checks'); checks.innerHTML='';
+    let filled=0; const v6=val('f6'); const keyOk=keyHasMeaning(v6);
+    FIELDS.forEach(f=>{
+      const v=val(f.id); const ok=v.length>0; if(ok) filled++;
+      let pass=ok, why='';
+      if(f.key){
+        pass=keyOk;
+        why = keyOk
+          ? '— 운행구분 코드 뜻까지 있네요! 바로 쓸 수 있어요.'
+          : (ok ? '— 적긴 했는데 코드(A·B·C) 뜻이 안 보여요. 그게 핵심이에요!' : '— "운행구분 A·B·C가 무슨 뜻이죠?" 이게 없으면 못 써요!');
+      } else if(!ok){
+        why='— 이 칸이 비어서 잘 모르겠어요.';
+      }
+      const row=document.createElement('div');
+      row.className='row '+(pass?'ok':'no');
+      row.innerHTML=`<span class="ic">${pass?'✓':'✗'}</span><span><b>${f.name}</b><span class="why">${why}</span></span>`;
+      checks.appendChild(row);
+    });
+    const face=$('pface'), bub=$('pbubble');
+    if(filled===6 && keyOk){
+      face.textContent='😄';
+      bub.textContent='완벽해요! 이 설명서만 보고도 바로 이해돼요. 운행구분 코드 뜻까지 있어서 안심됩니다.';
+      $('nextBtn').classList.add('show');
+    } else if(!keyOk){
+      face.textContent='😕';
+      bub.textContent='운행구분 A·B·C가 무슨 뜻인지 모르겠어요. 이대로면 이 데이터, 못 쓰겠는데요? (★항목 정의를 배경 설명에서 찾아 채워주세요)';
+    } else {
+      face.textContent='🤔';
+      bub.textContent='몇 칸이 비어 헷갈려요. 배경 설명을 다시 보고 빈 칸을 채워주세요.';
+      $('nextBtn').classList.add('show');
+    }
+    $('person').classList.add('show');
+    $('person').scrollIntoView({behavior:'smooth',block:'nearest'});
+  }
+
+  $('handBtn').addEventListener('click',hand);
+  $('modelBtn').addEventListener('click',()=>{
+    const m=$('model'); m.classList.toggle('show');
+    if(m.classList.contains('show')) m.scrollIntoView({behavior:'smooth',block:'nearest'});
+  });
+  $('nextBtn').addEventListener('click',()=>{
+    $('stage2').classList.add('show');
+    $('stage2').scrollIntoView({behavior:'smooth'});
+  });
+  $('model2Btn').addEventListener('click',()=>{
+    const m=$('model2'); m.classList.toggle('show');
+    if(m.classList.contains('show')) m.scrollIntoView({behavior:'smooth',block:'nearest'});
+  });
+
+  // ===== STAGE 3 — 실제 데이터 인터랙티브 =====
+  const EXP={
+    name:"이 표 전체가 <b>'무슨 데이터'</b>인지 한 줄로 알려줍니다. (= 우리가 쓴 1번 '데이터명')",
+    org:"누가 만들고 관리하는지. <b>국방부</b>가 제공하고 <b>육군본부</b>가 관리합니다. (= 생산 주체)",
+    fmt:"파일은 <b>CSV</b> 형식이고, 강조된 행처럼 한 줄 한 줄이 모여 <b>전체 2,646행</b>입니다. (= 형식)",
+    upd:"새 식단이 나오면 <b>수시로 자동 갱신</b>됩니다. (= 갱신 주기)",
+    col:"각 칸(컬럼)이 무엇인지 — 표의 <b>머리글(날짜·조식·열량…)</b>을 설명합니다. (= 항목/컬럼 정의)",
+    alg:"메뉴 옆 <b>(05)(17)</b>… 이게 무슨 알레르기인지 <b>메타데이터엔 안 적혀 있죠?</b> 왜냐하면 <b>식약처 국가표준</b>이라서예요 — 'cm'가 표준이라 매번 '1cm는 이만큼'이라 안 적는 것처럼요. 즉 <b>관리자가 잘못한 게 아니라 표준을 따른 것</b>입니다.<br><br>다만 BBC 사례 기억하죠? 표준이 <b>바뀌거나 사라지면</b> 이 부분을 못 읽을 수 있어요. 그래서 코드 뜻을 <b>데이터 옆에 병기</b>해두면, 표준이 변해도 데이터가 <b>스스로 읽히는</b> 더 안전·범용 데이터가 됩니다. (= 자기완결성)",
+  };
+
+  document.querySelectorAll('#metaList .mrow').forEach(r=>{
+    r.addEventListener('click',()=>{
+      document.querySelectorAll('#metaList .mrow').forEach(x=>x.classList.remove('active'));
+      r.classList.add('active');
+      document.querySelectorAll('#d3tbl .lit').forEach(e=>e.classList.remove('lit'));
+      const t=r.dataset.t;
+      if(t==='header') document.querySelectorAll('#d3tbl thead th').forEach(e=>e.classList.add('lit'));
+      else if(t==='row') document.querySelectorAll('#d3tbl tbody tr:nth-child(2) td').forEach(e=>e.classList.add('lit'));
+      else if(t==='alg') document.querySelectorAll('#d3tbl .alg').forEach(e=>e.classList.add('lit'));
+      const ex=$('explain');
+      ex.innerHTML=EXP[r.dataset.x];
+      ex.classList.add('show');
+      ex.scrollIntoView({behavior:'smooth',block:'nearest'});
+    });
+  });
+
+  $('next2Btn').addEventListener('click',()=>{
+    $('stage3').classList.add('show');
+    $('stage3').scrollIntoView({behavior:'smooth'});
+  });
+
+  updateBar();
+})();
+</script>
+</body>
+</html>
