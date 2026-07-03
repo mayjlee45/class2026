@@ -1,133 +1,321 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>생명주기 순서 맞히기</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>생명주기 순서 맞히기 (3차시)</title>
   <style>
-    :root {
-      --bg:#0f1720;--card:#172230;--line:#2a3a4d;--ink:#eaf1f8;
-      --sub:#9fb2c6;--accent:#3d8bfd;--ok:#27ae60;--err:#e74c3c;--warn:#e67e22;
-    }
-    *{box-sizing:border-box;margin:0;padding:0;}
-    body{background:var(--bg);color:var(--ink);
-      font-family:Pretendard,"Malgun Gothic","맑은 고딕",system-ui,sans-serif;
-      min-height:100vh;padding:28px 14px;display:flex;justify-content:center;}
-    .wrap{width:100%;max-width:680px;}
-    .back{display:inline-block;margin-bottom:18px;font-size:13px;color:var(--sub);text-decoration:none;}
-    .back:hover{color:var(--ink);}
-    .tag{display:inline-block;font-size:12px;font-weight:700;color:var(--accent);
-      background:rgba(61,139,253,.12);border:1px solid rgba(61,139,253,.3);
-      padding:4px 11px;border-radius:999px;margin-bottom:10px;}
-    h2{font-size:22px;margin-bottom:8px;}
-    .lead{color:var(--sub);font-size:14.5px;line-height:1.65;margin-bottom:22px;}
-    .card{background:var(--card);border:1px solid var(--line);border-radius:14px;
-      padding:18px 20px;margin-bottom:14px;}
-    .card h3{font-size:15px;margin-bottom:10px;}
-    .opts{display:grid;gap:8px;margin-top:10px;}
-    .opts.g2{grid-template-columns:1fr 1fr;}
-    .opts.g1{grid-template-columns:1fr;}
-    .btn{padding:10px 14px;border-radius:10px;background:#1e3050;color:var(--ink);
-      border:1px solid var(--line);font-size:14px;cursor:pointer;text-align:left;
-      transition:background .15s,border-color .15s;}
-    .btn:hover:not(:disabled){background:#253d63;border-color:var(--accent);}
-    .btn:disabled{opacity:.55;cursor:default;}
-    .btn.correct{background:rgba(39,174,96,.2)!important;border-color:var(--ok)!important;color:#6fe09f;}
-    .btn.wrong{background:rgba(231,76,60,.15)!important;border-color:var(--err)!important;color:#f08080;}
-    .fb{margin-top:10px;font-size:13.5px;padding:10px 14px;border-radius:10px;display:none;}
-    .fb.ok{background:rgba(39,174,96,.12);color:#6fe09f;display:block;}
-    .fb.err{background:rgba(231,76,60,.1);color:#f08080;display:block;}
-    .progress{font-size:13px;color:var(--sub);margin-bottom:16px;}
-    .score-box{background:var(--card);border:1px solid var(--line);border-radius:14px;
-      padding:24px;text-align:center;margin-top:18px;display:none;}
-    .score-box .big{font-size:48px;margin-bottom:8px;}
-    .score-box p{color:var(--sub);font-size:14px;}
-    .foot{text-align:center;font-size:12px;color:#4a5a6a;margin-top:36px;
-      padding-top:14px;border-top:1px solid var(--line);}
-    /* drag styles */
-    .drag-item{padding:10px 14px;background:#1e3050;border:1px solid var(--line);
-      border-radius:10px;cursor:grab;font-size:14px;user-select:none;transition:opacity .15s;}
-    .drag-item:active{cursor:grabbing;opacity:.7;}
-    .drag-item.dragging{opacity:.4;}
-    .drop-zone{min-height:54px;background:rgba(61,139,253,.06);border:2px dashed var(--line);
-      border-radius:10px;padding:8px;display:flex;flex-direction:column;gap:6px;}
-    .drop-zone.over{border-color:var(--accent);background:rgba(61,139,253,.12);}
-    .zone-label{font-size:12px;color:var(--sub);margin-bottom:4px;font-weight:600;}
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
+    body {
+      font-family: -apple-system, "Apple SD Gothic Neo", "맑은 고딕", sans-serif;
+      background: #fafaf8;
+      color: #2c2c2a;
+      line-height: 1.6;
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 24px 16px;
+    }
+
+    h1 {
+      font-size: 22px;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .sub {
+      font-size: 14px;
+      color: #5f5e5a;
+      margin-bottom: 18px;
+    }
+
+    .sub em {
+      color: #2c2c2a;
+      font-style: normal;
+      font-weight: 600;
+    }
+
+    .label {
+      font-size: 13px;
+      color: #5f5e5a;
+      margin: 16px 0 8px;
+    }
+
+    /* 단어 풀 영역 */
+    .pool {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      min-height: 52px;
+      background: #f1efe8;
+      border-radius: 10px;
+      padding: 12px;
+    }
+
+    /* 순서 배치 영역 */
+    .seq {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      min-height: 52px;
+      background: #eeedfe;
+      border: 1px dashed #afa9ec;
+      border-radius: 10px;
+      padding: 12px;
+    }
+
+    /* 칩 공통 */
+    .chip {
+      padding: 10px 16px;
+      border: 1px solid #cfc9bc;
+      background: #fff;
+      border-radius: 8px;
+      font-size: 15px;
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.12s;
+    }
+
+    .chip:hover { background: #f1efe8; }
+
+    .chip .n {
+      color: #534ab7;
+      font-weight: 600;
+      margin-right: 6px;
+    }
+
+    /* 정답/오답 chip 색상 */
+    .chip.correct {
+      background: #e1f5ee;
+      border-color: #4caf8a;
+      color: #085041;
+    }
+
+    .chip.correct .n { color: #085041; }
+
+    .chip.wrong {
+      background: #fdecea;
+      border-color: #e07070;
+      color: #7a2020;
+    }
+
+    .chip.wrong .n { color: #7a2020; }
+
+    /* 버튼 */
+    .btns {
+      display: flex;
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .btns button {
+      padding: 10px 18px;
+      border: 1px solid #cfc9bc;
+      background: #fff;
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+      font-family: inherit;
+      color: #2c2c2a;
+      transition: background 0.12s;
+    }
+
+    .btns button:hover { background: #f1efe8; }
+
+    /* 피드백 박스 */
+    .fb {
+      margin-top: 16px;
+      padding: 14px;
+      border-radius: 10px;
+      font-size: 15px;
+      display: none;
+    }
+
+    .fb.ok {
+      background: #e1f5ee;
+      color: #085041;
+    }
+
+    .fb.partial {
+      background: #faeedc;
+      color: #854f0b;
+    }
+
+    .answer {
+      margin-top: 10px;
+      font-size: 14px;
+      color: #5f5e5a;
+    }
+
+    .answer strong {
+      color: #534ab7;
+      font-weight: 700;
+    }
   </style>
 </head>
 <body>
-<div class="wrap">
-  <a class="back" href="index.html">← 목록으로</a>
-  <div class="tag">🔢 3차시 순서</div>
-  <h2>데이터 생명주기 순서 맞히기</h2>
-  <p class="lead">6단계를 느낌대로 순서대로 배치해보세요. 드래그로 위아래로 이동할 수 있습니다.</p>
 
-  <div class="card">
-    <p style="font-size:14px;color:var(--sub);margin-bottom:14px">
-      섞인 6단계를 올바른 순서로 드래그해 배치하세요. 직감대로 도전해보세요!
-    </p>
-    <div id="sort-list" style="display:flex;flex-direction:column;gap:8px;"></div>
-    <div id="sort-fb" class="fb" style="margin-top:14px"></div>
-    <div style="display:flex;gap:8px;margin-top:12px">
-      <button class="btn" style="flex:1;background:var(--accent);color:#fff" onclick="checkSort()">정답 확인</button>
-      <button class="btn" style="flex:1" onclick="resetSort()">다시 섞기</button>
-    </div>
+  <h1>♻️ 생명주기 순서 맞히기</h1>
+  <p class="sub">
+    3차시 · 아직 안 배웠어요. <em>느낌대로</em> 데이터의 한살이 6단계를 순서대로 놓아보세요.
+    (위 칸을 누르면 아래로 내려가요)
+  </p>
+
+  <div class="label">① 단어 (눌러서 순서대로 배치)</div>
+  <div class="pool" id="pool"></div>
+
+  <div class="label">② 내가 만든 순서 (누르면 다시 위로)</div>
+  <div class="seq" id="seq"></div>
+
+  <div class="btns">
+    <button onclick="check()">확인</button>
+    <button onclick="reset()">다시 하기</button>
   </div>
-  <div class="card" id="answer-reveal" style="display:none">
-    <h3>✅ 정답: 데이터 생명주기 6단계</h3>
-    <div style="font-size:14px;color:var(--sub);line-height:1.9">
-      <b style="color:var(--ink)">① 생성</b> → <b style="color:var(--ink)">② 수집 ⚠️</b> → <b style="color:var(--ink)">③ 저장</b> → <b style="color:var(--ink)">④ 활용</b> → <b style="color:var(--ink)">⑤ 보존</b> → <b style="color:var(--ink)">⑥ 폐기 ⚠️</b><br>
-      <span style="color:var(--warn)">⚠️ 급소: 수집(잘못 모으면 뒤에서 못 고침) · 폐기(안 지우면 보안 사고)</span>
-    </div>
+
+  <div class="fb" id="fb">
+    <div id="fbMsg"></div>
+    <div class="answer" id="fbAnswer"></div>
   </div>
-  <script>
-  var correct=["생성","수집","저장","활용","보존","폐기"];
-  var emojis={"생성":"🌱","수집":"📥","저장":"💾","활용":"🔍","보존":"🗄️","폐기":"🗑️"};
-  var current=[...correct].sort(()=>Math.random()-0.5);
-  var dragging=null;
-  function buildList(){
-    var list=document.getElementById('sort-list');
-    list.innerHTML='';
-    current.forEach(function(s,i){
-      var el=document.createElement('div');
-      el.className='drag-item';
-      el.draggable=true;
-      el.innerHTML='<span style="margin-right:8px;font-size:18px">'+emojis[s]+'</span>'+s;
-      el.dataset.val=s;
-      el.addEventListener('dragstart',function(){dragging=this;setTimeout(()=>this.classList.add('dragging'),0);});
-      el.addEventListener('dragend',function(){this.classList.remove('dragging');dragging=null;});
-      el.addEventListener('dragover',function(e){e.preventDefault();
-        var r=this.getBoundingClientRect();
-        if(e.clientY<r.top+r.height/2) list.insertBefore(dragging,this);
-        else list.insertBefore(dragging,this.nextSibling);
-      });
-      list.appendChild(el);
+
+<script>
+  /* ── 정답 순서 ─────────────────────────────────────────── */
+  const ANSWER = ['생성', '수집', '저장', '활용', '보존', '폐기'];
+
+  /* ── 점수별 메시지 ─────────────────────────────────────── */
+  function getMsg(score, total) {
+    if (score === total) {
+      return '🎉 ' + total + '개 전부 정답! 보세요, 외울 필요도 없죠? 너무 당연한 순서예요.';
+    }
+    return '👍 ' + score + ' / ' + total + ' 맞았어요. 거의 다 맞히셨죠? 안 배웠는데도요 — 그만큼 당연한 흐름이라는 거예요.';
+  }
+
+  /* ── 초기화 ────────────────────────────────────────────── */
+  function reset() {
+    // 피드백 숨기기
+    const fb = document.getElementById('fb');
+    fb.style.display = 'none';
+    fb.className = 'fb';
+
+    // seq 비우기
+    document.getElementById('seq').innerHTML = '';
+
+    // pool 초기화 (셔플)
+    const pool = document.getElementById('pool');
+    pool.innerHTML = '';
+    const shuffled = shuffle([...ANSWER]);
+    shuffled.forEach(word => {
+      const chip = makeChip(word, 'pool');
+      pool.appendChild(chip);
     });
   }
-  buildList();
-  function checkSort(){
-    var els=document.querySelectorAll('#sort-list .drag-item');
-    var order=[...els].map(function(e){return e.dataset.val;});
-    var allOk=order.every(function(v,i){return v===correct[i];});
-    var fb=document.getElementById('sort-fb');
-    var score=order.filter(function(v,i){return v===correct[i];}).length;
-    fb.textContent=(allOk?'✅ 완벽합니다! ':'❌ '+score+'/6 정답. ')+
-      (allOk?'생명주기 6단계를 정확히 알고 있군요!':'생성→수집→저장→활용→보존→폐기 순서입니다.');
-    fb.className='fb '+(allOk?'ok':'err');
-    if(score>=4) document.getElementById('answer-reveal').style.display='block';
-  }
-  function resetSort(){
-    current=[...correct].sort(()=>Math.random()-0.5);
-    buildList();
-    document.getElementById('sort-fb').className='fb';
-    document.getElementById('sort-fb').textContent='';
-    document.getElementById('answer-reveal').style.display='none';
-  }
-  </script>
 
-  <div class="foot">데이터 관리자 기본·실무 교육 · 3차시</div>
-</div>
+  /* ── chip 생성 ─────────────────────────────────────────── */
+  function makeChip(word, location) {
+    const chip = document.createElement('div');
+    chip.className = 'chip';
+    chip.dataset.word = word;
+    chip.dataset.loc = location;
 
+    if (location === 'seq') {
+      const n = document.getElementById('seq').children.length + 1;
+      chip.innerHTML = '<span class="n">' + n + '</span>' + word;
+    } else {
+      chip.textContent = word;
+    }
+
+    chip.addEventListener('click', () => onChipClick(chip));
+    return chip;
+  }
+
+  /* ── 칩 클릭 처리 ──────────────────────────────────────── */
+  function onChipClick(chip) {
+    // 결과 확인 후에는 클릭 불가
+    const fb = document.getElementById('fb');
+    if (fb.style.display === 'block') return;
+
+    const loc = chip.dataset.loc;
+    const word = chip.dataset.word;
+
+    if (loc === 'pool') {
+      // pool → seq
+      chip.remove();
+      const seq = document.getElementById('seq');
+      const newChip = makeChip(word, 'seq');
+      seq.appendChild(newChip);
+      renumberSeq();
+    } else {
+      // seq → pool
+      chip.remove();
+      renumberSeq();
+      const pool = document.getElementById('pool');
+      const newChip = makeChip(word, 'pool');
+      pool.appendChild(newChip);
+    }
+  }
+
+  /* ── seq 번호 재정렬 ────────────────────────────────────── */
+  function renumberSeq() {
+    const chips = document.querySelectorAll('#seq .chip');
+    chips.forEach((c, i) => {
+      const word = c.dataset.word;
+      c.innerHTML = '<span class="n">' + (i + 1) + '</span>' + word;
+    });
+  }
+
+  /* ── 확인 ──────────────────────────────────────────────── */
+  function check() {
+    const seqChips = Array.from(document.querySelectorAll('#seq .chip'));
+
+    // 전부 배치했는지 확인
+    if (seqChips.length < ANSWER.length) {
+      alert('단어를 모두 배치한 뒤 확인하세요.');
+      return;
+    }
+
+    const userOrder = seqChips.map(c => c.dataset.word);
+    let score = 0;
+
+    // chip 정답/오답 표시
+    seqChips.forEach((chip, i) => {
+      if (userOrder[i] === ANSWER[i]) {
+        chip.classList.add('correct');
+        score++;
+      } else {
+        chip.classList.add('wrong');
+      }
+    });
+
+    // 피드백 표시
+    const fb = document.getElementById('fb');
+    const fbMsg = document.getElementById('fbMsg');
+    const fbAnswer = document.getElementById('fbAnswer');
+
+    fbMsg.textContent = getMsg(score, ANSWER.length);
+
+    if (score === ANSWER.length) {
+      fb.className = 'fb ok';
+      fbAnswer.innerHTML = '';
+    } else {
+      fb.className = 'fb partial';
+      fbAnswer.innerHTML =
+        '정답: <strong>' + ANSWER.join(' → ') + '</strong><br>' +
+        '※ 급소는 <strong>수집</strong>(망치면 못 고침)과 <strong>폐기</strong>(안 지우면 사고)';
+    }
+
+    fb.style.display = 'block';
+  }
+
+  /* ── 유틸: 배열 셔플 ────────────────────────────────────── */
+  function shuffle(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
+  /* ── 시작 ──────────────────────────────────────────────── */
+  reset();
+</script>
 </body>
 </html>

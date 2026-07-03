@@ -1,105 +1,269 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>생명주기 예시 게임</title>
-  <style>
-    :root {
-      --bg:#0f1720;--card:#172230;--line:#2a3a4d;--ink:#eaf1f8;
-      --sub:#9fb2c6;--accent:#3d8bfd;--ok:#27ae60;--err:#e74c3c;--warn:#e67e22;
-    }
-    *{box-sizing:border-box;margin:0;padding:0;}
-    body{background:var(--bg);color:var(--ink);
-      font-family:Pretendard,"Malgun Gothic","맑은 고딕",system-ui,sans-serif;
-      min-height:100vh;padding:28px 14px;display:flex;justify-content:center;}
-    .wrap{width:100%;max-width:680px;}
-    .back{display:inline-block;margin-bottom:18px;font-size:13px;color:var(--sub);text-decoration:none;}
-    .back:hover{color:var(--ink);}
-    .tag{display:inline-block;font-size:12px;font-weight:700;color:var(--accent);
-      background:rgba(61,139,253,.12);border:1px solid rgba(61,139,253,.3);
-      padding:4px 11px;border-radius:999px;margin-bottom:10px;}
-    h2{font-size:22px;margin-bottom:8px;}
-    .lead{color:var(--sub);font-size:14.5px;line-height:1.65;margin-bottom:22px;}
-    .card{background:var(--card);border:1px solid var(--line);border-radius:14px;
-      padding:18px 20px;margin-bottom:14px;}
-    .card h3{font-size:15px;margin-bottom:10px;}
-    .opts{display:grid;gap:8px;margin-top:10px;}
-    .opts.g2{grid-template-columns:1fr 1fr;}
-    .opts.g1{grid-template-columns:1fr;}
-    .btn{padding:10px 14px;border-radius:10px;background:#1e3050;color:var(--ink);
-      border:1px solid var(--line);font-size:14px;cursor:pointer;text-align:left;
-      transition:background .15s,border-color .15s;}
-    .btn:hover:not(:disabled){background:#253d63;border-color:var(--accent);}
-    .btn:disabled{opacity:.55;cursor:default;}
-    .btn.correct{background:rgba(39,174,96,.2)!important;border-color:var(--ok)!important;color:#6fe09f;}
-    .btn.wrong{background:rgba(231,76,60,.15)!important;border-color:var(--err)!important;color:#f08080;}
-    .fb{margin-top:10px;font-size:13.5px;padding:10px 14px;border-radius:10px;display:none;}
-    .fb.ok{background:rgba(39,174,96,.12);color:#6fe09f;display:block;}
-    .fb.err{background:rgba(231,76,60,.1);color:#f08080;display:block;}
-    .progress{font-size:13px;color:var(--sub);margin-bottom:16px;}
-    .score-box{background:var(--card);border:1px solid var(--line);border-radius:14px;
-      padding:24px;text-align:center;margin-top:18px;display:none;}
-    .score-box .big{font-size:48px;margin-bottom:8px;}
-    .score-box p{color:var(--sub);font-size:14px;}
-    .foot{text-align:center;font-size:12px;color:#4a5a6a;margin-top:36px;
-      padding-top:14px;border-top:1px solid var(--line);}
-    /* drag styles */
-    .drag-item{padding:10px 14px;background:#1e3050;border:1px solid var(--line);
-      border-radius:10px;cursor:grab;font-size:14px;user-select:none;transition:opacity .15s;}
-    .drag-item:active{cursor:grabbing;opacity:.7;}
-    .drag-item.dragging{opacity:.4;}
-    .drop-zone{min-height:54px;background:rgba(61,139,253,.06);border:2px dashed var(--line);
-      border-radius:10px;padding:8px;display:flex;flex-direction:column;gap:6px;}
-    .drop-zone.over{border-color:var(--accent);background:rgba(61,139,253,.12);}
-    .zone-label{font-size:12px;color:var(--sub);margin-bottom:4px;font-weight:600;}
-
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>생명주기 줄세우기 · 3차시 복습</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-user-select:none;user-select:none}
+  :root{--bg:#0e1a17;--panel:#15241f;--ink:#eafff6;--sub:#9fc9ba;--line:#264139;
+    --ok:#2ee6a6;--no:#ff6b7a;--accent:#34d3a6;--slot:#11201b;}
+  body{margin:0;min-height:100vh;background:radial-gradient(120% 90% at 50% 0%,#15302a,#0a1512 70%);
+    color:var(--ink);font-family:"Pretendard","Malgun Gothic","맑은 고딕",system-ui,sans-serif;
+    display:flex;justify-content:center;padding:18px 14px 50px}
+  .wrap{width:100%;max-width:740px}
+  .hud{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+  .hud h1{font-size:16px;font-weight:800;margin-right:auto}
+  .pill{background:var(--panel);border:1px solid var(--line);border-radius:999px;
+    padding:6px 13px;font-size:13.5px;font-weight:700}
+  .pill b{color:var(--accent);font-size:15px}
+  .pill.lives b{color:var(--no)}
+  .domain{display:inline-block;font-size:13px;font-weight:800;color:var(--accent);
+    background:rgba(52,211,166,.12);border:1px solid rgba(52,211,166,.35);
+    padding:5px 12px;border-radius:999px;margin-bottom:8px}
+  .lead{color:var(--sub);font-size:14px;line-height:1.55;margin:0 0 12px}
+  .lead b{color:var(--ink)}
+  .flow{font-size:12.5px;color:var(--sub);margin-bottom:12px;text-align:center}
+  .slots{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
+  .slot{display:flex;align-items:stretch;gap:10px;min-height:56px}
+  .slot .no{flex:0 0 38px;display:flex;align-items:center;justify-content:center;
+    background:var(--panel);border:1px solid var(--line);border-radius:10px;font-weight:800;font-size:16px;color:var(--accent)}
+  .drop{flex:1;border:2px dashed var(--line);border-radius:12px;background:var(--slot);
+    display:flex;align-items:center;padding:6px;transition:border-color .15s,background .15s}
+  .drop.hot{border-color:var(--accent);background:rgba(52,211,166,.1)}
+  .drop .stage{display:none;flex:0 0 auto;font-size:12px;font-weight:800;color:var(--accent);padding:0 8px;white-space:nowrap}
+  .pool{border-top:1px solid var(--line);padding-top:12px}
+  .pool .ph{font-size:13px;color:var(--sub);margin-bottom:8px;font-weight:700}
+  .pool .holder{display:flex;flex-direction:column;gap:8px;min-height:20px}
+  .card{background:#1a2e27;border:1.5px solid #2f5347;border-radius:12px;padding:12px 14px;
+    font-size:14.5px;font-weight:600;line-height:1.4;cursor:grab;touch-action:none;
+    box-shadow:0 4px 12px rgba(0,0,0,.3);display:flex;align-items:center;gap:10px}
+  .card .ico{font-size:20px;flex:0 0 auto}
+  .card .tx{flex:1}
+  .card.drag{cursor:grabbing;position:fixed;z-index:99;width:auto;max-width:560px;
+    box-shadow:0 14px 30px rgba(0,0,0,.55);border-color:var(--accent);transform:scale(1.03)}
+  .card.right{border-color:var(--ok);background:rgba(46,230,166,.12)}
+  .card.wrong{border-color:var(--no);background:rgba(255,107,122,.12)}
+  .actions{display:flex;gap:10px;margin-top:16px;align-items:center}
+  .btn{background:linear-gradient(90deg,#2ee6a6,#34a0ff);color:#04221a;font-weight:800;font-size:16px;
+    border:none;border-radius:12px;padding:12px 26px;cursor:pointer}
+  .btn:disabled{opacity:.4;cursor:not-allowed}
+  .btn.ghost{background:none;border:1px solid var(--line);color:var(--sub);font-weight:700}
+  .res{font-size:15px;font-weight:800;margin-left:auto}
+  .banner{margin-top:14px;background:linear-gradient(180deg,#143028,#0e201b);border:1px solid var(--accent);
+    border-radius:14px;padding:16px 18px;display:none}
+  .banner.show{display:block}
+  .banner p{font-size:14.5px;color:#dffff3;line-height:1.6;margin:4px 0}
+  .banner b{color:#fff}
+  .bigwin{font-size:32px;font-weight:900;text-align:center;color:#fff;text-shadow:0 0 22px rgba(46,230,166,.85);animation:bigwin .6s ease both;margin-bottom:6px}
+  @keyframes bigwin{0%{transform:scale(.3);opacity:0}60%{transform:scale(1.18)}100%{transform:scale(1);opacity:1}}
+  .banner.win{border-color:var(--ok);box-shadow:0 0 34px rgba(46,230,166,.45);background:linear-gradient(180deg,#16382c,#0e221b)}
+  .foot{margin-top:16px;font-size:12.5px;color:var(--sub);text-align:center}
+  .confetti{position:fixed;top:-10px;width:10px;height:10px;border-radius:2px;z-index:999;
+    animation:fall linear forwards}
+  @keyframes fall{to{transform:translateY(110vh) rotate(720deg);opacity:0}}
+</style>
 </head>
 <body>
 <div class="wrap">
-  <a class="back" href="index.html">← 목록으로</a>
-  <div class="tag">🎮 3차시 게임</div>
-  <h2>어느 단계에서 생긴 문제일까?</h2>
-  <p class="lead">아래 상황들이 생명주기 6단계 중 어느 단계에서 발생한 문제인지 맞혀보세요.</p>
-
-  <div id="lc-qs"></div>
-  <div id="lc-score" class="fb" style="margin-top:4px"></div>
-  <script>
-  var qs=[
-    {q:"정비일지 일부 칸이 아예 비어 있다.",options:["생성","수집","저장","활용","보존","폐기"],correct:"수집",hint:"수집/입력 단계에서 발생한 누락입니다. 수집이 급소인 이유!"},
-    {q:"보존 기한이 지났는데 삭제하지 않고 그냥 두고 있다.",options:["생성","수집","저장","활용","보존","폐기"],correct:"폐기",hint:"폐기를 안 하면 보안 사고로 이어질 수 있습니다. 폐기도 급소!"},
-    {q:"담당 구역이 아닌 데이터를 무단으로 열어봤다.",options:["생성","수집","저장","활용","보존","폐기"],correct:"활용",hint:"권한 없이 열람하는 것은 활용 단계의 보안 문제입니다."},
-    {q:"오래된 데이터를 최신인 줄 알고 의사결정에 사용했다.",options:["생성","수집","저장","활용","보존","폐기"],correct:"활용",hint:"낡은 정보로 판단 = 활용 단계 품질(적시성) 문제입니다."},
-    {q:"장비 사진을 찍었는데 파일명 없이 바탕화면에만 저장했다.",options:["생성","수집","저장","활용","보존","폐기"],correct:"저장",hint:"메타데이터 없이 임의 저장 = 저장 단계 문제."},
-    {q:"퇴직한 담당자의 개인 USB에만 핵심 데이터가 남아있다.",options:["생성","수집","저장","활용","보존","폐기"],correct:"저장",hint:"공용 저장소에 저장하지 않은 저장 단계 실패입니다."},
-  ];
-  var correct=0;
-  qs.forEach(function(q,i){
-    var div=document.createElement('div');div.className='card';div.style.marginBottom='14px';
-    var opts=q.options.map(function(o){
-      return '<button class="btn" data-q="'+i+'" data-val="'+o+'" onclick="pickLC(this,'+i+',''+o+'',''+q.correct+'',''+q.hint+'')" style="font-size:13px;padding:8px 10px">'+o+'</button>';
-    }).join('');
-    div.innerHTML='<h3 style="font-size:14.5px">Q'+(i+1)+'. '+q.q+'</h3><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:10px">'+opts+'</div><div class="lc-fb-'+i+' fb"></div>';
-    document.getElementById('lc-qs').appendChild(div);
-  });
-  function pickLC(btn,qi,val,correct_val,hint){
-    var btns=document.querySelectorAll('[data-q="'+qi+'"]');
-    btns.forEach(function(b){b.disabled=true;});
-    var fb=document.querySelector('.lc-fb-'+qi);
-    if(val===correct_val){
-      btn.classList.add('correct');
-      fb.textContent='✅ 정답! '+hint;fb.className='lc-fb-'+qi+' fb ok';
-    } else {
-      btn.classList.add('wrong');
-      document.querySelector('[data-q="'+qi+'"][data-val="'+correct_val+'"]').classList.add('correct');
-      fb.textContent='❌ '+hint;fb.className='lc-fb-'+qi+' fb err';
-    }
-  }
-  </script>
-
+  <div class="hud">
+    <h1>🔄 생명주기 줄세우기</h1>
+    <span class="pill">레벨 <b id="lv">1</b>/3</span>
+    <span class="pill lives">생명 <b id="lives">❤❤❤</b></span>
+  </div>
+  <span class="domain" id="domain">정비 데이터</span>
+  <p class="lead">예시 카드를 데이터 한살이 <b>순서(생성 → 폐기)</b>대로 1~6번 칸에 드래그하세요.
+     다 맞히면 다음 레벨! <b>생명을 다 잃으면 레벨 1부터 다시.</b></p>
+  <div class="flow">생성 → 수집 → 저장 → 활용 → 보존 → 폐기</div>
+  <div class="slots" id="slots"></div>
+  <div class="pool">
+    <div class="ph">📦 예시 카드 (여기서 끌어다 위 칸에 넣기)</div>
+    <div class="holder" id="pool"></div>
+  </div>
+  <div class="actions">
+    <button class="btn" id="checkBtn" disabled>순서 확인</button>
+    <button class="btn ghost" id="resetBtn">현재 레벨 다시 ↻</button>
+    <span class="res" id="res"></span>
+  </div>
+  <div class="banner" id="banner"></div>
   <div class="foot">데이터 관리자 기본·실무 교육 · 3차시</div>
 </div>
+<script>
+(function(){
+  const STAGES=["","생성","수집","저장","활용","보존","폐기"];
+  const LEVELS=[
+    { name:"정비 데이터", data:[
+      {o:1,ico:"✍️",t:"정비를 하면서 정비일지에 기록을 입력했다"},
+      {o:2,ico:"📥",t:"여러 부서의 정비 기록을 한 시스템으로 모았다"},
+      {o:3,ico:"🗄️",t:"DB·파일서버에 백업해 안전하게 보관했다"},
+      {o:4,ico:"📈",t:"고장 패턴을 분석해 예방정비에 활용했다"},
+      {o:5,ico:"📦",t:"규정 기간 동안 꺼내 쓰지 않고 보관한다"},
+      {o:6,ico:"🗑️",t:"보존 기한이 끝나 완전히 삭제했다"},
+    ]},
+    { name:"군 급식 데이터", data:[
+      {o:1,ico:"✍️",t:"오늘 배식 인원과 메뉴를 급식일지에 입력했다"},
+      {o:2,ico:"📥",t:"부대별 급식 기록을 취사장 시스템으로 모았다"},
+      {o:3,ico:"🗄️",t:"급식 데이터를 서버에 백업해 보관했다"},
+      {o:4,ico:"📈",t:"잔반량·선호도를 분석해 식단을 개선했다"},
+      {o:5,ico:"📦",t:"정산·위생 규정 기간 동안 보관한다"},
+      {o:6,ico:"🗑️",t:"보존 기한이 지난 급식 기록을 삭제했다"},
+    ]},
+    { name:"출입 데이터", data:[
+      {o:1,ico:"✍️",t:"정문에서 출입증을 찍어 출입 기록이 생겼다"},
+      {o:2,ico:"📥",t:"여러 출입구의 기록을 통합 시스템으로 모았다"},
+      {o:3,ico:"🗄️",t:"출입 로그를 보안 서버에 보관했다"},
+      {o:4,ico:"📈",t:"구역별 출입 패턴을 분석해 보안 점검에 썼다"},
+      {o:5,ico:"📦",t:"규정 기간 동안 출입 기록을 보존한다"},
+      {o:6,ico:"🗑️",t:"기한이 끝난 개인 출입정보를 폐기했다(보안)"},
+    ]},
+  ];
+  const MAXLIVES=3;
+  let level=0, lives=MAXLIVES;
+  let dragCard=null, offX=0, offY=0, origin=null;
 
+  const slotsEl=document.getElementById('slots'), poolEl=document.getElementById('pool');
+  const $=id=>document.getElementById(id);
+  const drops=[...document.querySelectorAll('.drop')];
+
+  /* ── 슬롯 초기 생성 (1~6) ── */
+  for(let i=1;i<=6;i++){
+    const s=document.createElement('div'); s.className='slot';
+    s.innerHTML=`<div class="no">${i}</div><div class="drop" data-slot="${i}"><span class="stage"></span></div>`;
+    slotsEl.appendChild(s);
+  }
+
+  /* ── drop 요소 다시 수집 ── */
+  const dropsAll=[...document.querySelectorAll('.drop')];
+
+  function hud(){ $('lv').textContent=level+1; $('lives').textContent="❤".repeat(Math.max(0,lives))+
+    "🖤".repeat(Math.max(0,MAXLIVES-lives));
+    $('domain').textContent=LEVELS[level].name; }
+
+  function shuffle(a){ for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} }
+
+  function makeCard(d){
+    const c=document.createElement('div'); c.className='card'; c.dataset.o=d.o;
+    c.dataset.stage=STAGES[d.o];
+    c.innerHTML=`<span class="ico">≡</span><span class="tx">${d.t}</span>`;
+    c.addEventListener('pointerdown',e=>startDrag(e,c));
+    return c;
+  }
+
+  function buildLevel(){
+    poolEl.innerHTML='';
+    dropsAll.forEach(d=>{ const ex=d.querySelector('.card'); if(ex) ex.remove();
+      d.classList.remove('hot'); const st=d.querySelector('.stage'); st.style.display='none'; st.textContent=''; });
+    const arr=LEVELS[level].data.slice(); shuffle(arr);
+    arr.forEach(d=>poolEl.appendChild(makeCard(d)));
+    $('res').textContent=''; $('banner').classList.remove('show');
+    hud(); updateCheck();
+  }
+
+  function startDrag(e,c){
+    dragCard=c; const r=c.getBoundingClientRect();
+    offX=e.clientX-r.left; offY=e.clientY-r.top; origin=c.parentElement;
+    c.classList.add('drag'); c.style.width=r.width+'px';
+    c.style.left=(e.clientX-offX)+'px'; c.style.top=(e.clientY-offY)+'px';
+    try{c.setPointerCapture(e.pointerId);}catch(_){}
+    e.preventDefault();
+  }
+
+  document.addEventListener('pointermove',e=>{
+    if(!dragCard) return;
+    dragCard.style.left=(e.clientX-offX)+'px'; dragCard.style.top=(e.clientY-offY)+'px';
+    const t=dropUnder(e.clientX,e.clientY);
+    dropsAll.forEach(d=>d.classList.toggle('hot',d===t));
+  });
+
+  document.addEventListener('pointerup',e=>{
+    if(!dragCard) return;
+    const c=dragCard; dragCard=null;
+    c.classList.remove('drag'); c.style.cssText='';
+    dropsAll.forEach(d=>d.classList.remove('hot'));
+    const target=dropUnder(e.clientX,e.clientY);
+    if(target){
+      const occ=target.querySelector('.card');
+      if(occ && occ!==c) poolEl.appendChild(occ);
+      target.appendChild(c);
+    } else { origin.appendChild(c); }
+    document.querySelectorAll('.card').forEach(x=>x.classList.remove('right','wrong'));
+    dropsAll.forEach(d=>{ const st=d.querySelector('.stage'); st.style.display='none'; });
+    $('res').textContent='';
+    updateCheck();
+  });
+
+  function dropUnder(x,y){
+    return dropsAll.find(d=>{ const r=d.getBoundingClientRect();
+      return x>=r.left&&x<=r.right&&y>=r.top-8&&y<=r.bottom+8; })||null;
+  }
+
+  function updateCheck(){ $('checkBtn').disabled=!dropsAll.every(d=>d.querySelector('.card')); }
+
+  function check(){
+    let correct=0;
+    dropsAll.forEach(d=>{
+      const c=d.querySelector('.card'); if(!c) return;
+      const want=+d.dataset.slot, got=+c.dataset.o;
+      const st=d.querySelector('.stage');
+      if(want===got){ c.classList.add('right'); correct++; st.textContent="✓ "+c.dataset.stage; }
+      else { c.classList.add('wrong'); st.textContent="→ "+STAGES[want]; }
+      st.style.display='inline-block';
+    });
+    $('res').textContent=`${correct} / 6`;
+    if(correct===6){ levelClear(); }
+    else { lives--; hud(); imperfect(correct); }
+  }
+
+  function imperfect(correct){
+    const b=$('banner');
+    b.innerHTML=`<p><b>${correct}/6 정답.</b> 올바른 순서(→)를 확인하고 다시 도전하세요! (생명 -1)</p>`;
+    if(lives<=0){
+      b.innerHTML=`<p>💔 <b>생명을 다 잃었습니다.</b> 레벨 1부터 다시 도전!</p>
+        <p>팁: 데이터는 <b>만들고(생성)→모으고(수집)→보관(저장)→쓰고(활용)→묵히고(보존)→버린다(폐기)</b>.</p>`;
+      b.classList.add('show');
+      setTimeout(()=>{ level=0; lives=MAXLIVES; buildLevel(); },1800);
+    } else {
+      b.innerHTML=`<p><b>${correct}/6 정답.</b> 올바른 순서(→)를 확인하고 다시 도전하세요! (생명 -1)</p>`;
+      b.classList.add('show');
+    }
+  }
+
+  function levelClear(){
+    const b=$('banner');
+    b.innerHTML=''; /* reset */
+    const livesTxt="❤".repeat(Math.max(0,lives));
+    if(level>=LEVELS.length-1){
+      b.classList.add('win');
+      b.innerHTML=`<div class="bigwin">🎉 CLEAR! 🎉</div>
+        <p>🏆 <b>3레벨 클리어!</b> 정비·급식·출입까지, 어떤 데이터든 한살이 흐름을 잡으셨어요.</p>
+        <p>외울 필요 없습니다 — 흐름으로 이해하면 끝. 급소는 <b>수집</b>과 <b>폐기</b>!</p>`;
+      b.classList.add('show'); $('checkBtn').disabled=true; $('res').textContent='🎊 완료!';
+      spawnConfetti(); setTimeout(spawnConfetti,450); setTimeout(spawnConfetti,900);
+    } else {
+      b.innerHTML=`<p>✅ <b>클리어! 다음 레벨</b> → <b>${LEVELS[level+1].name}</b>으로 넘어갑니다.</p>`;
+      b.classList.add('show'); $('checkBtn').disabled=true; $('res').textContent='🎊 정답!';
+      setTimeout(()=>{ level++; buildLevel(); },1500);
+    }
+  }
+
+  function spawnConfetti(){
+    const colors=["#2ee6a6","#34a0ff","#f7b733","#ff6b7a","#ffffff","#a06bff"];
+    for(let i=0;i<60;i++){
+      const c=document.createElement('div'); c.className='confetti';
+      c.style.left=Math.random()*100+'vw';
+      c.style.background=colors[Math.floor(Math.random()*colors.length)];
+      c.style.animationDuration=(1.6+Math.random()*1.6)+'s';
+      c.style.animationDelay=(Math.random()*0.35)+'s';
+      c.style.transform='rotate('+Math.random()*360+'deg)';
+      document.body.appendChild(c);
+      setTimeout(()=>c.remove(),3700);
+    }
+  }
+
+  $('checkBtn').addEventListener('click',check);
+  $('resetBtn').addEventListener('click',buildLevel);
+  buildLevel();
+})();
+</script>
 </body>
 </html>

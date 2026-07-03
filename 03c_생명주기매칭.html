@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>생명주기 단계 맞히기 (3차시)</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, "Apple SD Gothic Neo", "맑은 고딕", sans-serif;
+      background: #fafaf8;
+      color: #2c2c2a;
+      line-height: 1.6;
+      max-width: 700px;
+      margin: 0 auto;
+      padding: 28px 16px;
+    }
+
+    h1 {
+      font-size: 22px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .sub {
+      font-size: 13px;
+      color: #5f5e5a;
+      margin-bottom: 14px;
+    }
+
+    /* 안내 박스 */
+    .help {
+      background: #fff8e1;
+      border: 1px solid #f0e3b0;
+      border-radius: 10px;
+      padding: 12px 14px;
+      font-size: 13px;
+      color: #6b5a1e;
+      margin-bottom: 16px;
+    }
+
+    .help b { color: #6b5a1e; }
+
+    /* 점수 바 */
+    .bar {
+      font-size: 14px;
+      color: #5f5e5a;
+      margin-bottom: 12px;
+    }
+
+    .bar b {
+      font-size: 18px;
+      color: #2c2c2a;
+    }
+
+    /* 문항 카드 */
+    .card {
+      background: #fff;
+      border: 1px solid #e6e3da;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 12px;
+    }
+
+    .q {
+      font-size: 15px;
+      margin-bottom: 12px;
+    }
+
+    .btns {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .btns button {
+      padding: 9px 12px;
+      border: 1px solid #cfc9bc;
+      background: #fff;
+      border-radius: 8px;
+      font-size: 13px;
+      cursor: pointer;
+      font-family: inherit;
+      color: #2c2c2a;
+      transition: background 0.12s;
+    }
+
+    .btns button:hover { background: #f1efe8; }
+
+    /* 피드백 */
+    .fb {
+      margin-top: 12px;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 14px;
+      display: none;
+    }
+
+    .fb.ok {
+      background: #e1f5ee;
+      color: #085041;
+    }
+
+    .fb.no {
+      background: #faeae6;
+      color: #8a2a1a;
+    }
+
+    /* 답한 카드 — 버튼 숨기고 피드백 표시 */
+    .card.done .btns { display: none; }
+    .card.done .fb   { display: block; }
+
+    /* 최종 결과 */
+    .result {
+      text-align: center;
+      background: #eeedfe;
+      color: #3c3489;
+      border-radius: 12px;
+      padding: 20px;
+      font-size: 16px;
+      display: none;
+      margin-top: 4px;
+    }
+
+    .result .r-score {
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .result .r-msg {
+      font-size: 14px;
+      color: #4a40a0;
+    }
+
+    /* 다시 하기 */
+    .reset {
+      display: block;
+      margin: 16px auto 0;
+      padding: 8px 18px;
+      border: 1px solid #cfc9bc;
+      background: #fff;
+      border-radius: 8px;
+      font-size: 13px;
+      cursor: pointer;
+      color: #5f5e5a;
+      font-family: inherit;
+      transition: background 0.12s;
+    }
+
+    .reset:hover { background: #f1efe8; }
+  </style>
+</head>
+<body>
+
+  <h1>♻️ 생명주기 단계 맞히기</h1>
+  <p class="sub">3차시 · 각 상황이 데이터 생명주기 어느 단계일까요?</p>
+
+  <div class="help">
+    ℹ️ <b>이렇게 하세요:</b> 6단계 = 생성 → 수집 → 저장 → 활용 → 보존 → 폐기.
+    각 상황에 맞는 단계 버튼을 누르면 정답·해설이 바로 나와요.
+  </div>
+
+  <div class="bar">점수 <b id="score">0</b> / <span id="total">6</span></div>
+
+  <div id="cards"></div>
+
+  <div class="result" id="result">
+    <div class="r-score" id="rScore"></div>
+    <div class="r-msg" id="rMsg"></div>
+  </div>
+
+  <button class="reset" onclick="init()">다시 하기</button>
+
+<script>
+  /* ── 문항 데이터 ───────────────────────────────────────── */
+  const ALL_QUESTIONS = [
+    {
+      q: '여러 부서의 일지를 한 곳에 모았다',
+      answer: '수집',
+      okMsg: '✅ 정답! 흩어진 데이터를 끌어모음 = 수집. (여기서 잘못 모으면 뒤에서 못 고침!)',
+      noMsg: '❌ 정답은 수집 — 흩어진 데이터를 끌어모음 = 수집. (여기서 잘못 모으면 뒤에서 못 고침!)'
+    },
+    {
+      q: '다 쓴 민감 데이터를 규정대로 안전하게 파기',
+      answer: '폐기',
+      okMsg: '✅ 정답! 수명이 끝난 데이터를 없애는 단계 = 폐기. (안 지우면 보안사고!)',
+      noMsg: '❌ 정답은 폐기 — 수명이 끝난 데이터를 없애는 단계 = 폐기. (안 지우면 보안사고!)'
+    },
+    {
+      q: '모은 데이터를 부서 서버·폴더에 보관했다',
+      answer: '저장',
+      okMsg: '✅ 정답! 안전하게 두고 누가 접근할지 정하는 단계 = 저장.',
+      noMsg: '❌ 정답은 저장 — 안전하게 두고 누가 접근할지 정하는 단계 = 저장.'
+    },
+    {
+      q: '오래된 데이터를 핵심만 추려 묶어 장기 보관',
+      answer: '보존',
+      okMsg: '✅ 정답! 바로 안 쓰지만 남겨두는 단계 = 보존.',
+      noMsg: '❌ 정답은 보존 — 바로 안 쓰지만 남겨두는 단계 = 보존.'
+    },
+    {
+      q: '그 데이터로 고장 분석·보고를 했다',
+      answer: '활용',
+      okMsg: '✅ 정답! 실제로 꺼내 쓰는 단계 = 활용.',
+      noMsg: '❌ 정답은 활용 — 실제로 꺼내 쓰는 단계 = 활용.'
+    },
+    {
+      q: '정비를 마치고 일지에 내용을 처음 적었다',
+      answer: '생성',
+      okMsg: '✅ 정답! 데이터가 처음 만들어지는 순간 = 생성.',
+      noMsg: '❌ 정답은 저장 — 안전하게 두고 누가 접근할지 정하는 단계 = 저장.'
+    }
+  ];
+
+  // 정답 메시지 맵 (단계명 → 설명)
+  const STAGE_NO_MSG = {
+    '생성': '❌ 정답은 생성 — 데이터가 처음 만들어지는 순간 = 생성.',
+    '수집': '❌ 정답은 수집 — 흩어진 데이터를 끌어모음 = 수집. (여기서 잘못 모으면 뒤에서 못 고침!)',
+    '저장': '❌ 정답은 저장 — 안전하게 두고 누가 접근할지 정하는 단계 = 저장.',
+    '활용': '❌ 정답은 활용 — 실제로 꺼내 쓰는 단계 = 활용.',
+    '보존': '❌ 정답은 보존 — 바로 안 쓰지만 남겨두는 단계 = 보존.',
+    '폐기': '❌ 정답은 폐기 — 수명이 끝난 데이터를 없애는 단계 = 폐기. (안 지우면 보안사고!)'
+  };
+
+  const STAGES = ['생성', '수집', '저장', '활용', '보존', '폐기'];
+
+  /* ── 상태 ─────────────────────────────────────────────── */
+  let score = 0;
+  let answered = 0;
+  let questions = [];
+
+  /* ── 셔플 ─────────────────────────────────────────────── */
+  function shuffle(arr) {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  /* ── 초기화 ────────────────────────────────────────────── */
+  function init() {
+    score = 0;
+    answered = 0;
+    questions = shuffle([...ALL_QUESTIONS]);
+
+    document.getElementById('score').textContent = '0';
+    document.getElementById('total').textContent = questions.length;
+    document.getElementById('result').style.display = 'none';
+
+    const container = document.getElementById('cards');
+    container.innerHTML = '';
+
+    questions.forEach((q, i) => {
+      // 카드
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.id = 'card' + i;
+
+      // 질문
+      const qDiv = document.createElement('div');
+      qDiv.className = 'q';
+      qDiv.textContent = (i + 1) + '. ' + q.q;
+      card.appendChild(qDiv);
+
+      // 버튼 그룹
+      const btns = document.createElement('div');
+      btns.className = 'btns';
+      STAGES.forEach(stage => {
+        const btn = document.createElement('button');
+        btn.textContent = stage;
+        btn.onclick = () => answer(i, stage);
+        btns.appendChild(btn);
+      });
+      card.appendChild(btns);
+
+      // 피드백
+      const fb = document.createElement('div');
+      fb.className = 'fb';
+      fb.id = 'fb' + i;
+      card.appendChild(fb);
+
+      container.appendChild(card);
+    });
+  }
+
+  /* ── 정답 처리 ─────────────────────────────────────────── */
+  function answer(idx, selected) {
+    const q = questions[idx];
+    const card = document.getElementById('card' + idx);
+    const fb   = document.getElementById('fb' + idx);
+
+    // 이미 답변한 카드 무시
+    if (card.classList.contains('done')) return;
+
+    card.classList.add('done');
+
+    const isCorrect = selected === q.answer;
+
+    if (isCorrect) {
+      score++;
+      document.getElementById('score').textContent = score;
+      fb.className = 'fb ok';
+      fb.textContent = q.okMsg;
+    } else {
+      fb.className = 'fb no';
+      // 오답 메시지: 정답 단계 기반으로 표시
+      fb.textContent = STAGE_NO_MSG[q.answer] || ('❌ 정답은 ' + q.answer);
+    }
+
+    answered++;
+
+    if (answered === questions.length) {
+      setTimeout(showResult, 300);
+    }
+  }
+
+  /* ── 결과 표시 ─────────────────────────────────────────── */
+  function showResult() {
+    const resultEl = document.getElementById('result');
+    const rScore   = document.getElementById('rScore');
+    const rMsg     = document.getElementById('rMsg');
+
+    rScore.textContent = '🎉 ' + score + ' / ' + questions.length + '!';
+
+    if (score === questions.length) {
+      rMsg.textContent = '외울 필요는 없어요 — 데이터에도 태어나서 사라지기까지 흐름이 있다는 것만!';
+    } else if (score >= 4) {
+      rMsg.textContent = '잘 하셨어요! 헷갈린 단계를 다시 한번 확인해보세요.';
+    } else {
+      rMsg.textContent = '생성 → 수집 → 저장 → 활용 → 보존 → 폐기 흐름을 다시 떠올려보세요.';
+    }
+
+    resultEl.style.display = 'block';
+    resultEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  /* ── 시작 ─────────────────────────────────────────────── */
+  init();
+</script>
+</body>
+</html>
