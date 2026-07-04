@@ -24,17 +24,14 @@
   .opt{text-align:left;background:var(--card);border:1.5px solid var(--line);border-radius:12px;padding:13px 15px;font-size:14px;cursor:pointer;font-family:inherit;color:#222}
   .opt:hover{border-color:var(--me)}
   .opt .q{color:var(--sub);font-size:12px;margin-bottom:3px;font-weight:700}
-  .opt.dim{opacity:.4}
-  .opt.ok{border-color:var(--ok);background:#eefaf3}
-  .opt.no{border-color:var(--no);background:#fdeeec}
+  .opt.dim{opacity:.4} .opt.ok{border-color:var(--ok);background:#eefaf3} .opt.no{border-color:var(--no);background:#fdeeec}
   .chat{margin-top:13px;display:none}
   .chat.show{display:block}
   .bub{max-width:90%;padding:11px 14px;border-radius:15px;font-size:13.5px;margin:7px 0;line-height:1.5}
   .me{background:var(--me);color:#fff;margin-left:auto;border-bottom-right-radius:5px;max-width:86%}
   .aimsg{background:#fff;border:1px solid var(--line);border-bottom-left-radius:5px}
   .aimsg .tag{font-size:11px;font-weight:800;margin-bottom:6px}
-  .aimsg.bad .tag{color:var(--no)}
-  .aimsg.good .tag{color:var(--ok)}
+  .aimsg.bad .tag{color:var(--no)} .aimsg.good .tag{color:var(--ok)}
   .cap{font-size:12px;color:var(--sub);margin-top:7px}
   table{border-collapse:collapse;width:100%;font-size:12px;margin-top:3px}
   th,td{border:1px solid #dfe3e8;padding:5px 7px;text-align:left}
@@ -44,18 +41,14 @@
   .essay{font-size:12.5px;color:#444;background:#f7f8fa;border-radius:8px;padding:9px 11px}
   .fake{color:#c2362b}
   .verdict{font-size:13.5px;line-height:1.6;margin-top:10px;padding:11px 13px;border-radius:10px}
-  .verdict.bad{background:#fdeeec;color:#8a2b22}
-  .verdict.good{background:#eefaf3;color:#155e3c}
+  .verdict.bad{background:#fdeeec;color:#8a2b22} .verdict.good{background:#eefaf3;color:#155e3c}
   .verdict b{color:#111}
   .next{display:none;margin-top:13px;width:100%;background:#1f2530;color:#fff;border:none;border-radius:11px;padding:12px;font-size:15px;font-weight:800;cursor:pointer}
   .next.show{display:block}
   .result{display:none;text-align:center;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px}
-  .result.show{display:block}
-  .result .sc{font-size:32px;font-weight:900;color:var(--me)}
+  .result.show{display:block} .result .sc{font-size:32px;font-weight:900;color:var(--me)}
   .note{margin-top:14px;text-align:left;background:#f7f8fa;border:1px solid var(--line);border-radius:12px;padding:14px}
-  .note h3{font-size:13px;color:var(--gold);margin-bottom:8px}
-  .note div{font-size:12.5px;color:#444;line-height:1.55;padding:7px 0;border-top:1px solid var(--line)}
-  .note b{color:#111}
+  .note h3{font-size:13px;color:var(--gold);margin-bottom:8px} .note div{font-size:12.5px;color:#444;line-height:1.55;padding:7px 0;border-top:1px solid var(--line)} .note b{color:#111}
   .again{margin-top:13px;background:none;border:1px solid var(--line);color:var(--sub);border-radius:11px;padding:10px 22px;cursor:pointer;font-weight:700}
 </style>
 </head>
@@ -66,7 +59,7 @@
   <div id="introBox">
     <div class="intro">
       AI에게 일을 시킬 때, <b>막연하게 시키면 그 빠진 부분 때문에 엉뚱한 결과</b>가 돌아옵니다. 같은 일을 시키는 세 가지 프롬프트 중 — <b>원하는 결과가 나올 프롬프트</b>를 고르세요. 고른 대로 AI가 실제로 답합니다.
-      <div class="key">💡 너무 어렵게 생각하지 마세요. 요즘 AI는 <b>두루뭉술하게 시켜도 꽤 잘합니다.</b> ① 원하는 <b>형식이 정해져 있으면</b> 그것만 짚어주고, ② 형식이 고민이면 <b>“추천 형식 있어?”라고 물어봐도</b> 됩니다. ③ 그리고 결과는 늘 한 번 확인 — AI가 자주 틀려서가 아니라, <b>최종 책임이 사람에게 있기 때문</b>입니다.
+      <div class="key">💡 너무 어렵게 생각하지 마세요. 요즘 AI는 <b>두루뭉술하게 시켜도 꽤 잘합니다.</b> ① 원하는 <b>형식이 정해져 있으면</b> 그것만 짚어주고, ② 형식이 고민이면 <b>“추천 형식 있어?”라고 물어봐도</b> 됩니다. ③ 그리고 결과는 늘 한 번 확인 — AI가 자주 틀려서가 아니라, <b>최종 책임이 사람에게 있기 때문</b>입니다.</div>
     </div>
     <button class="start" id="start">시작 ▶</button>
   </div>
@@ -104,31 +97,31 @@
     return g;
   }
   const Q=[
-    {lv:'1단계',goal:"정비일지 <b>500행</b>으로 '장비별 평균 소요시간'을 보고받고 싶습니다.",miss:"출력 형식·이상값 처리(범위)",
+    {lv:'1단계',goal:"정비일지 <b>500행</b>으로 ‘장비별 평균 소요시간’을 보고받고 싶습니다.",miss:"출력 형식·이상값 처리(범위)",
      opts:[
       {p:"이 데이터 보기 좋게 정리해줘",ok:false,tag:"😕 원치 않은 결과",
        out:bar(['무전기','안테나','중계기','광단말기'],[1402,76,1188,83],[0,2]),
-       cap:"'정리'만 곧이곧대로 했을 뿐, <b>이상값(9999)을 안 걸러</b> 평균이 1402분처럼 엉망입니다. 무엇을 기준으로 했는지도 알 수 없어요."},
-      {p:"정비일지를 '장비별 평균 소요시간' 표로. 이상값(9999·음수) 제외하고, 없는 값은 '-'로.",ok:true,tag:"✅ 쓸 만한 결과",
+       cap:"‘정리’만 곧이곧대로 했을 뿐, <b>이상값(9999)을 안 걸러</b> 평균이 1402분처럼 엉망입니다. 무엇을 기준으로 했는지도 알 수 없어요."},
+      {p:"정비일지를 ‘장비별 평균 소요시간’ 표로. 이상값(9999·음수) 제외하고, 없는 값은 ‘-’로.",ok:true,tag:"✅ 쓸 만한 결과",
        out:bar(['무전기','안테나','중계기','광단말기'],[78,64,71,69]),
        cap:"이상값을 빼라고 명시하니 평균이 정상 범위로. 기준이 명확해 <b>검증·반복</b>이 됩니다."},
       {p:"알아서 잘 정리해줘 빨리",ok:false,tag:"😕 원치 않은 결과",
        out:"<div class='essay'>“총 500건의 정비 기록이 있습니다. 다양한 장비가 포함되어 있습니다.”</div>",
        cap:"가장 짧은 길로 한 문장만 — 정작 필요한 <b>집계 표가 없습니다.</b>"}],
-     why:"빠진 건 <b>출력 형식 + 이상값 처리(범위)</b>. '무엇을 어떤 형식으로, 무엇은 빼고'를 콕 집어야 합니다."},
+     why:"빠진 건 <b>출력 형식 + 이상값 처리(범위)</b>. ‘무엇을 어떤 형식으로, 무엇은 빼고’를 콕 집어야 합니다."},
 
     {lv:'2단계',goal:"정비반 <b>회의 메모(줄글)</b>를 표로 만들고 싶습니다. (메모엔 담당자·기한이 일부만 적혀 있음)",miss:"환각 방지 제약 + 형식",
      opts:[
       {p:"회의록 깔끔하게 표로 만들어줘",ok:false,tag:"😕 원치 않은 결과(지어냄)",
        out:"<table><tr><th>안건</th><th>담당</th><th>기한</th></tr><tr><td>안테나 교체</td><td>박상사</td><td>6/12</td></tr><tr><td>예비부품 신청</td><td class='bad'>김중사</td><td class='bad'>6/15</td></tr></table>",
        cap:"메모에 <b>없던 담당자·기한을 그럴듯하게 지어냄</b>(빨간 칸). 그대로 올리면 사고."},
-      {p:"안건/담당/기한/상태 4열 표로. 메모에 없는 건 '미정'으로. 표만 출력.",ok:true,tag:"✅ 쓸 만한 결과",
+      {p:"안건/담당/기한/상태 4열 표로. 메모에 없는 건 ‘미정’으로. 표만 출력.",ok:true,tag:"✅ 쓸 만한 결과",
        out:"<table><tr><th>안건</th><th>담당</th><th>기한</th><th>상태</th></tr><tr><td>안테나 교체</td><td>박상사</td><td>6/12</td><td>진행</td></tr><tr><td>예비부품 신청</td><td class='mut'>미정</td><td class='mut'>미정</td><td>대기</td></tr></table>",
-       cap:"있는 것만 채우고 빈칸은 '미정' — <b>지어내기 없이</b> 바로 검토 가능."},
+       cap:"있는 것만 채우고 빈칸은 ‘미정’ — <b>지어내기 없이</b> 바로 검토 가능."},
       {p:"이 회의 내용 요약해줘",ok:false,tag:"😕 빗나간 결과",
        out:"<div class='essay'>“이번 회의에서는 안테나 교체와 예비부품 신청에 대해 논의했으며…”</div>",
        cap:"표가 아니라 <b>줄글 요약</b>이 나옴 — 원한 형식이 아닙니다."}],
-     why:"빠진 건 <b>환각 방지('없는 건 지어내지 마') + 형식 지정</b>. 그리고 결과는 <b>반드시 확인</b> — AI를 못 믿어서가 아니라, 올린 사람이 책임지기 때문입니다."},
+     why:"빠진 건 <b>환각 방지(‘없는 건 지어내지 마’) + 형식 지정</b>. 그리고 결과는 <b>반드시 확인</b> — AI를 못 믿어서가 아니라, 올린 사람이 책임지기 때문입니다."},
 
     {lv:'3단계',goal:"정비 데이터를 정리하고 싶은데 <b>어떤 형식이 좋을지 모르겠습니다.</b>",miss:"형식이 고민이면 — AI에게 추천 형식 물어보기",
      opts:[
