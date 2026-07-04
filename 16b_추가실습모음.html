@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>3일차 추가 실습 · 유료/자율</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{--bg:#FAF8F3;--ink:#23272e;--sub:#5f6670;--card:#fff;--line:#e7e3d8;--accent:#1b2a4a;}
+  body{font-family:"Pretendard","Apple SD Gothic Neo","맑은 고딕",system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.6;max-width:760px;margin:0 auto;padding:22px 16px 56px}
+  .hero{background:linear-gradient(135deg,#1b2a4a,#34507e);color:#fff;border-radius:16px;padding:20px;margin-bottom:8px}
+  .hero .k{font-size:12px;font-weight:800;letter-spacing:.08em;opacity:.85}
+  .hero h1{font-size:21px;font-weight:800;margin:4px 0 8px}
+  .hero p{font-size:13.5px;opacity:.96}
+  .note{font-size:12.8px;background:#eef6ff;border:1px solid #cfe0f5;border-radius:11px;padding:10px 13px;margin:12px 0 16px;color:#2c466b}
+  .note b{color:#1b2a4a}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:15px 17px;margin-bottom:12px}
+  .tag{display:inline-block;font-size:11px;font-weight:800;letter-spacing:.03em;padding:3px 10px;border-radius:999px;margin-bottom:7px}
+  .free{background:#e7ede9;color:#2e6b4a}.paid{background:#f4eee0;color:#8a5a00}
+  .card h3{font-size:17px;font-weight:800;margin-bottom:2px}
+  .card p{font-size:13.5px;color:#39414b;margin-bottom:10px}
+  .go{display:inline-block;background:var(--accent);color:#fff;text-decoration:none;font-weight:800;font-size:14.5px;border-radius:10px;padding:11px 18px}
+  .go:hover{background:#142036}
+  .warn{background:#fdf1e8;border:1px solid #f0cba3;color:#8a3d10;border-radius:11px;padding:11px 14px;font-size:13px;margin-top:14px}
+  .warn b{color:#6e2f08}
+  .foot{font-size:12px;color:#a39c8e;text-align:center;margin-top:20px}
+</style>
+</head>
+<body>
+  <div class="hero">
+    <div class="k">3일차 · 추가 실습 모음</div>
+    <h1>➕ 더 해보고 싶다면 — 추가 실습</h1>
+    <p>오늘 수업에선 <b>'AI 분석 캡스톤' 하나만</b> 다 같이 합니다(무료 토큰을 아끼려고요). 아래는 <b>유료 계정이 있거나, 시간이 남거나, 집에서 더 해보고 싶은 분</b>을 위한 추가 연습입니다. 순서 상관없이 골라서 하세요.</p>
+  </div>
+  <div class="note">💡 <b>바이브 코딩</b>은 코랩 내장 AI로 <b>무료</b>로도 됩니다. 나머지(원샷·카탈로그)는 챗봇 토큰을 쓰니 <b>유료 계정</b>이 있으면 넉넉합니다.</div>
+
+  <div class="card">
+    <span class="tag free">무료 가능</span>
+    <h3>🧩 바이브 코딩 실습 (Colab)</h3>
+    <p>코랩에서 <b>말로 시켜</b> 통계표·그래프·상관을 직접 뽑아봅니다. 목표만 보고 직접 → 막히면 모범 프롬프트. (스타터 노트북 + 카드)</p>
+    <a class="go" href="바이브코딩_카드.html" target="_blank" rel="noopener">실습 카드 열기 ▶</a>
+  </div>
+
+  <div class="card">
+    <span class="tag free">무료 가능</span>
+    <h3>🧰 AI 도구 투어</h3>
+    <p>ChatGPT·Claude·Gemini 말고도 데이터용 무료 AI 도구들(NotebookLM·Julius·Datawrapper·Flourish)을 카드로 둘러보고 가벼운 미션.</p>
+    <a class="go" href="AI도구투어.html" target="_blank" rel="noopener">도구 투어 열기 ▶</a>
+  </div>
+
+  <div class="card">
+    <span class="tag paid">유료 넉넉</span>
+    <h3>📝 원샷 프롬프트 실습</h3>
+    <p>회의록 → 표, 데이터 설명 → 메타데이터, 긴 문서 요약. 15차시 복붙 샘플과 원샷 프롬프트·검증 체크리스트.</p>
+    <a class="go" href="15_실습자료.html" target="_blank" rel="noopener">원샷 실습 열기 ▶</a>
+  </div>
+
+  <div class="card">
+    <span class="tag paid">유료 넉넉</span>
+    <h3>📇 AI 활용 카탈로그 (8가지)</h3>
+    <p>학습·정보수집·문서작성·변환·요약 등, 두고두고 꺼내 쓰는 복붙 예시 프롬프트 모음. 이어 다듬기 실습 포함.</p>
+    <a class="go" href="16_활용카탈로그.html" target="_blank" rel="noopener">카탈로그 열기 ▶</a>
+  </div>
+
+  <div class="warn">🔒 <b>공개·가공 데이터만.</b> 실제 부대·장비·인명·군사정보는 어떤 도구에도 입력·업로드 금지.</div>
+  <p class="foot">데이터 관리자 기본·실무 교육 · 3일차 추가 실습 모음 · 강사 박지윤</p>
+</body>
+</html>

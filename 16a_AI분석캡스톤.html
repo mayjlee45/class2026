@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 분석 캡스톤 · 3일차 최종 실습</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{--bg:#FAF8F3;--ink:#23272e;--sub:#5f6670;--card:#fff;--line:#e7e3d8;--accent:#3C3489;--ok:#1f8f5f;--navy:#1b2a4a;}
+  body{font-family:"Pretendard","Apple SD Gothic Neo","맑은 고딕",system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.6;max-width:760px;margin:0 auto;padding:22px 16px 60px}
+  .hero{background:linear-gradient(135deg,#3C3489,#5a4fb0);color:#fff;border-radius:16px;padding:20px;margin-bottom:14px}
+  .hero .k{font-size:12px;font-weight:800;letter-spacing:.08em;opacity:.85}
+  .hero h1{font-size:22px;font-weight:800;margin:4px 0 8px}
+  .hero p{font-size:13.5px;opacity:.96;line-height:1.55}
+  .sec{font-size:11.5px;font-weight:800;color:var(--accent);letter-spacing:.04em;margin:22px 0 7px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:15px 16px;margin-bottom:11px}
+  .card h3{font-size:15.5px;font-weight:700;margin-bottom:6px}
+  .card p,.card li{font-size:13.5px;color:#39414b}
+  ul{margin:6px 0 2px 2px;padding-left:20px}li{margin:5px 0}
+  .free{display:inline-block;background:#efe9ff;color:#3a2f86;border-radius:6px;padding:2px 9px;font-size:12px;font-weight:700;margin:2px 4px 2px 0}
+  .prompt{position:relative;background:#0e1a2b;color:#e6edf7;border-radius:12px;padding:15px 15px 14px;font-size:12.7px;line-height:1.62;white-space:pre-wrap;font-family:"D2Coding","Consolas",monospace}
+  .prompt b{color:#8fd0ff;font-weight:700}
+  .copy{position:absolute;top:10px;right:10px;background:#2b3a56;color:#dbe7fb;border:none;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit}
+  .copy:hover{background:#37507a}
+  .copy.done{background:#1f8f5f;color:#fff}
+  .chk li{list-style:none;position:relative;padding-left:26px;margin:8px 0}
+  .chk li:before{content:"☐";position:absolute;left:0;font-size:15px;color:var(--accent)}
+  .chk b{color:#111}
+  .tip{background:#eef6ff;border-left:3px solid #5b8fd6;border-radius:8px;padding:10px 13px;font-size:13px;color:#2c466b;margin:8px 0}
+  .warn{background:#fdf1e8;border:1px solid #f0cba3;color:#8a3d10;border-radius:11px;padding:11px 14px;font-size:13px;margin-top:12px}
+  .warn b{color:#6e2f08}
+  .submit{display:block;text-align:center;background:var(--accent);color:#fff;border-radius:12px;padding:15px;font-size:16px;font-weight:800;text-decoration:none;margin:8px 0 4px}
+  .submit:hover{background:#2e2769}
+  .foot{font-size:12px;color:#a39c8e;text-align:center;margin-top:22px}
+</style>
+</head>
+<body>
+  <div class="hero">
+    <div class="k">3일차 · 최종 실습 (캡스톤)</div>
+    <h1>🚀 내 데이터, AI로 끝까지 분석하기</h1>
+    <p>어제 노코드(Orange)로 했던 그 데이터를, 오늘은 <b>AI에게 전 과정을 시켜</b> 보고서까지 만듭니다. 그리고 <b>AI가 제대로 했는지 검증</b>합니다.</p>
+  </div>
+
+  <div class="sec">데이터</div>
+  <div class="card">
+    <p>📂 <b>어제 data.go.kr에서 받은 CSV</b>를 그대로 쓰세요. (원하면 새로 하나 받아도 됩니다.)<br>
+    <span class="free">개별 데이터</span><span class="free">CSV·엑셀</span> 안 받아오셨으면 강사가 준 <b>정비일지 학생용</b>으로 하셔도 됩니다.</p>
+  </div>
+
+  <div class="sec">STEP 1 · AI에게 시키기 (프롬프트 가이드)</div>
+  <div class="card">
+    <p style="margin-bottom:6px">프롬프트 '기술'보다 <b>무엇을 '출력'할지</b>를 분명히 하는 게 핵심입니다. <b>①전체 가이드</b>는 필요한 항목만 골라 쓰라고 풀로 적어둔 것이고, 무료 버전이면 <b>②간단 버전</b>부터 쓰세요.</p>
+    <p style="margin:2px 0 6px;font-weight:800;color:#1b2a4a">① 전체 가이드 (필요한 항목만 골라서)</p>
+    <div class="prompt" id="ptext"><button class="copy" onclick="cp('ptext')">가이드 복사</button><b>[역할]</b> 너는 지휘관 보고를 돕는 꼼꼼한 데이터 분석가다.
+
+<b>[해줄 일 — 올린 파일 기준, 추측 금지]</b>
+1) 파악: 행·열 수, 각 컬럼의 의미·자료형을 표로. 결측·이상값·표기 혼용 등 품질 문제를 진단.
+2) 전처리: 결측·이상값을 규칙을 정해 처리(무엇을 왜), 표기 통일. 원본은 두고 사본에서. 처리 내역을 기록.
+3) 전/후 비교: 행수·결측수·핵심 기술통계(평균·중앙값·표준편차)를 전·후로 나란히.
+4) 시각화: 분포·이상값·관계 그래프. 각 그래프마다 <b>왜 그렇게 그렸는지, 무엇을 뜻하는지, 어떻게 해석하는지를 근거를 들어</b> 서술.
+5) 통계 분석: 유의미한 관계가 있을 법한 항목을 스스로 추려 상관·필요한 통계 분석을 진행. <b>왜 그 항목을 골랐는지</b>와 <b>어떤 통계 방법을 적용했는지</b>를 함께 쓰고, 그 방법을 나에게 따로 쉽게 설명.
+6) 함의: 각 그림·통계 결과가 실무적으로 어떤 의미인지 <b>근거를 들어</b> 정리.
+
+<b>[문체·형식 규칙]</b>
+- 상관에게 보고하는 용도. '~이다'체로 깔끔하게 끝맺음. 비속어·축약어 금지.
+- 영어 약어는 처음 나올 때 풀네임을 괄호로 병기(예: LLM(Large Language Model)).
+- 전문용어로 보이는 것은 그 자리에 짧은 설명을 덧붙일 것.
+- 가독성: 제목·소제목·표로 한눈에 읽히게. 색은 차분하고 일관되게(강조는 한두 색만).
+
+<b>[산출물]</b>
+- 위 내용을 담은 한 장짜리 보고서를 PDF(또는 HTML 대시보드)로 저장해 다운로드 링크.
+- 전처리된 데이터도 파일(CSV/엑셀)로 저장해 다운로드 링크.
+- 마지막에 가정한 것·버린 것을 3줄로.</div>
+
+    <div class="warn" style="margin:12px 0 8px;background:#fff8e8;border-color:#f0dca3;color:#7a5a10">⚠️ <b>한 번에 다 시키지 마세요.</b> 무료 AI(특히 ChatGPT 무료)는 길이·용량 제한이 있어 전 과정을 몰아넣으면 끊기거나 대충 답합니다. <b>필요한 것 하나씩</b> 나눠 시키세요.</div>
+    <p style="margin:2px 0 6px;font-weight:800;color:#1b2a4a">② 간단 버전 (무료용 · 하나씩)</p>
+    <div class="prompt" id="ptext2"><button class="copy" onclick="cp('ptext2')">간단 버전 복사</button><b>[역할]</b> 너는 지휘관 보고를 돕는 데이터 분석가다.
+
+<b>[해줄 일 — 올린 파일 기준, 아래만 딱, 추측 금지]</b>
+1) 이 데이터 한 문단 소개: 행·열 수, 주요 컬럼, 눈에 띄는 품질 문제.
+2) 기술통계: 주요 숫자 컬럼의 평균·중앙값·표준편차·최소·최대를 표 하나로.
+3) 그래프 1개: 가장 의미 있어 보이는 것 하나만. 왜 골랐고 어떻게 해석하는지 근거를 들어.
+4) 상관 1개: 관계 있을 법한 두 항목의 상관을 보고, 왜 골랐는지·어떤 방법인지 쓰고 쉽게 설명(상관≠인과 한 줄).
+
+<b>[문체]</b> '~이다'체, 축약어 금지, 영어 약어는 처음에 풀네임 병기.
+<b>[산출물]</b> 짧은 보고서 한 편. (PDF 되면 저장, 안 되면 화면 캡처로 제출)</div>
+    <div class="tip">💡 더 하고 싶으면 <b>이어서 하나씩</b>: "이제 전처리해서 정제 파일로 줘", "그래프 하나 더"처럼. 한꺼번에 ✗, 하나씩 ✓.</div>
+  </div>
+
+  <div class="sec">STEP 2 · AI가 제대로 했는지 검증 (제일 중요!)</div>
+  <div class="card">
+    <p>AI는 <b>그럴듯하게 틀릴 수</b> 있습니다. 받은 <b>정제 데이터와 보고서를 직접 열어</b> 확인하세요.</p>
+    <ul class="chk">
+      <li><b>전처리 후에도</b> 결측·이상값·표기 혼용이 <b>남아있지 않은가?</b> (정제 CSV를 직접 열어보기)</li>
+      <li>AI가 <b>지어낸 숫자·컬럼·항목</b>은 없는가? (원본과 대조)</li>
+      <li>그래프의 축·단위·제목이 <b>데이터와 맞는가?</b></li>
+      <li>상관을 <b>인과로 단정</b>하지 않았는가?</li>
+      <li>처리 내역(무엇을 왜 버렸는지)이 <b>기록</b>되어 있는가?</li>
+    </ul>
+    <div class="tip">💡 하자를 발견하면 그게 <b>실력</b>입니다 — "○○ 컬럼에 아직 9999가 남아있어, 다시 처리해줘"처럼 <b>구체적으로 되돌려</b> 고치게 하세요.</div>
+  </div>
+
+  <div class="sec">STEP 3 · 어제(노코드)와 비교</div>
+  <div class="card">
+    <ul>
+      <li>어제 Orange로 본 결과(평균·최다 항목·분포)와 <b>AI 결과가 일치</b>하나요? 다르면 왜일까요?</li>
+      <li>어느 쪽이 더 <b>빠르고</b>, 어느 쪽이 더 <b>통제·검증이 쉬웠</b>나요?</li>
+      <li>결론: <b>도구는 수단</b> — 상황에 맞게 고르고, 결과는 사람이 검증한다.</li>
+    </ul>
+  </div>
+
+  <div class="sec">STEP 4 · 제출</div>
+  <div class="card">
+    <p>완성한 <b>보고서 PDF를 Padlet에 올리고</b>, <b>댓글로 본인 생각</b>을 남겨주세요.<br>
+    (예: AI가 틀렸던 점 / 노코드와 비교 소감 / 실무에 어떻게 쓸지)</p>
+    <a class="submit" href="https://padlet.com/rantoringagain/padlet-skj6fbu62esfxxpl" target="_blank" rel="noopener">📌 Padlet에 보고서 올리기 + 댓글</a>
+  </div>
+
+  <div class="warn">🔒 <b>공개·가공 데이터만 사용.</b> 실제 부대·장비·인명·군사정보는 절대 업로드·입력·게시 금지(입력 = 외부 전송, 학습에 쓰일 수 있음).</div>
+
+  <p class="foot">데이터 관리자 기본·실무 교육 · 3일차 AI 분석 캡스톤 · 강사 박지윤</p>
+
+<script>
+  function cp(id){
+    const src=document.getElementById(id);
+    const clone=src.cloneNode(true); const b0=clone.querySelector('.copy'); if(b0) b0.remove();
+    const txt=clone.innerText.trim();
+    const btn=src.querySelector('.copy');
+    const done=()=>{const o=btn.textContent;btn.textContent='복사됨 ✓';btn.classList.add('done');setTimeout(()=>{btn.textContent=o;btn.classList.remove('done');},1600);};
+    if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(txt).then(done).catch(fallback); }
+    else fallback();
+    function fallback(){ const ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');done();}catch(e){alert('복사가 안 되면 직접 드래그해 복사하세요.');}document.body.removeChild(ta); }
+  }
+</script>
+</body>
+</html>
