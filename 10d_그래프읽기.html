@@ -230,7 +230,7 @@ function showResult(){
   if(wrong.length===0){
     noteWrap.innerHTML='<h3 class="perfect">🎉 만점! 전처리부터 시각화·판단까지 완벽합니다.</h3>';
   } else {
-    let html='<h3>📒 오답노트</h3>';
+    let html='<h3>📒 오답 노트</h3>';
     wrong.forEach(w=>{
       html+=`<div><b>${w.q}</b> <span>(${w.scn})</span><br>→ ${w.fb}</div>`;
     });
