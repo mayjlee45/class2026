@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>나의 데이터 유형 테스트 (18차시)</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, "Apple SD Gothic Neo", "맑은 고딕", sans-serif;
+    background: #FAFAF8; color: #2C2C2A; line-height: 1.6;
+    max-width: 640px; margin: 0 auto; padding: 28px 16px;
+  }
+  h1 { font-size: 22px; font-weight: 600; margin-bottom: 4px; }
+  .sub { font-size: 13px; color: #5F5E5A; margin-bottom: 20px; }
+  .prog { font-size: 12px; color: #888780; margin-bottom: 10px; }
+  .card { background: #fff; border: 1px solid #E6E3DA; border-radius: 14px; padding: 22px; }
+  .q { font-size: 17px; font-weight: 600; margin-bottom: 16px; }
+  .opt { display: block; width: 100%; text-align: left; padding: 13px 16px; margin-bottom: 10px;
+         border: 1px solid #CFC9BC; background: #fff; border-radius: 10px; font-size: 15px;
+         cursor: pointer; font-family: inherit; color: #2C2C2A; }
+  .opt:hover { background: #F1EFE8; border-color: #B7AE9C; }
+  .result { background: #EEEDFE; border-radius: 14px; padding: 26px; text-align: center; }
+  .result .big { font-size: 22px; font-weight: 700; color: #3C3489; margin: 6px 0 10px; }
+  .result .desc { font-size: 15px; color: #3C3489; }
+  .result .ex { font-size: 13px; color: #5F5E5A; margin-top: 12px; }
+  .reset { display: block; margin: 18px auto 0; padding: 9px 20px; border: 1px solid #CFC9BC;
+           background: #fff; border-radius: 8px; font-size: 13px; cursor: pointer; color: #5F5E5A; }
+</style>
+</head>
+<body>
+  <h1>🧭 나의 데이터 유형 테스트</h1>
+  <p class="sub">18차시 · 재미로 보는 거예요. 기록 안 되니 편하게! (4문항)</p>
+  <div id="app"></div>
+
+<script>
+// 유형: 정형 / 시계열 / 텍스트 / 미디어(비정형 미디어)
+const Q = [
+  { q: "Q1. 부대에서 새로 맡고 싶은 일은?", opts: [
+    ["정비 기록·재고를 표로 딱딱 관리", "정형"],
+    ["장비 상태가 시간따라 어떻게 변하는지 추적", "시계열"],
+    ["보고서·교범 정리하고 핵심 뽑기", "텍스트"],
+    ["점검 사진·CCTV·무전 녹음 분류·활용", "미디어"],
+  ]},
+  { q: "Q2. 데이터에서 제일 끌리는 순간은?", opts: [
+    ["숫자가 딱 맞아떨어질 때", "정형"],
+    ["그래프가 시간따라 출렁일 때", "시계열"],
+    ["글 속 숨은 의미를 찾을 때", "텍스트"],
+    ["사진·영상·소리에서 뭔가 발견할 때", "미디어"],
+  ]},
+  { q: "Q3. 퇴근 후 취미에 가까운 건?", opts: [
+    ["가계부·엑셀 정리", "정형"],
+    ["운동기록·날씨 추적", "시계열"],
+    ["일기·독서 메모", "텍스트"],
+    ["사진·영상 편집, 음악", "미디어"],
+  ]},
+  { q: "Q4. AI한테 제일 먼저 시켜보고 싶은 건?", opts: [
+    ["표 정리·계산", "정형"],
+    ["추세·예측", "시계열"],
+    ["긴 문서 요약", "텍스트"],
+    ["사진 분류·녹음 받아쓰기", "미디어"],
+  ]},
+];
+const RESULT = {
+  정형:   { big: "정형(표·숫자)형", desc: "깔끔한 정리왕! 표와 숫자가 당신의 무기예요.", ex: "어울리는 데이터: 정비이력·재고·인사 DB" },
+  시계열: { big: "시계열·추세형", desc: "흐름을 읽는 사람. 변화와 예측에 강해요.", ex: "어울리는 데이터: 센서·장비 상태·추세 기록" },
+  텍스트: { big: "텍스트·문서형", desc: "의미 사냥꾼. 글 속에서 핵심을 캐냅니다.", ex: "어울리는 데이터: 보고서·교범·규정" },
+  미디어: { big: "비정형 미디어형", desc: "감각파 수집가. 사진·영상·소리를 데이터로 봅니다.", ex: "어울리는 데이터: 점검 사진·CCTV·무전 녹음" },
+};
+
+let step = 0;
+const score = { 정형: 0, 시계열: 0, 텍스트: 0, 미디어: 0 };
+
+function render() {
+  const app = document.getElementById("app");
+  if (step < Q.length) {
+    const cur = Q[step];
+    app.innerHTML =
+      '<div class="prog">' + (step + 1) + ' / ' + Q.length + '</div>' +
+      '<div class="card"><div class="q">' + cur.q + '</div>' +
+      cur.opts.map((o, i) => '<button class="opt" onclick="pick(\'' + o[1] + '\')">' + o[0] + '</button>').join('') +
+      '</div>';
+  } else {
+    let top = "정형", max = -1;
+    for (const k in score) if (score[k] > max) { max = score[k]; top = k; }
+    const r = RESULT[top];
+    app.innerHTML =
+    '<div class="result"><div>당신은…</div>' +
+      '<div class="big">' + r.big + '</div>' +
+      '<div class="desc">' + r.desc + '</div>' +
+      '<div class="ex">' + r.ex + '</div></div>' +
+      '<div style="text-align:center;font-size:13px;color:#5F5E5A;margin-top:14px">어떤 유형이든, 좋은 데이터 관리의 원칙은 똑같습니다 🙂</div>' +
+      '<button class="reset" onclick="restart()">다시 하기</button>';
+  }
+}
+function pick(type) { score[type]++; step++; render(); }
+function restart() { step = 0; for (const k in score) score[k] = 0; render(); }
+render();
+</script>
+</body>
+</html>
