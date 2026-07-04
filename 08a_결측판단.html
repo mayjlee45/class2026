@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>결측 판단 퀴즈 (8차시)</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,"Apple SD Gothic Neo","맑은 고딕",sans-serif;background:#FAFAF8;color:#2C2C2A;line-height:1.6;max-width:660px;margin:0 auto;padding:28px 16px}
+  h1{font-size:22px;font-weight:600;margin-bottom:4px}
+  .sub{font-size:13px;color:#5F5E5A;margin-bottom:14px}
+  .help{background:#FFF8E1;border:1px solid #F0E3B0;border-radius:10px;padding:12px 14px;font-size:13px;color:#6B5A1E;margin-bottom:16px}
+  .bar{font-size:14px;color:#5F5E5A;margin-bottom:12px}.bar b{font-size:18px;color:#2C2C2A}
+  .card{background:#fff;border:1px solid #E6E3DA;border-radius:14px;padding:20px;margin-bottom:14px}
+  .q{font-size:15px;font-weight:600;margin-bottom:14px}
+  .opt{display:block;width:100%;text-align:left;padding:12px 14px;margin-bottom:9px;border:1px solid #CFC9BC;background:#fff;border-radius:10px;font-size:14px;cursor:pointer;font-family:inherit;color:#2C2C2A}
+  .opt:hover{background:#F1EFE8}
+  .fb{margin-top:6px;padding:10px 14px;border-radius:8px;font-size:14px;display:none}
+  .fb.ok{background:#E1F5EE;color:#085041}.fb.no{background:#FAEAE6;color:#8A2A1A}
+  .card.done .opt{pointer-events:none;opacity:.6}.card.done .fb{display:block}
+  .result{text-align:center;background:#EEEDFE;color:#3C3489;border-radius:14px;padding:24px;font-size:16px;display:none}
+  .reset{display:block;margin:16px auto 0;padding:9px 20px;border:1px solid #CFC9BC;background:#fff;border-radius:8px;font-size:13px;cursor:pointer;color:#5F5E5A}
+</style></head>
+<body>
+  <h1>🕳️ 결측(빈 값) 판단 퀴즈</h1>
+  <p class="sub">8차시 · 데이터에 빈 값이 있을 때, 관리자는 어떻게?</p>
+  <div class="help">ℹ️ <b>이렇게 하세요:</b> 각 상황에서 맞는 선택을 고르세요. <b>상황마다 정답이 달라요</b> — 빼는 게 맞을 때도, 채우는 게 맞을 때도, 그냥 두는 게 맞을 때도 있습니다. 단 하나 공통은 <b>원본은 보존하고 기록한다.</b></div>
+  <div class="bar">맞힌 개수 <b id="score">0</b> / <span id="total">0</span></div>
+  <div id="cards"></div>
+  <div class="result" id="result"></div>
+  <button class="reset" onclick="init()">다시 하기</button>
+<script>
+const QS=[
+ {q:"① 1만 건 중 소요시간 3건만 비었고, 지금 전체 평균을 빨리 내야 한다.",
+  opts:["분석 사본에서 그 3건만 빼고 계산하고, 원본·누락은 기록","원본에서 3행을 삭제한다","빈 칸에 아무 값이나 넣어 채운다"],a:0,
+  why:"결측이 극소수면 <b>분석 사본에서 제외</b>해도 무방. 단 원본은 보존하고 무엇을 왜 뺐는지 기록. (정답이 늘 '보존'만은 아니죠.)"},
+ {q:"② '정비비용'(연속형)이 군데군데 비었는데, 분포가 한쪽으로 길게 치우쳐 있다.",
+  opts:["평균값으로 채운다","중앙값으로 채운다","전부 0으로 채운다"],a:1,
+  why:"치우친 분포·이상값이 있으면 평균보다 <b>중앙값 대치</b>가 안전. 0은 '없음'이 아니라 '0이라는 값'이라 왜곡돼요."},
+ {q:"③ 급해서 빈 값을 전부 0으로 일괄 입력하려 한다.",
+  opts:["좋다, 빈 칸이 사라진다","안 된다 — 0과 결측은 다르다, 표시·기록이 먼저","0 대신 9999로 채운다"],a:1,
+  why:"0은 평균·합계에 그대로 섞여 통계를 망칩니다. <b>빈 값(NA)과 0은 다른 것.</b>"},
+ {q:"④ '담당자'(범주형, 글자)가 많이 비었다.",
+  opts:["평균값으로 채운다","최빈값 또는 '미상'이라는 별도 값으로 둔다","그 컬럼을 원본에서 삭제한다"],a:1,
+  why:"범주형엔 평균이 의미 없습니다. <b>최빈값 대치</b> 또는 <b>'미상'을 한 범주</b>로. 원본 삭제는 금물."},
+ {q:"⑤ 무응답이 '특정 부대'에만 몰려 있다.",
+  opts:["평균으로 채워 메운다","'몰린 무응답' 자체가 정보일 수 있으니 표시·기록한다","그 부대를 통째로 뺀다"],a:1,
+  why:"한쪽에 몰린 결측은 <b>그 자체가 신호</b>(왜 거기만?). 함부로 채우거나 빼지 않습니다."},
+ {q:"⑥ '비고' 칸이 40% 비어 있다.",
+  opts:["많이 비었으니 컬럼을 삭제한다","비고는 선택 입력이라 빈 게 정상일 수 있다 — 보존한다","빈 칸을 '없음'으로 일괄 입력한다"],a:1,
+  why:"원래 <b>선택 항목</b>이면 빈 게 정상. 비율만 보고 지우면 정보를 잃습니다."},
+ {q:"⑦ 센서 오류로 하루치가 통째로 비었다.",
+  opts:["전날 값을 복제해 채운다","원인(센서 오류)을 기록하고, 함부로 채우지 않는다","해당 날짜를 원본에서 삭제한다"],a:1,
+  why:"임의 복제는 <b>가짜 데이터</b>를 만듭니다. 원인을 기록해두는 게 핵심."},
+ {q:"⑧ 이 모든 결측 처리를 어디서 할까?",
+  opts:["원본 파일을 바로 고친다","사본을 만들어 사본에서만, 처리 내역을 기록한다","빠르게 원본에 덮어쓴다"],a:1,
+  why:"<b>원본 불변 · 사본 작업 · 기록</b> — 삭제는 쉽지만 복구는 불가능합니다."},
+];
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+QS.forEach(it=>{const ct=it.opts[it.a];it.shuf=shuffle(it.opts.slice());it.ca=it.shuf.indexOf(ct);});
+let score=0,done=0;
+function init(){score=0;done=0;document.getElementById("score").textContent=0;document.getElementById("total").textContent=QS.length;document.getElementById("result").style.display="none";
+ const w=document.getElementById("cards");w.innerHTML="";
+ QS.forEach((it,i)=>{const c=document.createElement("div");c.className="card";
+  c.innerHTML='<div class="q">'+it.q+'</div>'+it.shuf.map((o,j)=>'<button class="opt" onclick="pick('+i+','+j+',this)">'+o+'</button>').join('')+'<div class="fb" id="fb'+i+'"></div>';w.appendChild(c);});}
+function pick(i,j,btn){const it=QS[i];const card=btn.closest(".card");if(card.classList.contains("done"))return;const fb=document.getElementById("fb"+i);const ok=j===it.ca;if(ok)score++;document.getElementById("score").textContent=score;
+ fb.className="fb "+(ok?"ok":"no");fb.innerHTML=(ok?"✅ 정답! ":"❌ 정답: 원본 보존+표시+기록 — ")+it.why;card.classList.add("done");done++;
+ if(done===QS.length){const r=document.getElementById("result");r.style.display="block";r.innerHTML="🎉 <b>"+score+" / "+QS.length+"</b>!<br><span style='font-size:14px'>관리자는 지우는 사람이 아니라, 원본을 지키고 기록하는 사람.</span>";}}
+init();
+</script></body></html>
