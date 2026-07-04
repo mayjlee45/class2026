@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>17차시 · AI 환각 직접 체험하기</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{--bg:#FAF8F3;--ink:#23272e;--sub:#6b7280;--card:#fff;--line:#e7e3d8;--accent:#b4521a;--ok:#1f8f5f;--warn:#b4521a;}
+  body{font-family:"Pretendard","Apple SD Gothic Neo","맑은 고딕",system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.6;max-width:720px;margin:0 auto;padding:24px 16px 56px}
+  h1{font-size:22px;font-weight:800;margin-bottom:4px}
+  .lead{font-size:13.5px;color:var(--sub);margin-bottom:14px}
+  .warn{background:#fdf1e8;border:1px solid #f0cba3;color:#8a3d10;border-radius:11px;padding:11px 14px;font-size:13px;margin-bottom:18px}
+  .warn b{color:#6e2f08}
+  .step{font-size:11.5px;font-weight:800;color:var(--accent);letter-spacing:.04em;margin:24px 0 8px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;margin-bottom:10px;overflow:hidden}
+  .ch{display:flex;align-items:center;gap:8px;padding:11px 14px;border-bottom:1px solid var(--line)}
+  .ch h3{font-size:14.5px;font-weight:700;margin-right:auto}
+  .ch .why{font-size:11.5px;color:var(--sub);font-weight:500}
+  .copy{background:var(--accent);color:#fff;border:none;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;flex-shrink:0}
+  .copy.done{background:var(--ok)}
+  .cb{padding:12px 14px;font-size:12.5px;white-space:pre-wrap;font-family:"D2Coding","Consolas",monospace;color:#7a3411;background:#fdf6f0}
+  .cb.v{color:#16603f;background:#eefaf3}
+  .obs{font-size:12px;color:var(--sub);padding:0 14px 12px}
+  ul{margin:4px 0 4px 2px;padding-left:20px} li{margin:6px 0;font-size:13.5px}
+  .foot{font-size:12px;color:#a39c8e;text-align:center;margin-top:26px}
+</style>
+</head>
+<body>
+  <h1>🔬 AI 환각 직접 체험</h1>
+  <p class="lead">아래는 일부러 <b>‘없을 법한 것’</b>을 묻는 질문입니다. AI가 어떻게 <b>자신 있게 지어내는지</b> 관찰하고, 진짜인지 확인해보세요. (복사 → 자동 선택+복사, 안 되면 Ctrl+C)</p>
+  <div class="warn">🎯 목적: "AI가 자신 있게 틀리는 것"을 <b>직접 겪어보는 것</b>이 가장 강력한 학습입니다(S46). 🔒 공개·가공 내용만 사용.</div>
+
+  <div class="step">A · 환각이 잘 나오는 질문 (복붙해 던져보기)</div>
+  <div class="card"><div class="ch"><h3>① 없는 책·편람 인용</h3><span class="why">지어낼 가능성↑</span><button class="copy" data-t="h1">복사</button></div>
+    <div class="cb" id="h1">「2024 통신장비 정비 표준편람」 제3장 4절에 나오는 장비별 정비 주기 기준을 그대로 인용해서 알려줘.</div>
+    <div class="obs">👀 관찰: 실제로 있는 책일까? AI가 그럴듯한 내용을 만들어내는지 보세요.</div></div>
+  <div class="card"><div class="ch"><h3>② 특정 페이지 요약</h3><span class="why">페이지 단위는 환각↑</span><button class="copy" data-t="h2">복사</button></div>
+    <div class="cb" id="h2">『데이터 과학 입문』 187쪽의 핵심 내용을 3줄로 요약해줘.</div>
+    <div class="obs">👀 관찰: AI가 그 책 187쪽을 진짜 알 리 없습니다 — 그래도 답하나요?</div></div>
+  <div class="card"><div class="ch"><h3>③ 최신 논문·링크 요구</h3><span class="why">가짜 URL 주의</span><button class="copy" data-t="h3">복사</button></div>
+    <div class="cb" id="h3">통신장비 고장률 예측에 관한 최신 논문 5편을 제목과 링크(URL)와 함께 알려줘.</div>
+    <div class="obs">👀 관찰: 링크를 <b>직접 클릭</b>해보세요. 존재하지 않는 주소가 섞여 있을 수 있습니다.</div></div>
+  <div class="card"><div class="ch"><h3>④ 큰 수 계산</h3><span class="why">계산도 틀림</span><button class="copy" data-t="h4">복사</button></div>
+    <div class="cb" id="h4">738,914 × 24,591 은 얼마야? 숫자만 답해줘.</div>
+    <div class="obs">👀 관찰: <b>엑셀·계산기</b>로 재점검하세요. AI 답이 미묘하게 틀릴 수 있습니다.</div></div>
+
+  <div class="step">B · 검증하는 법 (이렇게 다시 시키기)</div>
+  <div class="card"><div class="ch"><h3>출처 요구 + 직접 확인</h3><button class="copy" data-t="v1">복사</button></div>
+    <div class="cb v" id="v1">방금 답에 대한 출처를 URL로 달아줘. 추측하지 말고, 확실하지 않으면 '모름'이라고 해.</div>
+    <div class="obs">→ 받은 URL을 <b>직접 클릭</b>해 존재·내용 일치 확인.</div></div>
+  <div class="card"><div class="ch"><h3>모르면 모른다고</h3><button class="copy" data-t="v2">복사</button></div>
+    <div class="cb v" id="v2">확실한 사실만 답하고, 모르거나 출처가 없으면 '모르겠습니다'라고만 해. 지어내지 마.</div></div>
+  <div class="card"><div class="ch"><h3>교차검증 · 계산 재점검</h3><button class="copy" data-t="v3">복사</button></div>
+    <div class="cb" id="v3">• 중요한 사실 → 구글 또는 다른 AI에 같은 질문으로 한 번 더 확인
+- 계산 → 엑셀·계산기로 재점검
+- 코드로 계산시키고 그 코드 로직을 검수(가장 신뢰도 높음)</div></div>
+
+  <div class="step">정리</div>
+  <div class="card"><div class="cb" style="color:#333;background:#fff;font-family:inherit">
+    <ul>
+      <li>AI는 <b>‘모른다’가 없어</b> 빈자리를 그럴듯하게 채웁니다 = 환각.</li>
+      <li>출처·계산·중요 사실은 <b>사람이 반드시 확인</b> — AI가 틀려서가 아니라, <b>책임이 나에게 있어서</b>.</li>
+      <li>🔒 그리고 무엇을 묻든 <b>실데이터·민감정보는 입력 금지</b>(입력 = 외부 전송).</li>
+    </ul>
+  </div></div>
+
+  <p class="foot">강사 박지윤 · 데이터 관리자 기본·실무 교육</p>
+<script>
+  document.querySelectorAll('.copy').forEach(b=>{
+    b.onclick=()=>{ const el=document.getElementById(b.dataset.t);
+      const r=document.createRange(); r.selectNodeContents(el);
+      const sel=getSelection(); sel.removeAllRanges(); sel.addRange(r);
+      let ok=false; try{ ok=document.execCommand('copy'); }catch(e){}
+      try{ if(navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(el.innerText); }catch(e){}
+      b.textContent= ok ? '✓ 복사됨' : '선택됨 · Ctrl+C'; b.classList.add('done');
+      setTimeout(()=>{ b.textContent='복사'; b.classList.remove('done'); sel.removeAllRanges(); },1900); };
+  });
+</script>
+</body>
+</html>
