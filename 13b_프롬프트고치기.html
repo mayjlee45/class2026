@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>프롬프트 고치기 · 막연하면 엉뚱한 답이 온다</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-user-select:none;user-select:none}
+  :root{--bg:#eef0f4;--ink:#1f2530;--sub:#6b7280;--card:#fff;--line:#e2e5ea;--me:#2f6df6;--ok:#1f8f5f;--no:#e0483d;--gold:#b97e00;}
+  body{font-family:"Pretendard","Apple SD Gothic Neo","맑은 고딕",system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.55;display:flex;justify-content:center;padding:18px 12px 44px}
+  .wrap{width:100%;max-width:540px}
+  .top{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+  .top h1{font-size:17px;margin-right:auto}
+  .badge{background:#fff;border:1px solid var(--line);border-radius:999px;padding:4px 11px;font-size:12.5px;font-weight:800;color:var(--gold)}
+  .intro{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:17px;font-size:14px}
+  .intro b{color:#111}
+  .intro .key{background:#fff7e6;border-left:3px solid var(--gold);border-radius:8px;padding:10px 12px;margin-top:11px;font-size:13px;color:#6b5300}
+  .start{margin-top:14px;width:100%;background:var(--me);color:#fff;border:none;border-radius:11px;padding:12px;font-size:15px;font-weight:800;cursor:pointer}
+  .lv{display:inline-block;font-size:11.5px;font-weight:800;color:#fff;background:#3b4456;border-radius:6px;padding:3px 9px;margin-bottom:8px}
+  .goal{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:13px 15px;font-size:14.5px;margin-bottom:12px}
+  .goal b{color:#111}
+  .ask{font-size:13px;color:var(--sub);margin:4px 2px 9px}
+  .opts{display:flex;flex-direction:column;gap:9px}
+  .opt{text-align:left;background:var(--card);border:1.5px solid var(--line);border-radius:12px;padding:13px 15px;font-size:14px;cursor:pointer;font-family:inherit;color:#222}
+  .opt:hover{border-color:var(--me)}
+  .opt .q{color:var(--sub);font-size:12px;margin-bottom:3px;font-weight:700}
+  .opt.dim{opacity:.4}
+  .opt.ok{border-color:var(--ok);background:#eefaf3}
+  .opt.no{border-color:var(--no);background:#fdeeec}
+  .chat{margin-top:13px;display:none}
+  .chat.show{display:block}
+  .bub{max-width:90%;padding:11px 14px;border-radius:15px;font-size:13.5px;margin:7px 0;line-height:1.5}
+  .me{background:var(--me);color:#fff;margin-left:auto;border-bottom-right-radius:5px;max-width:86%}
+  .aimsg{background:#fff;border:1px solid var(--line);border-bottom-left-radius:5px}
+  .aimsg .tag{font-size:11px;font-weight:800;margin-bottom:6px}
+  .aimsg.bad .tag{color:var(--no)}
+  .aimsg.good .tag{color:var(--ok)}
+  .cap{font-size:12px;color:var(--sub);margin-top:7px}
+  table{border-collapse:collapse;width:100%;font-size:12px;margin-top:3px}
+  th,td{border:1px solid #dfe3e8;padding:5px 7px;text-align:left}
+  th{background:#f3f5f8;font-weight:700}
+  td.bad{color:#c2362b;font-weight:700;background:#fdeeec}
+  td.mut{color:#9aa1ac}
+  .essay{font-size:12.5px;color:#444;background:#f7f8fa;border-radius:8px;padding:9px 11px}
+  .fake{color:#c2362b}
+  .verdict{font-size:13.5px;line-height:1.6;margin-top:10px;padding:11px 13px;border-radius:10px}
+  .verdict.bad{background:#fdeeec;color:#8a2b22}
+  .verdict.good{background:#eefaf3;color:#155e3c}
+  .verdict b{color:#111}
+  .next{display:none;margin-top:13px;width:100%;background:#1f2530;color:#fff;border:none;border-radius:11px;padding:12px;font-size:15px;font-weight:800;cursor:pointer}
+  .next.show{display:block}
+  .result{display:none;text-align:center;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px}
+  .result.show{display:block}
+  .result .sc{font-size:32px;font-weight:900;color:var(--me)}
+  .note{margin-top:14px;text-align:left;background:#f7f8fa;border:1px solid var(--line);border-radius:12px;padding:14px}
+  .note h3{font-size:13px;color:var(--gold);margin-bottom:8px}
+  .note div{font-size:12.5px;color:#444;line-height:1.55;padding:7px 0;border-top:1px solid var(--line)}
+  .note b{color:#111}
+  .again{margin-top:13px;background:none;border:1px solid var(--line);color:var(--sub);border-radius:11px;padding:10px 22px;cursor:pointer;font-weight:700}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><h1>🛠️ 프롬프트 고치기</h1><span class="badge" id="badge">시작</span></div>
+
+  <div id="introBox">
+    <div class="intro">
+      AI에게 일을 시킬 때, <b>막연하게 시키면 그 빠진 부분 때문에 엉뚱한 결과</b>가 돌아옵니다. 같은 일을 시키는 세 가지 프롬프트 중 — <b>원하는 결과가 나올 프롬프트</b>를 고르세요. 고른 대로 AI가 실제로 답합니다.
+      <div class="key">💡 너무 어렵게 생각하지 마세요. 요즘 AI는 <b>두루뭉술하게 시켜도 꽤 잘합니다.</b> ① 원하는 <b>형식이 정해져 있으면</b> 그것만 짚어주고, ② 형식이 고민이면 <b>“추천 형식 있어?”라고 물어봐도</b> 됩니다. ③ 그리고 결과는 늘 한 번 확인 — AI가 자주 틀려서가 아니라, <b>최종 책임이 사람에게 있기 때문</b>입니다.
+    </div>
+    <button class="start" id="start">시작 ▶</button>
+  </div>
+
+  <div id="game" style="display:none">
+    <span class="lv" id="lv"></span>
+    <div class="goal" id="goal"></div>
+    <div class="ask">어떤 프롬프트를 보낼까요?</div>
+    <div class="opts" id="opts"></div>
+    <div class="chat" id="chat"></div>
+    <div id="verdict"></div>
+    <button class="next" id="next">다음 ▶</button>
+  </div>
+
+  <div class="result" id="result">
+    <p>점수</p><div class="sc" id="sc"></div>
+    <p style="font-size:13.5px;color:#444;margin-top:8px">핵심: 두루뭉술해도 요즘 잘 됩니다. <b>형식이 정해졌으면 짚어주고, 고민이면 물어보고</b> — 결과 확인은 늘. (AI가 틀려서가 아니라 <b>내 책임이라서</b>)</p>
+    <div class="note" id="noteWrap"><h3>📒 오답노트</h3><div id="notes"></div></div>
+    <button class="again" id="again">다시 풀기 ↻</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  // 세로 막대그래프 (값 라벨 표시)
+  function bar(labels,vals,hi){
+    const W=360,H=150,m={l:30,r:10,t:22,b:24},pw=W-m.l-m.r,ph=H-m.t-m.b,n=vals.length,mx=Math.max(...vals),bw=pw/n*0.6;
+    let g='<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;height:auto"><rect width="'+W+'" height="'+H+'" fill="#fff"/>';
+    g+='<line x1="'+m.l+'" y1="'+(H-m.b)+'" x2="'+(W-m.r)+'" y2="'+(H-m.b)+'" stroke="#cfd5dd"/>';
+    vals.forEach((v,i)=>{const x=m.l+pw/n*i+(pw/n-bw)/2,h=Math.max(2,v/mx*ph),col=(hi&&hi.indexOf(i)>=0)?'#e0483d':'#2f6df6';
+      g+='<rect x="'+x+'" y="'+(H-m.b-h)+'" width="'+bw+'" height="'+h+'" fill="'+col+'" rx="2"/>';
+      g+='<text x="'+(x+bw/2)+'" y="'+(H-m.b-h-4)+'" fill="#444" font-size="9.5" text-anchor="middle" font-weight="700">'+v+'</text>';
+      g+='<text x="'+(x+bw/2)+'" y="'+(H-m.b+12)+'" fill="#6b7280" font-size="9" text-anchor="middle">'+labels[i]+'</text>';});
+    g+='<text x="'+m.l+'" y="14" fill="#6b7280" font-size="9.5">평균 소요시간(분)</text></svg>';
+    return g;
+  }
+  const Q=[
+    {lv:'1단계',goal:"정비일지 <b>500행</b>으로 '장비별 평균 소요시간'을 보고받고 싶습니다.",miss:"출력 형식·이상값 처리(범위)",
+     opts:[
+      {p:"이 데이터 보기 좋게 정리해줘",ok:false,tag:"😕 원치 않은 결과",
+       out:bar(['무전기','안테나','중계기','광단말기'],[1402,76,1188,83],[0,2]),
+       cap:"'정리'만 곧이곧대로 했을 뿐, <b>이상값(9999)을 안 걸러</b> 평균이 1402분처럼 엉망입니다. 무엇을 기준으로 했는지도 알 수 없어요."},
+      {p:"정비일지를 '장비별 평균 소요시간' 표로. 이상값(9999·음수) 제외하고, 없는 값은 '-'로.",ok:true,tag:"✅ 쓸 만한 결과",
+       out:bar(['무전기','안테나','중계기','광단말기'],[78,64,71,69]),
+       cap:"이상값을 빼라고 명시하니 평균이 정상 범위로. 기준이 명확해 <b>검증·반복</b>이 됩니다."},
+      {p:"알아서 잘 정리해줘 빨리",ok:false,tag:"😕 원치 않은 결과",
+       out:"<div class='essay'>“총 500건의 정비 기록이 있습니다. 다양한 장비가 포함되어 있습니다.”</div>",
+       cap:"가장 짧은 길로 한 문장만 — 정작 필요한 <b>집계 표가 없습니다.</b>"}],
+     why:"빠진 건 <b>출력 형식 + 이상값 처리(범위)</b>. '무엇을 어떤 형식으로, 무엇은 빼고'를 콕 집어야 합니다."},
+
+    {lv:'2단계',goal:"정비반 <b>회의 메모(줄글)</b>를 표로 만들고 싶습니다. (메모엔 담당자·기한이 일부만 적혀 있음)",miss:"환각 방지 제약 + 형식",
+     opts:[
+      {p:"회의록 깔끔하게 표로 만들어줘",ok:false,tag:"😕 원치 않은 결과(지어냄)",
+       out:"<table><tr><th>안건</th><th>담당</th><th>기한</th></tr><tr><td>안테나 교체</td><td>박상사</td><td>6/12</td></tr><tr><td>예비부품 신청</td><td class='bad'>김중사</td><td class='bad'>6/15</td></tr></table>",
+       cap:"메모에 <b>없던 담당자·기한을 그럴듯하게 지어냄</b>(빨간 칸). 그대로 올리면 사고."},
+      {p:"안건/담당/기한/상태 4열 표로. 메모에 없는 건 '미정'으로. 표만 출력.",ok:true,tag:"✅ 쓸 만한 결과",
+       out:"<table><tr><th>안건</th><th>담당</th><th>기한</th><th>상태</th></tr><tr><td>안테나 교체</td><td>박상사</td><td>6/12</td><td>진행</td></tr><tr><td>예비부품 신청</td><td class='mut'>미정</td><td class='mut'>미정</td><td>대기</td></tr></table>",
+       cap:"있는 것만 채우고 빈칸은 '미정' — <b>지어내기 없이</b> 바로 검토 가능."},
+      {p:"이 회의 내용 요약해줘",ok:false,tag:"😕 빗나간 결과",
+       out:"<div class='essay'>“이번 회의에서는 안테나 교체와 예비부품 신청에 대해 논의했으며…”</div>",
+       cap:"표가 아니라 <b>줄글 요약</b>이 나옴 — 원한 형식이 아닙니다."}],
+     why:"빠진 건 <b>환각 방지('없는 건 지어내지 마') + 형식 지정</b>. 그리고 결과는 <b>반드시 확인</b> — AI를 못 믿어서가 아니라, 올린 사람이 책임지기 때문입니다."},
+
+    {lv:'3단계',goal:"정비 데이터를 정리하고 싶은데 <b>어떤 형식이 좋을지 모르겠습니다.</b>",miss:"형식이 고민이면 — AI에게 추천 형식 물어보기",
+     opts:[
+      {p:"대충 보기 좋게 정리해줘",ok:false,tag:"🙂 무난하지만 아쉬움",
+       out:"<div class='essay'>“표로 정리해 드렸습니다.” <span class='cap' style='display:inline'>(AI가 임의의 형식으로 표 하나 제시)</span></div>",
+       cap:"틀린 건 아닙니다 — 다만 AI가 고른 형식이 내 목적과 맞을지는 운에 맡긴 셈이에요."},
+      {p:"이 정비 데이터, 어떤 형식으로 정리하면 좋을지 먼저 추천해줘. 두세 개 옵션과 이유로.",ok:true,tag:"✅ 좋은 접근",
+       out:"<div class='essay'>“① 장비별 요약표 — 비교용 / ② 월별 추이 — 추세용 / ③ 부대별 집계 — 보고용. 어느 게 좋을까요?”</div>",
+       cap:"형식이 고민일 땐 <b>AI에게 추천을 받아</b> 고르면 됩니다. 장벽을 높일 필요 없어요."},
+      {p:"장비ID·소요시간·담당자·날짜·비용·부대·증상 전부 넣고 정렬하고 색칠하고 합계도 내고…",ok:false,tag:"😵 과한 지시",
+       out:"<div class='essay'>요구가 너무 많아 결과가 뒤죽박죽 — 정작 핵심이 묻힙니다.</div>",
+       cap:"무조건 자세히가 답은 아닙니다. <b>필요한 것만</b> 명확히."}],
+     why:"형식이 정해졌으면 짚어주고, <b>고민이면 AI에게 추천을 물어보세요.</b> 욱여넣을 필요도, 너무 어렵게 볼 필요도 없습니다."}
+  ];
+  const $=id=>document.getElementById(id); let i=0,score=0,busy=false,wrong=[];
+  $('start').onclick=()=>{ $('introBox').style.display='none'; $('game').style.display=''; show(); };
+  function show(){ busy=false; const q=Q[i]; $('badge').textContent=(i+1)+' / '+Q.length; $('lv').textContent=q.lv;
+    $('goal').innerHTML='🎯 '+q.goal; const ow=$('opts'); ow.innerHTML='';
+    q.opts.forEach((o,k)=>{ const b=document.createElement('button'); b.className='opt'; b.innerHTML='<div class="q">프롬프트 '+(k+1)+'</div>“'+o.p+'”'; b.onclick=()=>pick(k,b); ow.appendChild(b); });
+    $('opts').style.display=''; $('chat').className='chat'; $('chat').innerHTML=''; $('verdict').innerHTML=''; $('next').className='next'; }
+  function pick(k,btn){ if(busy)return; busy=true; const q=Q[i],o=q.opts[k],ok=o.ok; if(ok)score++; else wrong.push(q);
+    [...$('opts').children].forEach((b,j)=>{ if(j!==k) b.classList.add('dim'); });
+    btn.classList.add(ok?'ok':'no');
+    $('chat').className='chat show';
+    $('chat').innerHTML='<div class="bub me">'+o.p+'</div><div class="bub aimsg '+(ok?'good':'bad')+'"><div class="tag">'+o.tag+'</div>'+o.out+'<div class="cap">'+o.cap+'</div></div>';
+    const v=$('verdict'); v.className='verdict '+(ok?'good':'bad');
+    v.innerHTML=(ok?'✅ <b>좋은 선택!</b> ':'<b>바로 이런 엉뚱한 결과가 나옵니다.</b> ')+q.why;
+    $('next').textContent=i<Q.length-1?'다음 ▶':'결과 보기'; $('next').className='next show'; }
+  $('next').onclick=()=>{ if(i<Q.length-1){i++;show();} else finish(); };
+  function finish(){ $('game').style.display='none'; $('badge').textContent='완료';
+    $('result').classList.add('show'); $('sc').textContent=score+' / '+Q.length;
+    if(wrong.length){ $('notes').innerHTML=wrong.map(w=>'<div><b>'+w.goal.replace(/<[^>]+>/g,'')+'</b><br>→ 빠지면 안 되는 것: '+w.miss+'</div>').join(''); }
+    else { $('noteWrap').innerHTML='<h3 style="color:#1f8f5f">🎉 만점! 명확하게 시키는 감을 잡았어요.</h3>'; } }
+  $('again').onclick=()=>{ i=0;score=0;wrong=[]; $('result').classList.remove('show'); $('noteWrap').innerHTML='<h3>📒 오답노트</h3><div id="notes"></div>'; $('game').style.display=''; show(); };
+})();
+</script>
+</body>
+</html>

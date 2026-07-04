@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>1·2일차 복습 퀴즈 (13차시)</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,"Apple SD Gothic Neo","맑은 고딕",sans-serif;background:#FAFAF8;color:#2C2C2A;line-height:1.6;max-width:640px;margin:0 auto;padding:28px 16px}
+  h1{font-size:22px;font-weight:600;margin-bottom:4px}
+  .sub{font-size:13px;color:#5F5E5A;margin-bottom:14px}
+  .help{background:#FFF8E1;border:1px solid #F0E3B0;border-radius:10px;padding:12px 14px;font-size:13px;color:#6B5A1E;margin-bottom:16px}
+  .bar{font-size:14px;color:#5F5E5A;margin-bottom:12px}.bar b{font-size:18px;color:#2C2C2A}
+  .card{background:#fff;border:1px solid #E6E3DA;border-radius:14px;padding:20px;margin-bottom:14px}
+  .q{font-size:16px;font-weight:600;margin-bottom:14px}
+  .opt{display:block;width:100%;text-align:left;padding:12px 14px;margin-bottom:9px;border:1px solid #CFC9BC;background:#fff;border-radius:10px;font-size:15px;cursor:pointer;font-family:inherit;color:#2C2C2A}
+  .opt:hover{background:#F1EFE8}
+  .fb{margin-top:6px;padding:10px 14px;border-radius:8px;font-size:14px;display:none}
+  .fb.ok{background:#E1F5EE;color:#085041}.fb.no{background:#FAEAE6;color:#8A2A1A}
+  .card.done .opt{pointer-events:none;opacity:.6}.card.done .fb{display:block}
+  .result{text-align:center;background:#EEEDFE;color:#3C3489;border-radius:14px;padding:24px;font-size:18px;display:none}
+  .reset{display:block;margin:16px auto 0;padding:9px 20px;border:1px solid #CFC9BC;background:#fff;border-radius:8px;font-size:13px;cursor:pointer;color:#5F5E5A}
+</style></head>
+<body>
+  <h1>🔁 1·2일차 복습 퀴즈</h1>
+  <p class="sub">13차시 · 3일차 시작 전 가볍게 (6문항)</p>
+  <div class="help">ℹ️ <b>이렇게 하세요:</b> 보기를 누르면 바로 정답·해설이 나와요. 기록 안 되니 편하게!</div>
+  <div class="bar">맞힌 개수 <b id="score">0</b> / <span id="total">0</span></div>
+  <div id="cards"></div>
+  <div class="result" id="result"></div>
+  <button class="reset" onclick="init()">다시 하기</button>
+
+<script>
+const QS=[
+ {q:"1. 다음 중 '비정형' 데이터는?",opts:["정비일지 엑셀 표","점검 사진·무전 녹음","인사 DB"],a:1},
+ {q:"2. 전처리를 한 마디로?",opts:["데이터 청소·정리","데이터 삭제","데이터 암호화"],a:0},
+ {q:"3. 표준화는 무엇과 비슷?",opts:["콘센트 규격·맞춤법(다 같이 쓰는 약속)","개인 취향","비밀 암호"],a:0},
+ {q:"4. 코드(도구)로 못 잡고 '사람이 대조'해야 하는 기준은?",opts:["완전성","유효성","정확성","일관성"],a:2},
+ {q:"5. '상관'은 무엇과 다르다?",opts:["인과(원인-결과)","평균","분포"],a:0},
+ {q:"6. 시각화를 하는 이유는?",opts:["숫자 표만 보면 잘 안 보여서","파일 용량을 줄이려고","데이터를 지우려고"],a:0},
+];
+let score=0,done=0;
+function init(){score=0;done=0;document.getElementById("score").textContent=0;document.getElementById("total").textContent=QS.length;document.getElementById("result").style.display="none";
+ const w=document.getElementById("cards");w.innerHTML="";
+ QS.forEach((it,i)=>{const c=document.createElement("div");c.className="card";
+  c.innerHTML='<div class="q">'+it.q+'</div>'+it.opts.map((o,j)=>'<button class="opt" onclick="pick('+i+','+j+',this)">'+o+'</button>').join('')+'<div class="fb" id="fb'+i+'"></div>';w.appendChild(c);});
+}
+function pick(i,j,btn){const it=QS[i];const card=btn.closest(".card");if(card.classList.contains("done"))return;const fb=document.getElementById("fb"+i);const ok=j===it.a;if(ok)score++;document.getElementById("score").textContent=score;
+ fb.className="fb "+(ok?"ok":"no");fb.innerHTML=ok?"✅ 정답!":"❌ 정답: <b>"+it.opts[it.a]+"</b>";card.classList.add("done");done++;
+ if(done===QS.length){const r=document.getElementById("result");r.style.display="block";r.innerHTML="🎉 <b>"+score+" / "+QS.length+"</b> 정답! 이제 AI를 부려봅시다 🤖";}}
+init();
+</script>
+</body>
+</html>
