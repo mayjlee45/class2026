@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>1일차 복습 · O/X 스와이프</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-user-select:none;user-select:none}
+  :root{--bg:#0e1430;--card:#fff;--ink:#22305a;--sub:#7a86a8;--ok:#2ee6a6;--no:#ff6b7a;--accent:#6c8cff;}
+  body{margin:0;min-height:100vh;background:radial-gradient(120% 90% at 50% 0%,#23306a,#0a0f24 70%);
+    color:#eaf1ff;font-family:"Pretendard","Malgun Gothic","맑은 고딕",system-ui,sans-serif;
+    display:flex;justify-content:center;padding:20px 14px;overflow:hidden}
+  .wrap{width:100%;max-width:560px;display:flex;flex-direction:column;min-height:calc(100vh - 40px)}
+  .top{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+  .top h1{font-size:17px;font-weight:800;margin-right:auto}
+  .pill{background:#1b2550;border:1px solid #2e3b6e;border-radius:999px;padding:5px 12px;font-size:13px;font-weight:700}
+  .lead{font-size:13.5px;color:#aab6e0;margin-bottom:14px;line-height:1.5}
+  .lead b{color:#fff}
+  /* deck */
+  .stage{position:relative;flex:1;min-height:340px;display:flex;align-items:center;justify-content:center}
+  .card{position:absolute;width:92%;max-width:440px;min-height:280px;background:var(--card);color:var(--ink);
+    border-radius:22px;box-shadow:0 16px 40px rgba(0,0,0,.45);padding:30px 26px;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;text-align:center;cursor:grab;touch-action:none}
+  .card .tag{font-size:13px;font-weight:800;color:var(--accent);margin-bottom:14px}
+  .card .q{font-size:21px;font-weight:800;line-height:1.5}
+  .card .hintO,.card .hintX{position:absolute;top:18px;font-size:30px;font-weight:900;opacity:0;border:4px solid;border-radius:12px;padding:2px 12px}
+  .card .hintO{right:18px;color:var(--ok);border-color:var(--ok);transform:rotate(12deg)}
+  .card .hintX{left:18px;color:var(--no);border-color:var(--no);transform:rotate(-12deg)}
+  .card.grab{cursor:grabbing}
+  .btns{display:flex;justify-content:space-between;gap:14px;margin-top:14px}
+  .btns button{flex:1;height:64px;border-radius:14px;border:none;cursor:pointer;font-size:19px;font-weight:900;
+    box-shadow:0 8px 22px rgba(0,0,0,.4);transition:transform .08s;font-family:inherit}
+  .btns button:active{transform:scale(.96)}
+  .bx{background:#fff;color:var(--no);text-align:left;padding-left:22px}
+  .bo{background:#fff;color:var(--ok);text-align:right;padding-right:22px}
+  .hintbar{text-align:center;font-size:12.5px;color:#8d99c8;margin-top:10px}
+  /* result */
+  .result{position:absolute;inset:0;background:#0e1430;border-radius:22px;display:none;flex-direction:column;
+    padding:24px;overflow:auto}
+  .result.show{display:flex}
+  .result h2{font-size:24px;text-align:center;margin-bottom:4px}
+  .result .score{text-align:center;font-size:40px;font-weight:900;color:var(--ok);margin-bottom:6px}
+  .result .sub{text-align:center;font-size:14px;color:#aab6e0;margin-bottom:14px}
+  .note{background:#161f44;border:1px solid #2a3568;border-radius:12px;padding:12px 14px;margin-bottom:9px}
+  .note .nq{font-size:14px;font-weight:700;margin-bottom:4px}
+  .note .na{font-size:13px;color:var(--ok);font-weight:700}
+  .note .nw{font-size:12.5px;color:#aab6e0;margin-top:3px;line-height:1.5}
+  .again{margin:8px auto 0;background:linear-gradient(90deg,#6c8cff,#2ee6a6);color:#06122a;font-weight:800;
+    font-size:16px;border:none;border-radius:12px;padding:12px 28px;cursor:pointer}
+  .perfect{text-align:center;color:var(--ok);font-weight:700;margin-bottom:10px}
+  .zone{position:absolute;top:50%;transform:translateY(-50%);text-align:center;font-weight:900;opacity:.32;pointer-events:none;line-height:1.1}
+  .zone .big{font-size:46px;display:block} .zone .sm{font-size:14px}
+  .zoneL{left:2px;color:var(--no)} .zoneR{right:2px;color:var(--ok)}
+  .flash{position:fixed;inset:0;pointer-events:none;opacity:0;z-index:60}
+  .flash.f-ok{background:radial-gradient(circle at 50% 50%,rgba(46,230,166,.5),transparent 72%);animation:fl .5s ease}
+  .flash.f-no{background:radial-gradient(circle at 50% 50%,rgba(255,107,122,.55),transparent 72%);animation:fl .5s ease}
+  @keyframes fl{0%{opacity:1}100%{opacity:0}}
+  .keys{text-align:center;font-size:15px;color:#cdd6ff;font-weight:700;margin-top:10px}
+  .keys b{color:#fff;background:#23306a;border:1px solid #3a4a86;border-radius:7px;padding:2px 9px;margin:0 2px;font-size:17px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <h1>🔁 1일차 복습 · O/X 스와이프</h1>
+    <span class="pill"><b id="idx">1</b>/<span id="tot">8</span></span>
+  </div>
+  <p class="lead">설명이 <b style="color:#2ee6a6">맞으면 오른쪽(O)</b>, <b style="color:#ff6b7a">틀리면 왼쪽(X)</b>으로 카드를 넘기세요.</p>
+
+  <div class="stage" id="stage">
+    <div class="zone zoneL"><span class="big">✗</span><span class="sm">틀림</span></div>
+    <div class="zone zoneR"><span class="big">○</span><span class="sm">맞음</span></div>
+    <div class="result" id="result">
+      <h2>복습 완료!</h2>
+      <div class="score" id="score">0 / 8</div>
+      <div class="sub" id="sub"></div>
+      <div id="notes"></div>
+      <button class="again" id="again">다시 하기 ↻</button>
+    </div>
+  </div>
+
+  <div class="btns">
+    <button class="bx" id="bx">←  ✗ 틀림</button>
+    <button class="bo" id="bo">맞음 ○  →</button>
+  </div>
+  <div class="keys">드래그하거나 · 좌우 버튼 · 키보드 <b>←</b> / <b>→</b></div>
+</div>
+<div class="flash" id="flash"></div>
+
+<script>
+(function(){
+  // ans: true=맞는 설명(O) / false=틀린 설명(X)
+  const Q = [
+    {
+      q: "사진·녹음·CCTV 영상도 모두 데이터다.",
+      a: true,
+      why: "기록된 것은 형태와 무관하게 모두 데이터입니다."
+    },
+    {
+      q: "데이터 거버넌스는 첨단 기술 솔루션을 뜻한다.",
+      a: false,
+      why: "기술이 아니라 '누가 무엇을 책임지는지' 정하는 약속·규칙입니다."
+    },
+    {
+      q: "데이터의 오너는 조직에서 가장 높은 사람이다.",
+      a: false,
+      why: "오너는 결정 권한을 가진 '가장 가까운' 책임자입니다."
+    },
+    {
+      q: "스튜어드는 데이터를 매일 돌보는 역할이며, 대부분 여러분이 여기에 해당한다.",
+      a: true,
+      why: "맞습니다. 데이터를 매일 살리는 핵심 역할입니다."
+    },
+    {
+      q: "불량 데이터도 양이 많으면 항상 좋은 결과가 나온다.",
+      a: false,
+      why: "불량을 넣으면 불량이 나옵니다(GIGO). 양으로 해결되지 않습니다."
+    },
+    {
+      q: "데이터 품질 4대 기준 중 '정확성'은 사람이 직접 확인해야 한다.",
+      a: true,
+      why: "완전성·유효성·일관성은 도구가, 정확성은 사람이 확인합니다."
+    },
+    {
+      q: "메타데이터는 '데이터를 설명하는 데이터'다.",
+      a: true,
+      why: "맞습니다. 값을 읽는 '열쇠'를 함께 남기는 것입니다."
+    },
+    {
+      q: "오류는 나중에 고치는 것이 수집 단계에서 막는 것보다 싸다.",
+      a: false,
+      why: "수집에서 1로 막을 것이 뒤에서는 10·100이 됩니다."
+    },
+  ];
+
+  document.getElementById('tot').textContent = Q.length;
+  const stage = document.getElementById('stage');
+  let i = 0, score = 0, wrong = [], card = null, sx = 0, dx = 0, dragging = false, busy = false;
+
+  function makeCard() {
+    const d = Q[i];
+    card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML =
+      `<div class="hintO" data-o>O</div>` +
+      `<div class="hintX" data-x>X</div>` +
+      `<div class="tag">맞는 설명일까요?</div>` +
+      `<div class="q">${d.q}</div>`;
+    stage.appendChild(card);
+    card.addEventListener('pointerdown', down);
+    document.getElementById('idx').textContent = i + 1;
+  }
+
+  function down(e) {
+    if (busy) return;
+    dragging = true;
+    sx = e.clientX;
+    card.classList.add('grab');
+    try { card.setPointerCapture(e.pointerId); } catch(_) {}
+  }
+
+  function move(e) {
+    if (!dragging) return;
+    dx = e.clientX - sx;
+    card.style.transform = `translateX(${dx}px) rotate(${dx / 22}deg)`;
+    card.querySelector('[data-o]').style.opacity = dx > 0 ? Math.min(1, dx / 90) : 0;
+    card.querySelector('[data-x]').style.opacity = dx < 0 ? Math.min(1, -dx / 90) : 0;
+  }
+
+  function up() {
+    if (!dragging) return;
+    dragging = false;
+    card.classList.remove('grab');
+    if (dx > 80) commit(true);
+    else if (dx < -80) commit(false);
+    else {
+      card.style.transition = 'transform .2s';
+      card.style.transform = '';
+      card.querySelector('[data-o]').style.opacity = 0;
+      card.querySelector('[data-x]').style.opacity = 0;
+      setTimeout(() => card.style.transition = '', 200);
+    }
+    dx = 0;
+  }
+
+  document.addEventListener('pointermove', move);
+  document.addEventListener('pointerup', up);
+
+  function commit(chooseO) {
+    // chooseO=true → 사용자가 '맞다(O)'
+    if (busy || !card) return;
+    busy = true;
+    const d = Q[i];
+    const correct = (chooseO === d.a);
+    if (correct) score++;
+    else wrong.push(d);
+    const fl = document.getElementById('flash');
+    fl.className = 'flash';
+    void fl.offsetWidth;
+    fl.classList.add(correct ? 'f-ok' : 'f-no');
+    const dir = chooseO ? 1 : -1;
+    card.style.transition = 'transform .4s ease, opacity .4s';
+    card.style.transform = `translateX(${dir * 700}px) rotate(${dir * 22}deg)`;
+    card.style.opacity = '0';
+    const old = card;
+    setTimeout(() => old.remove(), 400);
+    i++;
+    setTimeout(() => {
+      busy = false;
+      if (i < Q.length) { makeCard(); }
+      else finish();
+    }, 340);
+  }
+
+  function finish() {
+    document.querySelector('.btns').style.visibility = 'hidden';
+    document.querySelector('.keys').style.visibility = 'hidden';
+    const r = document.getElementById('result');
+    document.getElementById('score').textContent = `${score} / ${Q.length}`;
+    document.getElementById('sub').textContent =
+      score === Q.length ? "전부 정답! 1일차 완벽 복습 👏" :
+      score >= Q.length - 2 ? "좋아요! 거의 다 맞혔어요." :
+      "오답노트로 한 번 더 짚어봐요.";
+    const notes = document.getElementById('notes');
+    notes.innerHTML = '';
+    if (wrong.length === 0) {
+      notes.innerHTML = '<div class="perfect">오답 없음 — 깔끔합니다!</div>';
+    } else {
+      wrong.forEach(d => {
+        const n = document.createElement('div');
+        n.className = 'note';
+        n.innerHTML =
+          `<div class="nq">"${d.q}"</div>` +
+          `<div class="na">정답: ${d.a ? 'O (맞는 설명)' : 'X (틀린 설명)'}</div>` +
+          `<div class="nw">${d.why}</div>`;
+        notes.appendChild(n);
+      });
+    }
+    r.classList.add('show');
+  }
+
+  document.getElementById('bo').addEventListener('click', () => commit(true));
+  document.getElementById('bx').addEventListener('click', () => commit(false));
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight') commit(true);
+    if (e.key === 'ArrowLeft') commit(false);
+  });
+  document.getElementById('again').addEventListener('click', () => {
+    i = 0; score = 0; wrong = [];
+    document.getElementById('result').classList.remove('show');
+    document.querySelector('.btns').style.visibility = '';
+    document.querySelector('.keys').style.visibility = '';
+    makeCard();
+  });
+
+  makeCard();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>7차시 · AI 모델 체험 사이트</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{--bg:#FAF8F3;--ink:#23272e;--sub:#5f6670;--card:#fff;--line:#e7e3d8;--navy:#1b2a4a;}
+  body{font-family:"Pretendard","Apple SD Gothic Neo","맑은 고딕",system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.6;max-width:740px;margin:0 auto;padding:22px 16px 56px}
+  .hero{background:linear-gradient(135deg,#1b2a4a,#34507e);color:#fff;border-radius:16px;padding:20px;margin-bottom:8px}
+  .hero .k{font-size:12px;font-weight:800;letter-spacing:.08em;opacity:.85}
+  .hero h1{font-size:21px;font-weight:800;margin:4px 0 8px}
+  .hero p{font-size:13.5px;opacity:.95}
+  .note{font-size:12.5px;color:var(--sub);background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 13px;margin:12px 0 16px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 17px;margin-bottom:13px}
+  .tag{display:inline-block;font-size:11px;font-weight:800;letter-spacing:.03em;padding:3px 10px;border-radius:999px;margin-bottom:8px}
+  .t1{background:#e8ecf7;color:#2b4a86}.t2{background:#e7ede9;color:#2e6b4a}.t3{background:#f4eee0;color:#8a5a00}.t4{background:#efe9f7;color:#5a3f96}
+  .card h3{font-size:17px;font-weight:800;margin-bottom:3px}
+  .card .site{font-size:12.5px;color:var(--sub);margin-bottom:8px}
+  .card p{font-size:13.5px;color:#39414b;margin-bottom:6px}
+  .how{font-size:13px;background:#f7f9fc;border-left:3px solid #34507e;border-radius:7px;padding:9px 12px;margin:9px 0 12px;color:#2b3a52}
+  .how b{color:var(--navy)}
+  .go{display:inline-block;background:var(--navy);color:#fff;text-decoration:none;font-weight:800;font-size:14.5px;border-radius:10px;padding:11px 18px}
+  .go:hover{background:#142036}
+  .alt{font-size:12.5px;margin-top:9px}
+  .alt a{color:#2b4a86;font-weight:700}
+  .foot{font-size:12px;color:#a39c8e;text-align:center;margin-top:20px}
+</style>
+</head>
+<body>
+  <div class="hero">
+    <div class="k">7차시 · AI는 데이터를 어떻게 쓰나</div>
+    <h1>🧪 AI 모델 직접 체험하기</h1>
+    <p>네 가지 학습 방식을, 브라우저에서 직접 만져 보며 이해합니다. 각 버튼을 누르면 새 창에서 사이트가 열립니다.</p>
+  </div>
+  <div class="note">💡 인터넷이 되는 PC(강사용 PC)에서 열립니다. 코딩·설치 없이 클릭만으로 동작해요. 강사가 시연하거나, 시간이 되면 직접 만져 보셔도 좋습니다.</div>
+
+  <div class="card">
+    <span class="tag t1">① 지도학습 · 정답 보고 배우기</span>
+    <h3>Teachable Machine</h3>
+    <div class="site">teachablemachine.withgoogle.com</div>
+    <p>웹캠으로 <b>직접 가르치는 AI.</b> 내가 예시(정답)를 보여주면 그걸로 배웁니다.</p>
+    <div class="how">📌 <b>이렇게:</b> Get Started → Image Project → Standard. 클래스1에 '손바닥'을 웹캠으로 여러 장, 클래스2에 '주먹'을 여러 장 찍고 → <b>Train</b> → 카메라에 손을 바꿔 보이면 실시간으로 맞힙니다. "정답을 보고 배운다"가 눈앞에서 일어나요.</div>
+    <a class="go" href="https://teachablemachine.withgoogle.com/" target="_blank" rel="noopener">사이트 열기 ▶</a>
+    <div class="alt">딥러닝 경계선을 보고 싶다면 → <a href="https://playground.tensorflow.org/" target="_blank" rel="noopener">TensorFlow Playground</a> (층·뉴런 늘리며 학습 관찰)</div>
+  </div>
+
+  <div class="card">
+    <span class="tag t2">② 비지도학습 · 스스로 묶기</span>
+    <h3>Visualizing K-Means</h3>
+    <div class="site">naftaliharris.com</div>
+    <p>정답 없이 <b>비슷한 점끼리 군집</b>으로 묶이는 과정을 한 단계씩 봅니다.</p>
+    <div class="how">📌 <b>이렇게:</b> 위 메뉴에서 데이터 모양(예: <i>Gaussian Mixture</i>) 선택 → 중심점 배치(<i>I'll Choose</i> 또는 랜덤) → <b>Update Centroids / Reassign Points</b>를 번갈아 누르면 군집이 자리를 잡아갑니다.</div>
+    <a class="go" href="https://www.naftaliharris.com/blog/visualizing-k-means-clustering/" target="_blank" rel="noopener">사이트 열기 ▶</a>
+  </div>
+
+  <div class="card">
+    <span class="tag t3">③ 강화학습 · 보상으로 배우기</span>
+    <h3>REINFORCEjs · Gridworld</h3>
+    <div class="site">cs.stanford.edu/people/karpathy</div>
+    <p>에이전트가 <b>시행착오로 목표까지 가는 길</b>을 스스로 학습하는 과정을 봅니다.</p>
+    <div class="how">📌 <b>이렇게:</b> 페이지의 <b>Toggle TD Learning</b>(또는 Start)을 누르면 에이전트가 칸을 돌아다니며 각 칸의 가치를 점점 채웁니다. 색이 진해지는 칸 = 보상에 가까운 길. 잠시 두면 최적 경로를 찾아갑니다.</div>
+    <a class="go" href="https://cs.stanford.edu/people/karpathy/reinforcejs/gridworld_td.html" target="_blank" rel="noopener">사이트 열기 ▶</a>
+  </div>
+
+  <div class="card">
+    <span class="tag t4">④ 트랜스포머 · 생성형 AI의 심장</span>
+    <h3>Transformer Explainer</h3>
+    <div class="site">poloclub.github.io</div>
+    <p>브라우저에서 <b>실제 GPT-2가 돌아가며</b>, 다음 단어를 어떻게 예측하는지 보여줍니다.</p>
+    <div class="how">📌 <b>이렇게:</b> 입력칸에 짧은 문장(예: <i>Data is the new</i>)을 넣으면 → 다음에 올 단어 후보와 확률이 뜹니다. 단어에 마우스를 올리면 <b>어텐션</b>(어느 단어에 집중하는지)이 선으로 보이고, <i>Temperature</i> 슬라이더로 답의 과감함도 조절됩니다.</div>
+    <a class="go" href="https://poloclub.github.io/transformer-explainer/" target="_blank" rel="noopener">사이트 열기 ▶</a>
+  </div>
+
+  <p class="foot">데이터 관리자 기본·실무 교육 · 7차시 AI 모델 체험 · 강사 박지윤</p>
+</body>
+</html>

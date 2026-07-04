@@ -1,105 +1,218 @@
 <!DOCTYPE html>
-<html lang="ko"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AI 개념 잇기</title><style>
-    :root {
-      --bg:#0f1720;--card:#172230;--line:#2a3a4d;--ink:#eaf1f8;
-      --sub:#9fb2c6;--accent:#3d8bfd;--ok:#27ae60;--err:#e74c3c;--warn:#e67e22;
-    }
-    *{box-sizing:border-box;margin:0;padding:0;}
-    body{background:var(--bg);color:var(--ink);
-      font-family:Pretendard,"Malgun Gothic","맑은 고딕",system-ui,sans-serif;
-      min-height:100vh;padding:28px 14px;display:flex;justify-content:center;}
-    .wrap{width:100%;max-width:680px;}
-    .back{display:inline-block;margin-bottom:18px;font-size:13px;color:var(--sub);text-decoration:none;}
-    .back:hover{color:var(--ink);}
-    .tag{display:inline-block;font-size:12px;font-weight:700;color:var(--accent);
-      background:rgba(61,139,253,.12);border:1px solid rgba(61,139,253,.3);
-      padding:4px 11px;border-radius:999px;margin-bottom:10px;}
-    h2{font-size:22px;margin-bottom:8px;}
-    .lead{color:var(--sub);font-size:14.5px;line-height:1.65;margin-bottom:22px;}
-    .card{background:var(--card);border:1px solid var(--line);border-radius:14px;
-      padding:18px 20px;margin-bottom:14px;}
-    .card h3{font-size:15px;margin-bottom:10px;}
-    .opts{display:grid;gap:8px;margin-top:10px;}
-    .opts.g2{grid-template-columns:1fr 1fr;}
-    .opts.g1{grid-template-columns:1fr;}
-    .btn{padding:10px 14px;border-radius:10px;background:#1e3050;color:var(--ink);
-      border:1px solid var(--line);font-size:14px;cursor:pointer;text-align:left;
-      transition:background .15s,border-color .15s;}
-    .btn:hover:not(:disabled){background:#253d63;border-color:var(--accent);}
-    .btn:disabled{opacity:.55;cursor:default;}
-    .btn.correct{background:rgba(39,174,96,.2)!important;border-color:var(--ok)!important;color:#6fe09f;}
-    .btn.wrong{background:rgba(231,76,60,.15)!important;border-color:var(--err)!important;color:#f08080;}
-    .fb{margin-top:10px;font-size:13.5px;padding:10px 14px;border-radius:10px;display:none;}
-    .fb.ok{background:rgba(39,174,96,.12);color:#6fe09f;display:block;}
-    .fb.err{background:rgba(231,76,60,.1);color:#f08080;display:block;}
-    .progress{font-size:13px;color:var(--sub);margin-bottom:16px;}
-    .score-box{background:var(--card);border:1px solid var(--line);border-radius:14px;
-      padding:24px;text-align:center;margin-top:18px;display:none;}
-    .score-box .big{font-size:48px;margin-bottom:8px;}
-    .score-box p{color:var(--sub);font-size:14px;}
-    .foot{text-align:center;font-size:12px;color:#4a5a6a;margin-top:36px;
-      padding-top:14px;border-top:1px solid var(--line);}
-    /* drag styles */
-    .drag-item{padding:10px 14px;background:#1e3050;border:1px solid var(--line);
-      border-radius:10px;cursor:grab;font-size:14px;user-select:none;transition:opacity .15s;}
-    .drag-item:active{cursor:grabbing;opacity:.7;}
-    .drag-item.dragging{opacity:.4;}
-    .drop-zone{min-height:54px;background:rgba(61,139,253,.06);border:2px dashed var(--line);
-      border-radius:10px;padding:8px;display:flex;flex-direction:column;gap:6px;}
-    .drop-zone.over{border-color:var(--accent);background:rgba(61,139,253,.12);}
-    .zone-label{font-size:12px;color:var(--sub);margin-bottom:4px;font-weight:600;}
-</style></head>
-<body><div class="wrap">
-<a class="back" href="index.html">← 목록으로</a>
-<div class="tag">🔗 7차시 매칭</div><h2>AI 핵심 개념 잇기</h2><p class="lead">AI 학습 방식과 주요 개념을 설명과 연결하세요.</p>
-
-  <div class="card">
-    <h3>AI 개념과 설명 연결하기</h3>
-    <p style="font-size:13.5px;color:var(--sub);margin-bottom:14px">왼쪽 개념을 클릭한 뒤 오른쪽 설명을 클릭해 연결하세요.</p>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-      <div><div class="zone-label">개념</div><div id="lc" style="display:flex;flex-direction:column;gap:8px;"></div></div>
-      <div><div class="zone-label">설명</div><div id="rc" style="display:flex;flex-direction:column;gap:8px;"></div></div>
-    </div>
-    <div id="ai-match-fb" class="fb" style="margin-top:14px"></div>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 개념 잇기 · 7차시 복습</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-user-select:none;user-select:none}
+  :root{--bg:#0d1430;--panel:#172150;--ink:#eaf1ff;--sub:#9fb0e0;--line:#2a3568;--ok:#2ee6a6;--no:#ff6b7a;--accent:#7c9bff;}
+  body{margin:0;min-height:100vh;background:radial-gradient(120% 90% at 50% 0%,#1c2a63,#0a0f24 70%);
+    color:var(--ink);font-family:"Pretendard","Malgun Gothic","맑은 고딕",system-ui,sans-serif;
+    display:flex;justify-content:center;padding:18px 14px 40px}
+  .wrap{width:100%;max-width:680px}
+  .top{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+  .top h1{font-size:17px;font-weight:800;margin-right:auto}
+  .pill{background:#1b2550;border:1px solid var(--line);border-radius:999px;padding:5px 12px;font-size:13px;font-weight:700}
+  .pill b{color:var(--ok)}
+  .lvname{font-size:13px;color:var(--sub);font-weight:700;margin-bottom:10px}
+  .lead{font-size:13px;color:var(--sub);margin-bottom:12px;line-height:1.5}
+  .lead b{color:#fff}
+  .board{position:relative}
+  svg.lines{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1}
+  .cols{position:relative;display:flex;gap:64px;z-index:2}
+  .col{flex:1;display:flex;flex-direction:column;gap:10px}
+  .it{background:var(--panel);border:2px solid var(--line);border-radius:12px;padding:13px 12px;font-size:14px;
+    font-weight:600;line-height:1.35;cursor:pointer;min-height:54px;display:flex;align-items:center;transition:border-color .15s,background .15s}
+  .it.r{justify-content:flex-start}
+  .col.left .it{justify-content:flex-end;text-align:right}
+  .it:hover{border-color:var(--accent)}
+  .it.sel{border-color:var(--accent);background:#22307a}
+  .it.done{border-color:var(--ok);background:rgba(46,230,166,.12);cursor:default;color:#cffcec}
+  .it.bad{border-color:var(--no);background:rgba(255,107,122,.15);animation:shake .3s}
+  @keyframes shake{0%,100%{}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+  .res{margin-top:12px;text-align:center;font-size:14px;font-weight:700;color:var(--sub);min-height:20px}
+  .banner{margin-top:12px;background:linear-gradient(180deg,#15306a,#0e1f4a);border:1px solid var(--accent);
+    border-radius:14px;padding:16px;text-align:center;display:none}
+  .banner.show{display:block}
+  .banner p{font-size:15px;color:#dde7ff;margin:4px 0}
+  .btn{margin-top:8px;background:linear-gradient(90deg,#7c9bff,#2ee6a6);color:#06122a;font-weight:800;font-size:15px;
+    border:none;border-radius:11px;padding:11px 24px;cursor:pointer}
+  .confetti{position:fixed;top:-14px;width:9px;height:13px;z-index:60;pointer-events:none;border-radius:2px;animation:cf linear forwards}
+  @keyframes cf{to{transform:translateY(107vh) rotate(720deg);opacity:.9}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <h1>🧠 AI 개념 잇기</h1>
+    <span class="pill">레벨 <b id="lv">1</b>/3</span>
+    <span class="pill">맞춤 <b id="cnt">0</b>/5</span>
   </div>
-  <script>
-  var pairs=[
-    {term:"지도학습",def:"정답(라벨)을 보고 배우는 학습 방식"},
-    {term:"비지도학습",def:"정답 없이 데이터의 패턴·군집을 스스로 찾기"},
-    {term:"환각(Hallucination)",def:"AI가 없는 사실을 그럴듯하게 만들어내는 현상"},
-    {term:"RAG",def:"검색 증강 생성 — 외부 문서를 검색해 답변에 활용"},
-    {term:"LLM",def:"거대 언어 모델 — 방대한 텍스트로 학습된 AI"},
-    {term:"RLHF",def:"인간 피드백 기반 강화학습 — 사람의 선호도로 AI 개선"},
-    {term:"멀티모달",def:"텍스트·이미지·음성 등 여러 형태의 데이터를 처리"},
-    {term:"편향(Bias)",def:"AI가 치우친 데이터를 학습해 공정하지 않은 결과 출력"},
-  ];
-  var shuffled=[...pairs].sort(()=>Math.random()-0.5);
-  var selL=null,selR=null,done={};
-  var lc=document.getElementById('lc'),rc=document.getElementById('rc');
-  pairs.forEach(function(p,i){
-    var el=document.createElement('div');el.className='drag-item';el.textContent=p.term;
-    el.dataset.idx=i;el.dataset.role='L';el.style.cursor='pointer';
-    el.onclick=function(){if(done[i])return;document.querySelectorAll('[data-role="L"]').forEach(x=>x.style.borderColor='var(--line)');this.style.borderColor='var(--accent)';selL=this;tryM();};
-    lc.appendChild(el);
-  });
-  shuffled.forEach(function(p){
-    var oi=pairs.indexOf(p);
-    var el=document.createElement('div');el.className='drag-item';el.textContent=p.def;
-    el.dataset.idx=oi;el.dataset.role='R';el.style.cursor='pointer';el.style.fontSize='13px';
-    el.onclick=function(){if(done[oi])return;document.querySelectorAll('[data-role="R"]').forEach(x=>x.style.borderColor='var(--line)');this.style.borderColor='var(--accent)';selR=this;tryM();};
-    rc.appendChild(el);
-  });
-  function tryM(){
-    if(!selL||!selR)return;
-    var li=parseInt(selL.dataset.idx),ri=parseInt(selR.dataset.idx);
-    var fb=document.getElementById('ai-match-fb');
-    if(li===ri){selL.style.borderColor='var(--ok)';selL.style.color='#6fe09f';done[li]=true;selR.style.borderColor='var(--ok)';selR.style.color='#6fe09f';fb.textContent='✅ 맞았습니다!';fb.className='fb ok';}
-    else{[selL,selR].forEach(el=>el.style.background='rgba(231,76,60,.15)');fb.textContent='❌ 다시 해보세요.';fb.className='fb err';setTimeout(()=>{[selL,selR].forEach(el=>{el.style.background='';el.style.borderColor='var(--line)';});},700);}
-    selL=null;selR=null;
-    if(Object.keys(done).length===pairs.length){fb.textContent='🎉 모두 연결 완료!';fb.className='fb ok';}
-  }
-  </script>
+  <div class="lvname" id="lvname"></div>
+  <p class="lead">왼쪽 개념을 누르고 → 오른쪽 설명을 누르면 <b>선으로 이어집니다.</b> 5쌍을 모두 맞히면 다음 레벨!</p>
+  <div class="board" id="board">
+    <svg class="lines" id="svg"></svg>
+    <div class="cols">
+      <div class="col left" id="left"></div>
+      <div class="col right" id="right"></div>
+    </div>
+  </div>
+  <div class="res" id="res"></div>
+  <div class="banner" id="banner"></div>
+</div>
 
-<div class="foot">데이터 관리자 기본·실무 교육 · 7차시</div>
-</div></body></html>
+<script>
+(function(){
+  const LEVELS = [
+    [
+      ["지도학습",   "정답(라벨)을 보고 배운다"],
+      ["비지도학습", "정답 없이 비슷한 것끼리 묶는다"],
+      ["강화학습",   "보상·시행착오로 배운다"],
+      ["생성형 AI",  "새로운 글·그림을 만들어낸다"],
+      ["분류",       "정상/이상으로 나눈다"],
+    ],
+    [
+      ["LLM",       "거대 언어 모델 (ChatGPT 등)"],
+      ["트랜스포머", "생성형 AI의 핵심 엔진"],
+      ["어텐션",    "중요한 단어에 집중한다"],
+      ["환각",      "없는 사실을 그럴듯하게 지어낸다"],
+      ["라벨",      "데이터에 붙인 '정답' 표시"],
+    ],
+    [
+      ["멀티모달", "텍스트·이미지·음성을 함께 다룬다"],
+      ["RAG",      "우리 데이터를 검색해 근거로 쓴다"],
+      ["블랙박스", "내부 판단 과정을 다 볼 수 없다"],
+      ["편향",     "데이터가 치우치면 AI도 치우친다"],
+      ["RLHF",     "사람의 선호에 맞춰 조정한다"],
+    ],
+  ];
+
+  const $ = id => document.getElementById(id);
+  let level = 0, matched = 0, sel = null;
+
+  function shuffle(a){
+    a = a.slice();
+    for(let i=a.length-1;i>0;i--){
+      const j = Math.floor(Math.random()*(i+1));
+      [a[i],a[j]] = [a[j],a[i]];
+    }
+    return a;
+  }
+
+  function build(){
+    matched = 0; sel = null;
+    $('cnt').textContent = '0';
+    $('lv').textContent = level + 1;
+    $('lvname').textContent = `레벨 ${level+1} — ${["기본 학습 방식","생성형·핵심 용어","2026 흐름·응용"][level]}`;
+    $('res').textContent = '';
+    $('banner').classList.remove('show');
+    $('svg').innerHTML = '';
+    const pairs = LEVELS[level];
+    const L = $('left'), R = $('right');
+    L.innerHTML = ''; R.innerHTML = '';
+
+    // 왼쪽 — 개념 (순서 고정)
+    pairs.forEach((p, idx) => {
+      const d = document.createElement('div');
+      d.className = 'it';
+      d.dataset.id = idx;
+      d.textContent = p[0];
+      d.addEventListener('click', () => pickLeft(d));
+      L.appendChild(d);
+    });
+
+    // 오른쪽 — 설명 (순서 셔플)
+    shuffle(pairs.map((p, idx) => ({t: p[1], id: idx}))).forEach(o => {
+      const d = document.createElement('div');
+      d.className = 'it r';
+      d.dataset.id = o.id;
+      d.textContent = o.t;
+      d.addEventListener('click', () => pickRight(d));
+      R.appendChild(d);
+    });
+  }
+
+  function pickLeft(d){
+    if(d.classList.contains('done')) return;
+    document.querySelectorAll('#left .it').forEach(x => x.classList.remove('sel'));
+    sel = d;
+    d.classList.add('sel');
+  }
+
+  function pickRight(d){
+    if(!sel || d.classList.contains('done')) return;
+    if(d.dataset.id === sel.dataset.id){
+      // 정답
+      sel.classList.remove('sel');
+      sel.classList.add('done');
+      d.classList.add('done');
+      drawLine(sel, d);
+      matched++;
+      $('cnt').textContent = matched;
+      sel = null;
+      if(matched === 5) levelDone();
+    } else {
+      // 오답
+      d.classList.add('bad');
+      const s = sel;
+      setTimeout(() => { d.classList.remove('bad'); s.classList.remove('sel'); }, 320);
+      sel = null;
+      $('res').textContent = '다시 — 맞는 설명을 골라보세요';
+      setTimeout(() => { $('res').textContent = ''; }, 900);
+    }
+  }
+
+  function drawLine(a, b){
+    const br = $('board').getBoundingClientRect();
+    const ar = a.getBoundingClientRect();
+    const rr = b.getBoundingClientRect();
+    const x1 = ar.right  - br.left;
+    const y1 = ar.top + ar.height / 2 - br.top;
+    const x2 = rr.left   - br.left;
+    const y2 = rr.top + rr.height / 2 - br.top;
+    const ln = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    ln.setAttribute('x1', x1);
+    ln.setAttribute('y1', y1);
+    ln.setAttribute('x2', x2);
+    ln.setAttribute('y2', y2);
+    ln.setAttribute('stroke', '#2ee6a6');
+    ln.setAttribute('stroke-width', '3');
+    ln.setAttribute('stroke-dasharray', '6 5');
+    ln.setAttribute('stroke-linecap', 'round');
+    $('svg').appendChild(ln);
+  }
+
+  function levelDone(){
+    const b = $('banner');
+    if(level >= 2){
+      b.innerHTML = `<p>🏆 <b>3레벨 클리어!</b> AI 핵심 개념을 모두 이으셨어요.</p><button class="btn" id="rb">다시 하기 ↻</button>`;
+      b.classList.add('show');
+      confetti();
+      setTimeout(confetti, 400);
+      $('rb').onclick = () => { level = 0; build(); };
+    } else {
+      b.innerHTML = `<p>✅ <b>레벨 ${level+1} 통과!</b> 다음 레벨로.</p><button class="btn" id="rb">다음 레벨 ▶</button>`;
+      b.classList.add('show');
+      $('rb').onclick = () => { level++; build(); };
+    }
+  }
+
+  function confetti(){
+    const cs = ["#2ee6a6","#7c9bff","#f7b733","#ff6b7a","#fff"];
+    for(let i=0;i<46;i++){
+      const c = document.createElement('div');
+      c.className = 'confetti';
+      c.style.left = Math.random()*100 + 'vw';
+      c.style.background = cs[i % cs.length];
+      c.style.animationDuration = (1.6 + Math.random()*1.4) + 's';
+      document.body.appendChild(c);
+      setTimeout(() => c.remove(), 3200);
+    }
+  }
+
+  build();
+})();
+</script>
+</body>
+</html>
