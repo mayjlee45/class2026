@@ -1,72 +1,281 @@
 <!DOCTYPE html>
-<html lang="ko"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>그래프 구성</title><style>
-    :root {
-      --bg:#0f1720;--card:#172230;--line:#2a3a4d;--ink:#eaf1f8;
-      --sub:#9fb2c6;--accent:#3d8bfd;--ok:#27ae60;--err:#e74c3c;--warn:#e67e22;
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>그래프 뜯어보기 · 구성요소와 축</title>
+<style>
+  :root{
+    --text:#bddfff;
+    --sub:#95b3ce;
+    --gold:#ffce59;
+  }
+  *{box-sizing:border-box;}
+  html{
+    background:radial-gradient(120% 90% at 50% 0%, #11223b, #080e18 70%);
+  }
+  body{
+    margin:0;
+    padding:18px 14px 40px;
+    font-family:Pretendard, "Malgun Gothic", "맑은 고딕", system-ui, sans-serif;
+    color:var(--text);
+    font-size:16px;
+    display:flex;
+    justify-content:center;
+  }
+  .wrap{width:620px; max-width:100%;}
+  h1{font-size:19px; font-weight:700; margin:0 0 6px;}
+  .lead{font-size:13.5px; color:var(--sub); margin:0 0 12px; line-height:1.5;}
+  .lead b{color:var(--text);}
+
+  .chartbox{
+    background:#0a121e;
+    border:1px solid #3b5d97;
+    border-radius:12px;
+    padding:8px;
+  }
+  .chartbox svg{display:block; width:100%; height:auto;}
+
+  .sec{font-size:12px; font-weight:800; color:var(--sub); margin:8px 0 6px;}
+
+  .parts{display:flex; flex-wrap:wrap; gap:7px; margin:0 0 8px;}
+  .parts button{
+    background:#121e32;
+    border:1px solid #005199;
+    border-radius:9px;
+    padding:8px 12px;
+    color:#9dcfff;
+    font-weight:700;
+    font-size:13px;
+    font-family:inherit;
+    cursor:pointer;
+  }
+  .parts button:hover{filter:brightness(1.15);}
+  .parts button.on{background:#005198; color:#d9d6d1;}
+
+  .explain{
+    background:#142032;
+    border:1px solid #3b5d97;
+    border-radius:11px;
+    padding:13px 14px;
+    color:var(--text);
+    font-size:13.5px;
+    line-height:1.55;
+    min-height:1.55em;
+  }
+  .explain b{color:var(--text);}
+  .hl{color:var(--gold); font-weight:700;}
+
+  .toggles{display:flex; flex-wrap:wrap; gap:8px; margin:12px 0 6px;}
+  .toggles button{
+    flex:1 1 0;
+    min-width:140px;
+    background:#11213b;
+    border:1px solid #986b00;
+    border-radius:10px;
+    padding:11px;
+    color:var(--gold);
+    font-weight:700;
+    font-size:13.5px;
+    font-family:inherit;
+    cursor:pointer;
+  }
+  .toggles button:hover{filter:brightness(1.15);}
+
+  .tnote{color:var(--sub); font-size:13px; line-height:1.6;}
+  .tnote b{color:var(--text);}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🔍 그래프 뜯어보기</h1>
+  <p class="lead">좋은 그래프는 부품이 제 역할을 합니다. <b>구성요소 버튼</b>을 눌러 의미를 보고, 아래 <b>축 설정</b>을 바꿔 — 같은 데이터가 어떻게 달라 보이는지 확인하세요.</p>
+
+  <div class="chartbox">
+    <svg id="chart" viewBox="0 0 340 210" xmlns="http://www.w3.org/2000/svg"></svg>
+  </div>
+
+  <div class="sec">🧩 구성요소 — 눌러서 의미 보기</div>
+  <div class="parts">
+    <button data-part="title">제목</button>
+    <button data-part="y">세로축(y)</button>
+    <button data-part="x">가로축(x)</button>
+    <button data-part="legend">범례(legend)</button>
+    <button data-part="color">색(color)</button>
+  </div>
+  <div class="explain" id="explain">버튼을 눌러보세요.</div>
+
+  <div class="sec">🎚️ 축 설정 바꿔보기 (같은 데이터, 다른 인상)</div>
+  <div class="toggles">
+    <button id="btnZero"></button>
+    <button id="btnOutlier"></button>
+  </div>
+  <div class="tnote" id="tnote"></div>
+</div>
+
+<script>
+  // ---- 고정 데이터 (교육용 예시: 장비별 평균 정비 소요시간) ----
+  const BASE = [
+    {k:'A', v:42, color:'#56b0ff'},
+    {k:'B', v:45, color:'#2ee6a6'},
+    {k:'C', v:44, color:'#ffce5a'},
+    {k:'D', v:43, color:'#ff8db0'}
+  ];
+  const OUTLIER = {k:'E', v:9999, color:'#56b0ff'};
+
+  const PX0=42, PX1=256, PY0=30, PY1=168; // plot area
+
+  const EXPLAIN = {
+    title:  '<b>제목</b> — 이 그래프가 <b>무엇을 보여주는지</b> 한 줄로. 없으면 무슨 데이터인지 알 수 없습니다.',
+    y:      '<b>세로축(y)</b> — <b>측정값</b>(여기선 소요시간, 분). <span class="hl">★ 척도(0부터냐 잘렸냐)에 따라 차이가 과장·축소</span>돼 보입니다. 아래 토글로 직접 확인!',
+    x:      '<b>가로축(x)</b> — <b>구분 항목</b>(여기선 장비 A·B·C·D). 무엇끼리 비교하는지 알려줍니다.',
+    legend: '<b>범례</b> — <b>색이 무엇을 뜻하는지</b> 설명. 여러 그룹·계열이 있을 때 필수입니다.',
+    color:  '<b>색</b> — 그룹을 구분. 너무 비슷한 색은 헷갈리고, <b>색각 이상</b>도 고려해 또렷한 색을 씁니다.'
+  };
+
+  const state = { yZero:true, outlier:false, part:null };
+
+  function getScale(){
+    if(state.outlier) return {min:0, max:10000};
+    if(state.yZero)   return {min:0, max:50};
+    return {min:40, max:46};
+  }
+
+  const svgns = "http://www.w3.org/2000/svg";
+  function el(tag, attrs){
+    const e = document.createElementNS(svgns, tag);
+    for(const k in attrs) e.setAttribute(k, attrs[k]);
+    return e;
+  }
+
+  function render(){
+    const svg = document.getElementById('chart');
+    svg.innerHTML = '';
+    const scale = getScale();
+    const items = state.outlier ? BASE.concat([OUTLIER]) : BASE;
+    const n = items.length;
+    const band = (PX1-PX0)/n;
+    const barW = band*0.6;
+
+    const goldY = state.part==='y';
+    const goldX = state.part==='x';
+    const goldTitle = state.part==='title';
+    const goldLegend = state.part==='legend';
+    const goldColor = state.part==='color';
+
+    // 배경
+    svg.appendChild(el('rect',{x:0,y:0,width:340,height:210,fill:'#0c1626'}));
+
+    // 그리드라인 (6개)
+    for(let i=0;i<6;i++){
+      const y = PY1 - i*(PY1-PY0)/5;
+      svg.appendChild(el('line',{x1:PX0,y1:y,x2:PX1,y2:y,
+        stroke: goldY ? '#3a557f' : '#172a44', 'stroke-width':1}));
     }
-    *{box-sizing:border-box;margin:0;padding:0;}
-    body{background:var(--bg);color:var(--ink);
-      font-family:Pretendard,"Malgun Gothic","맑은 고딕",system-ui,sans-serif;
-      min-height:100vh;padding:28px 14px;display:flex;justify-content:center;}
-    .wrap{width:100%;max-width:680px;}
-    .back{display:inline-block;margin-bottom:18px;font-size:13px;color:var(--sub);text-decoration:none;}
-    .back:hover{color:var(--ink);}
-    .tag{display:inline-block;font-size:12px;font-weight:700;color:var(--accent);
-      background:rgba(61,139,253,.12);border:1px solid rgba(61,139,253,.3);
-      padding:4px 11px;border-radius:999px;margin-bottom:10px;}
-    h2{font-size:22px;margin-bottom:8px;}
-    .lead{color:var(--sub);font-size:14.5px;line-height:1.65;margin-bottom:22px;}
-    .card{background:var(--card);border:1px solid var(--line);border-radius:14px;
-      padding:18px 20px;margin-bottom:14px;}
-    .card h3{font-size:15px;margin-bottom:10px;}
-    .opts{display:grid;gap:8px;margin-top:10px;}
-    .opts.g2{grid-template-columns:1fr 1fr;}
-    .opts.g1{grid-template-columns:1fr;}
-    .btn{padding:10px 14px;border-radius:10px;background:#1e3050;color:var(--ink);
-      border:1px solid var(--line);font-size:14px;cursor:pointer;text-align:left;
-      transition:background .15s,border-color .15s;}
-    .btn:hover:not(:disabled){background:#253d63;border-color:var(--accent);}
-    .btn:disabled{opacity:.55;cursor:default;}
-    .btn.correct{background:rgba(39,174,96,.2)!important;border-color:var(--ok)!important;color:#6fe09f;}
-    .btn.wrong{background:rgba(231,76,60,.15)!important;border-color:var(--err)!important;color:#f08080;}
-    .fb{margin-top:10px;font-size:13.5px;padding:10px 14px;border-radius:10px;display:none;}
-    .fb.ok{background:rgba(39,174,96,.12);color:#6fe09f;display:block;}
-    .fb.err{background:rgba(231,76,60,.1);color:#f08080;display:block;}
-    .progress{font-size:13px;color:var(--sub);margin-bottom:16px;}
-    .score-box{background:var(--card);border:1px solid var(--line);border-radius:14px;
-      padding:24px;text-align:center;margin-top:18px;display:none;}
-    .score-box .big{font-size:48px;margin-bottom:8px;}
-    .score-box p{color:var(--sub);font-size:14px;}
-    .foot{text-align:center;font-size:12px;color:#4a5a6a;margin-top:36px;
-      padding-top:14px;border-top:1px solid var(--line);}
-    /* drag styles */
-    .drag-item{padding:10px 14px;background:#1e3050;border:1px solid var(--line);
-      border-radius:10px;cursor:grab;font-size:14px;user-select:none;transition:opacity .15s;}
-    .drag-item:active{cursor:grabbing;opacity:.7;}
-    .drag-item.dragging{opacity:.4;}
-    .drop-zone{min-height:54px;background:rgba(61,139,253,.06);border:2px dashed var(--line);
-      border-radius:10px;padding:8px;display:flex;flex-direction:column;gap:6px;}
-    .drop-zone.over{border-color:var(--accent);background:rgba(61,139,253,.12);}
-    .zone-label{font-size:12px;color:var(--sub);margin-bottom:4px;font-weight:600;}
-</style></head>
-<body><div class="wrap">
-<a class="back" href="index.html">← 목록으로</a>
-<div class="tag">🔨 10차시</div><h2>그래프 구성요소 퀴즈</h2><p class="lead">올바른 그래프를 만들기 위한 핵심 규칙.</p>
-<div id="gc-qs"></div><script>
-var qs=[
-  {q:"그래프 축에 반드시 있어야 할 것은?",opts:["색깔","축 이름과 단위","범례","눈금선"],a:1,exp:"축 이름과 단위 없으면 읽을 수 없습니다."},
-  {q:"막대그래프 Y축은?",opts:["항상 잘라도 됨","0부터 시작 권장","음수부터 시작","자유롭게"],a:1,exp:"막대: 길이로 크기 비교하므로 0 기준 필수."},
-  {q:"이상값이 그래프를 망칠 때 해결책은?",opts:["이상값 포함 그대로","전처리 후 시각화 또는 별도 표시","그래프 포기","Y축 범위 자동"],a:1,exp:"이상값 제거 후 시각화, 또는 주석으로 별도 표시."},
-];
-var c=document.getElementById('gc-qs');
-qs.forEach(function(q,i){
-  var div=document.createElement('div');div.className='card';div.style.marginBottom='14px';
-  var opts=q.opts.map(function(o,oi){return '<button class="btn" data-qi="'+i+'" data-val="'+oi+'" onclick="pickGC(this,'+i+','+oi+','+q.a+',''+q.exp.replace(/'/g,"'")+'')">'+o+'</button>';}).join('');
-  div.innerHTML='<h3 style="font-size:14.5px;margin-bottom:10px">Q'+(i+1)+'. '+q.q+'</h3><div style="display:flex;flex-direction:column;gap:6px">'+opts+'</div><div class="gcfb-'+i+' fb"></div>';
-  c.appendChild(div);
-});
-function pickGC(btn,qi,val,a,exp){document.querySelectorAll('[data-qi="'+qi+'"]').forEach(function(b){b.disabled=true;});var fb=document.querySelector('.gcfb-'+qi);if(val===a){btn.classList.add('correct');fb.textContent='✅ '+exp;fb.className='gcfb-'+qi+' fb ok';}else{btn.classList.add('wrong');document.querySelector('[data-qi="'+qi+'"][data-val="'+a+'"]').classList.add('correct');fb.textContent='❌ '+exp;fb.className='gcfb-'+qi+' fb err';}}
+    // y축 라벨
+    for(let i=0;i<6;i++){
+      const y = PY1 - i*(PY1-PY0)/5;
+      const val = Math.round(scale.min + i*(scale.max-scale.min)/5);
+      const t = el('text',{x:37,y:y+3,'text-anchor':'end','font-size':9,
+        fill: goldY ? '#ffce5a' : '#6f86ad'});
+      t.textContent = val;
+      svg.appendChild(t);
+    }
+    // 축 (y, x)
+    svg.appendChild(el('line',{x1:PX0,y1:PY0,x2:PX0,y2:PY1,
+      stroke: goldY ? '#ffce5a' : '#3a557f','stroke-width':1.5}));
+    svg.appendChild(el('line',{x1:PX0,y1:PY1,x2:PX1,y2:PY1,
+      stroke: goldX ? '#ffce5a' : '#3a557f','stroke-width':1.5}));
+
+    // 축 제목
+    const yTitle = el('text',{x:12,y:99,'text-anchor':'middle','font-size':10,
+      fill: goldY ? '#ffce5a' : '#9ab0d0', transform:'rotate(-90 12 99)'});
+    yTitle.textContent = '소요시간(분)';
+    svg.appendChild(yTitle);
+
+    const xTitle = el('text',{x:149,y:202,'text-anchor':'middle','font-size':10,
+      fill: goldX ? '#ffce5a' : '#9ab0d0'});
+    xTitle.textContent = '장비';
+    svg.appendChild(xTitle);
+
+    // 차트 제목
+    const title = el('text',{id:'p_title', x:170, y:18, 'text-anchor':'middle',
+      'font-size':13,'font-weight':700, fill: goldTitle ? '#ffce5a' : '#eaf2ff'});
+    title.textContent = '장비별 평균 정비 소요시간';
+    svg.appendChild(title);
+
+    // 막대 + x축 라벨
+    items.forEach((it,i)=>{
+      const x = PX0 + i*band + (band-barW)/2;
+      const yTop = PY0 + (scale.max-it.v)/(scale.max-scale.min)*(PY1-PY0);
+      const h = PY1 - yTop;
+      const bar = el('rect',{x, y:yTop, width:barW, height:h, fill:it.color, rx:2});
+      if(goldColor){ bar.setAttribute('stroke','#fff'); bar.setAttribute('stroke-width',2); }
+      svg.appendChild(bar);
+
+      const lbl = el('text',{x:x+barW/2, y:181, 'text-anchor':'middle','font-size':9,
+        fill: goldX ? '#ffce5a' : '#9ab0d0'});
+      lbl.textContent = it.k;
+      svg.appendChild(lbl);
+    });
+
+    // 범례
+    const legendH = 14 + n*10;
+    const legendBox = el('rect',{x:262,y:24,width:66,height:legendH, fill:'#0e1c33',
+      stroke: goldLegend ? '#ffce5a' : '#24395c', 'stroke-width': goldLegend ? 2 : 1, rx:4});
+    svg.appendChild(legendBox);
+    items.forEach((it,i)=>{
+      svg.appendChild(el('rect',{x:268,y:32+i*11,width:9,height:9,fill:it.color}));
+      const t = el('text',{x:281,y:40+i*11,'font-size':8.5, fill:'#9ab0d0'});
+      t.textContent = '장비 '+it.k;
+      svg.appendChild(t);
+    });
+  }
+
+  function renderExplain(){
+    document.getElementById('explain').innerHTML = state.part ? EXPLAIN[state.part] : '버튼을 눌러보세요.';
+    document.querySelectorAll('.parts button').forEach(b=>{
+      b.classList.toggle('on', b.dataset.part === state.part);
+    });
+  }
+
+  function renderToggles(){
+    document.getElementById('btnZero').textContent =
+      state.yZero ? '세로축: 0부터' : '세로축: 40부터(잘림)';
+    document.getElementById('btnOutlier').textContent =
+      '이상값(9999): ' + (state.outlier ? '포함됨' : '제거됨');
+
+    const tnote = document.getElementById('tnote');
+    if(state.outlier){
+      tnote.innerHTML = '🚨 <b>이상값(9999) 하나</b> 때문에 세로축이 0~10000으로 늘어나, A·B·C·D 막대가 바닥에 깔려 <b>차이가 전혀 안 보입니다.</b> → 보기 전에 <b>전처리(이상값 점검)</b>가 필요!';
+    } else if(state.yZero){
+      tnote.innerHTML = '세로축 <b>0부터</b>: 42~45분 차이가 작게 보입니다(정직하지만 차이 파악은 어려움).';
+    } else {
+      tnote.innerHTML = '세로축 <b>40부터(잘림)</b>: 같은 데이터인데 차이가 <b>훨씬 커 보입니다.</b> 차이를 보긴 좋지만, 0부터가 아니면 <span class="hl">과장</span>될 수 있어 주의 — 맥락에 맞게.';
+    }
+  }
+
+  function renderAll(){ render(); renderExplain(); renderToggles(); }
+
+  document.querySelectorAll('.parts button').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      state.part = (state.part === btn.dataset.part) ? null : btn.dataset.part;
+      render(); renderExplain();
+    });
+  });
+
+  document.getElementById('btnZero').addEventListener('click', ()=>{
+    if(state.outlier) return; // 이상값 포함 상태에서는 축 토글 무시(원본과 동일)
+    state.yZero = !state.yZero;
+    render(); renderToggles();
+  });
+
+  document.getElementById('btnOutlier').addEventListener('click', ()=>{
+    state.outlier = !state.outlier;
+    render(); renderToggles();
+  });
+
+  renderAll();
 </script>
-<div class="foot">데이터 관리자 기본·실무 교육 · 10차시</div>
-</div></body></html>
+</body>
+</html>

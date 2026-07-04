@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>그래프 배우기 · 히스토그램·산점도·박스플롯</title>
+<style>
+  :root{
+    --mint:#e3f8f0; --mint-dark:#0f9d78; --ink:#1f2a24; --sub:#5b6b63;
+    --card:#ffffff; --border:#d9ece3;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; padding:24px; background:#f4faf7;
+    font-family:"Pretendard","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+    color:var(--ink);
+  }
+  .wrap{max-width:720px; margin:0 auto;}
+  h1{font-size:24px; margin-bottom:6px;}
+  .lead{color:var(--sub); font-size:14px; line-height:1.6; margin-bottom:18px;}
+  .lead .ex{color:var(--mint-dark); font-weight:600;}
+  .tabs{display:flex; gap:8px; margin-bottom:16px;}
+  .tab{
+    flex:1; padding:10px 0; border:1px solid var(--border); border-radius:10px;
+    background:#fff; color:var(--sub); font-size:15px; font-weight:600; cursor:pointer;
+  }
+  .tab.active{background:var(--mint-dark); color:#fff; border-color:var(--mint-dark);}
+  .panel{display:none; background:var(--card); border:1px solid var(--border); border-radius:14px; padding:20px;}
+  .panel.active{display:block;}
+  .desc{font-size:14px; line-height:1.7; color:var(--ink); margin-bottom:14px;}
+  .shape-btns{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:14px;}
+  .shape-btns button{
+    padding:8px 14px; border-radius:20px; border:1px solid var(--mint-dark);
+    background:var(--mint); color:var(--mint-dark); font-size:13px; cursor:pointer;
+  }
+  .shape-btns button.active{background:var(--mint-dark); color:#fff;}
+  canvas{width:100%; height:auto; background:#fbfffd; border-radius:10px;}
+  .reading{margin-top:14px; font-size:13px; line-height:1.7; background:var(--mint); padding:12px 14px; border-radius:10px; color:#0b5c44;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>📊 그래프 배우기</h1>
+  <p class="lead">
+    그래프 종류마다 알려주는 정보가 다릅니다. 탭과 버튼을 눌러 각 그래프가 무엇을 보여주는지, 어떻게 읽는지 익혀보세요.<br>
+    <span class="ex">예시 데이터: 신병 3km 달리기 기록 (연속형 변수)</span>
+  </p>
+
+  <div class="tabs">
+    <button class="tab active" data-tab="hist">히스토그램</button>
+    <button class="tab" data-tab="scatter">산점도</button>
+    <button class="tab" data-tab="box">박스플롯</button>
+  </div>
+
+  <section id="hist" class="panel active">
+    <p class="desc">하나의 연속형 값이 어디에 몰려 있는지, 즉 <b>분포</b>를 보여줍니다. 가로축은 값의 구간, 세로축은 그 구간에 속한 인원 수입니다. (범주형 자료에는 막대그래프를 대신 사용합니다.)</p>
+    <div class="shape-btns" id="histBtns">
+      <button data-shape="normal" class="active">정규(종모양)</button>
+      <button data-shape="rightskew">오른쪽 꼬리</button>
+      <button data-shape="leftskew">왼쪽 꼬리</button>
+      <button data-shape="bimodal">이봉(봉우리 2개)</button>
+    </div>
+    <canvas id="histCanvas" width="640" height="300"></canvas>
+    <p class="reading" id="histReading"></p>
+  </section>
+
+  <section id="scatter" class="panel">
+    <p class="desc">두 변수 사이의 <b>관계</b>를 보여줍니다. 점이 오른쪽 위로 향하면 양(+)의 관계, 오른쪽 아래로 향하면 음(−)의 관계, 흩어지면 관계가 약하다는 뜻입니다. 상관관계가 있다고 해서 인과관계가 있는 것은 아닙니다.</p>
+    <div class="shape-btns" id="scatterBtns">
+      <button data-shape="pos" class="active">양의 상관</button>
+      <button data-shape="neg">음의 상관</button>
+      <button data-shape="none">무상관</button>
+      <button data-shape="curve">곡선 관계</button>
+    </div>
+    <canvas id="scatterCanvas" width="640" height="300"></canvas>
+    <p class="reading" id="scatterReading"></p>
+  </section>
+
+  <section id="box" class="panel">
+    <p class="desc">중앙값·사분위(퍼짐)·이상값을 한눈에 보여줍니다. 상자는 가운데 50%(Q1~Q3), 상자 안 선은 중앙값, 수염은 정상 범위, 멀리 떨어진 점은 이상값입니다.</p>
+    <canvas id="boxCanvas" width="640" height="220"></canvas>
+    <p class="reading">노란 선(중앙값)이 상자 가운데에서 한쪽으로 치우쳐 있으면 분포가 비대칭이라는 뜻입니다. 분홍 점(이상값)은 입력 오류인지 실제 값인지 담당자가 확인해야 할 대상이며, 평균만 보면 이런 값이 가려질 수 있습니다.</p>
+  </section>
+</div>
+
+<script>
+// ---------- 탭 전환 ----------
+document.querySelectorAll('.tab').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(btn.dataset.tab).classList.add('active');
+  });
+});
+
+// ---------- 히스토그램 ----------
+const histData = {
+  normal:   [2,8,18,25,18,8,2],
+  rightskew:[8,22,25,16,9,5,2],
+  leftskew: [2,5,9,16,25,22,8],
+  bimodal:  [10,20,8,5,8,20,10]
+};
+const histReadings = {
+  normal:   "가운데가 높고 양옆이 대칭인 종 모양입니다. 평균과 중앙값이 비슷한 위치에 있으며, 가장 흔히 나타나는 안정적인 분포입니다.",
+  rightskew:"왼쪽(빠른 기록)에 인원이 몰려 있고 오른쪽으로 갈수록 인원이 줄며 꼬리처럼 길게 늘어집니다. 평균이 중앙값보다 큰 쪽으로 끌려가는 경향이 있습니다.",
+  leftskew: "오른쪽(느린 기록)에 인원이 몰려 있고 왼쪽으로 길게 꼬리가 늘어집니다. 평균이 중앙값보다 작은 쪽으로 끌려가는 경향이 있습니다.",
+  bimodal:  "봉우리가 두 개로 나뉘어 있어, 성격이 다른 두 그룹이 섞여 있을 가능성을 의심해볼 수 있습니다."
+};
+const histLabels = ['12','13','14','15','16','17','18'];
+
+function drawHist(shape){
+  const c = document.getElementById('histCanvas');
+  const ctx = c.getContext('2d');
+  ctx.clearRect(0,0,c.width,c.height);
+  const data = histData[shape];
+  const max = Math.max(...data);
+  const padL=45, padB=36, padT=16, padR=16;
+  const w = c.width - padL - padR, h = c.height - padT - padB;
+  const barW = w/data.length;
+
+  // 축
+  ctx.strokeStyle = '#9fb8ac'; ctx.lineWidth=1;
+  ctx.beginPath();
+  ctx.moveTo(padL, padT); ctx.lineTo(padL, padT+h); ctx.lineTo(padL+w, padT+h);
+  ctx.stroke();
+
+  // 막대
+  data.forEach((v,i)=>{
+    const bh = (v/max)*h;
+    ctx.fillStyle = '#0f9d78';
+    ctx.fillRect(padL + i*barW + 4, padT + h - bh, barW-8, bh);
+    ctx.fillStyle = '#5b6b63';
+    ctx.font = '12px sans-serif';
+    ctx.textAlign='center';
+    ctx.fillText(histLabels[i], padL + i*barW + barW/2, padT+h+18);
+  });
+
+  ctx.fillStyle='#1f2a24'; ctx.font='13px sans-serif'; ctx.textAlign='center';
+  ctx.fillText('기록(분) →', padL+w/2, padT+h+34);
+  ctx.save();
+  ctx.translate(14, padT+h/2); ctx.rotate(-Math.PI/2);
+  ctx.fillText('인원수(빈도)', 0, 0);
+  ctx.restore();
+
+  document.getElementById('histReading').textContent = '읽는 법: ' + histReadings[shape];
+}
+
+document.getElementById('histBtns').addEventListener('click', e=>{
+  if(e.target.tagName!=='BUTTON') return;
+  document.querySelectorAll('#histBtns button').forEach(b=>b.classList.remove('active'));
+  e.target.classList.add('active');
+  drawHist(e.target.dataset.shape);
+});
+
+// ---------- 산점도 ----------
+const scatterReadings = {
+  pos:  "점들이 오른쪽 위로 갈수록 함께 커집니다. 한 변수가 커질 때 다른 변수도 커지는 양(+)의 상관관계입니다. (그래도 인과관계는 아닙니다!)",
+  neg:  "점들이 오른쪽 아래로 향합니다. 한 변수가 커질수록 다른 변수는 작아지는 음(−)의 상관관계입니다.",
+  none: "점들이 뚜렷한 방향 없이 흩어져 있습니다. 두 변수 사이에 뚜렷한 선형 관계가 없다는 뜻입니다.",
+  curve:"점들이 직선이 아닌 곡선 형태를 이룹니다. 단순 상관계수만으로는 이 관계를 제대로 설명하기 어렵습니다."
+};
+
+function scatterPoints(shape){
+  const pts=[];
+  for(let i=0;i<45;i++){
+    let x = Math.random()*80+10;
+    let y;
+    if(shape==='pos')  y = x*0.85 + (Math.random()*18-9) + 5;
+    else if(shape==='neg') y = 100 - x*0.85 + (Math.random()*18-9);
+    else if(shape==='none') y = Math.random()*100;
+    else y = 95 - Math.pow(x-50,2)/45 + (Math.random()*10-5); // curve
+    y = Math.max(2, Math.min(98, y));
+    pts.push([x,y]);
+  }
+  return pts;
+}
+
+function drawScatter(shape){
+  const c = document.getElementById('scatterCanvas');
+  const ctx = c.getContext('2d');
+  ctx.clearRect(0,0,c.width,c.height);
+  const padL=45, padB=36, padT=16, padR=16;
+  const w = c.width - padL - padR, h = c.height - padT - padB;
+
+  ctx.strokeStyle='#9fb8ac'; ctx.lineWidth=1;
+  ctx.beginPath();
+  ctx.moveTo(padL, padT); ctx.lineTo(padL, padT+h); ctx.lineTo(padL+w, padT+h);
+  ctx.stroke();
+
+  const pts = scatterPoints(shape);
+  ctx.fillStyle='#0f9d78';
+  pts.forEach(([x,y])=>{
+    const px = padL + (x/100)*w;
+    const py = padT + h - (y/100)*h;
+    ctx.beginPath(); ctx.arc(px,py,4,0,Math.PI*2); ctx.fill();
+  });
+
+  ctx.fillStyle='#1f2a24'; ctx.font='13px sans-serif'; ctx.textAlign='center';
+  ctx.fillText('변수 X →', padL+w/2, padT+h+22);
+  ctx.save();
+  ctx.translate(14, padT+h/2); ctx.rotate(-Math.PI/2);
+  ctx.fillText('변수 Y', 0, 0);
+  ctx.restore();
+
+  document.getElementById('scatterReading').textContent = '읽는 법: ' + scatterReadings[shape];
+}
+
+document.getElementById('scatterBtns').addEventListener('click', e=>{
+  if(e.target.tagName!=='BUTTON') return;
+  document.querySelectorAll('#scatterBtns button').forEach(b=>b.classList.remove('active'));
+  e.target.classList.add('active');
+  drawScatter(e.target.dataset.shape);
+});
+
+// ---------- 박스플롯 ----------
+function drawBox(){
+  const c = document.getElementById('boxCanvas');
+  const ctx = c.getContext('2d');
+  ctx.clearRect(0,0,c.width,c.height);
+  const padL=45, padR=45, padT=30, padB=50;
+  const w = c.width - padL - padR;
+  const midY = padT + (c.height-padT-padB)/2;
+
+  const scaleMin=12, scaleMax=19;
+  const toX = v => padL + ((v-scaleMin)/(scaleMax-scaleMin))*w;
+
+  const stats = {min:13.2, q1:13.9, median:14.4, q3:15.3, max:16.6, outlier:18.1};
+
+  // 축
+  ctx.strokeStyle='#9fb8ac';
+  ctx.beginPath(); ctx.moveTo(padL, padT+ (c.height-padT-padB) +20); ctx.lineTo(c.width-padR, padT+(c.height-padT-padB)+20); ctx.stroke();
+  for(let v=scaleMin; v<=scaleMax; v++){
+    const x = toX(v);
+    ctx.fillStyle='#5b6b63'; ctx.font='11px sans-serif'; ctx.textAlign='center';
+    ctx.fillText(v, x, padT+(c.height-padT-padB)+36);
+  }
+
+  // 수염
+  ctx.strokeStyle='#0f9d78'; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.moveTo(toX(stats.min), midY); ctx.lineTo(toX(stats.q1), midY); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(toX(stats.q3), midY); ctx.lineTo(toX(stats.max), midY); ctx.stroke();
+  ['min','max'].forEach(k=>{
+    ctx.beginPath(); ctx.moveTo(toX(stats[k]), midY-14); ctx.lineTo(toX(stats[k]), midY+14); ctx.stroke();
+  });
+
+  // 상자
+  ctx.fillStyle='#d7f5ea'; ctx.strokeStyle='#0f9d78';
+  ctx.fillRect(toX(stats.q1), midY-26, toX(stats.q3)-toX(stats.q1), 52);
+  ctx.strokeRect(toX(stats.q1), midY-26, toX(stats.q3)-toX(stats.q1), 52);
+
+  // 중앙값 선(노랑)
+  ctx.strokeStyle='#e0b400'; ctx.lineWidth=3;
+  ctx.beginPath(); ctx.moveTo(toX(stats.median), midY-26); ctx.lineTo(toX(stats.median), midY+26); ctx.stroke();
+
+  // 이상값(분홍 점)
+  ctx.fillStyle='#e85d9c';
+  ctx.beginPath(); ctx.arc(toX(stats.outlier), midY, 5, 0, Math.PI*2); ctx.fill();
+
+  // 라벨
+  ctx.fillStyle='#1f2a24'; ctx.font='12px sans-serif'; ctx.textAlign='center';
+  ctx.fillText('Q1', toX(stats.q1), midY-34);
+  ctx.fillText('중앙값', toX(stats.median), midY-34);
+  ctx.fillText('Q3', toX(stats.q3), midY-34);
+  ctx.fillText('이상값', toX(stats.outlier), midY-14);
+  ctx.fillText('기록(분) →', padL+w/2, padT+(c.height-padT-padB)+54);
+}
+
+// 초기 렌더
+drawHist('normal');
+drawScatter('pos');
+drawBox();
+</script>
+</body>
+</html>

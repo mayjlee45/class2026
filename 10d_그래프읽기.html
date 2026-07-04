@@ -1,85 +1,457 @@
 <!DOCTYPE html>
-<html lang="ko"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>그래프 읽기</title><style>
-    :root {
-      --bg:#0f1720;--card:#172230;--line:#2a3a4d;--ink:#eaf1f8;
-      --sub:#9fb2c6;--accent:#3d8bfd;--ok:#27ae60;--err:#e74c3c;--warn:#e67e22;
-    }
-    *{box-sizing:border-box;margin:0;padding:0;}
-    body{background:var(--bg);color:var(--ink);
-      font-family:Pretendard,"Malgun Gothic","맑은 고딕",system-ui,sans-serif;
-      min-height:100vh;padding:28px 14px;display:flex;justify-content:center;}
-    .wrap{width:100%;max-width:680px;}
-    .back{display:inline-block;margin-bottom:18px;font-size:13px;color:var(--sub);text-decoration:none;}
-    .back:hover{color:var(--ink);}
-    .tag{display:inline-block;font-size:12px;font-weight:700;color:var(--accent);
-      background:rgba(61,139,253,.12);border:1px solid rgba(61,139,253,.3);
-      padding:4px 11px;border-radius:999px;margin-bottom:10px;}
-    h2{font-size:22px;margin-bottom:8px;}
-    .lead{color:var(--sub);font-size:14.5px;line-height:1.65;margin-bottom:22px;}
-    .card{background:var(--card);border:1px solid var(--line);border-radius:14px;
-      padding:18px 20px;margin-bottom:14px;}
-    .card h3{font-size:15px;margin-bottom:10px;}
-    .opts{display:grid;gap:8px;margin-top:10px;}
-    .opts.g2{grid-template-columns:1fr 1fr;}
-    .opts.g1{grid-template-columns:1fr;}
-    .btn{padding:10px 14px;border-radius:10px;background:#1e3050;color:var(--ink);
-      border:1px solid var(--line);font-size:14px;cursor:pointer;text-align:left;
-      transition:background .15s,border-color .15s;}
-    .btn:hover:not(:disabled){background:#253d63;border-color:var(--accent);}
-    .btn:disabled{opacity:.55;cursor:default;}
-    .btn.correct{background:rgba(39,174,96,.2)!important;border-color:var(--ok)!important;color:#6fe09f;}
-    .btn.wrong{background:rgba(231,76,60,.15)!important;border-color:var(--err)!important;color:#f08080;}
-    .fb{margin-top:10px;font-size:13.5px;padding:10px 14px;border-radius:10px;display:none;}
-    .fb.ok{background:rgba(39,174,96,.12);color:#6fe09f;display:block;}
-    .fb.err{background:rgba(231,76,60,.1);color:#f08080;display:block;}
-    .progress{font-size:13px;color:var(--sub);margin-bottom:16px;}
-    .score-box{background:var(--card);border:1px solid var(--line);border-radius:14px;
-      padding:24px;text-align:center;margin-top:18px;display:none;}
-    .score-box .big{font-size:48px;margin-bottom:8px;}
-    .score-box p{color:var(--sub);font-size:14px;}
-    .foot{text-align:center;font-size:12px;color:#4a5a6a;margin-top:36px;
-      padding-top:14px;border-top:1px solid var(--line);}
-    /* drag styles */
-    .drag-item{padding:10px 14px;background:#1e3050;border:1px solid var(--line);
-      border-radius:10px;cursor:grab;font-size:14px;user-select:none;transition:opacity .15s;}
-    .drag-item:active{cursor:grabbing;opacity:.7;}
-    .drag-item.dragging{opacity:.4;}
-    .drop-zone{min-height:54px;background:rgba(61,139,253,.06);border:2px dashed var(--line);
-      border-radius:10px;padding:8px;display:flex;flex-direction:column;gap:6px;}
-    .drop-zone.over{border-color:var(--accent);background:rgba(61,139,253,.12);}
-    .zone-label{font-size:12px;color:var(--sub);margin-bottom:4px;font-weight:600;}
-</style></head>
-<body><div class="wrap">
-<a class="back" href="index.html">← 목록으로</a>
-<div class="tag">👁️ 10차시</div><h2>그래프 읽기 실습</h2><p class="lead">정비 데이터 막대그래프를 보고 질문에 답하세요.</p>
-<div class="card"><h3>그래프를 보고 답하세요</h3>
-<canvas id="rc" width="640" height="240" style="width:100%;border-radius:10px;background:#0d1820;margin-bottom:14px;"></canvas>
-</div><div id="rd-qs"></div>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>그래프 읽기 3단계 퀴즈 · 10차시 복습</title>
+<style>
+  :root{
+    --ink:#eaf2ff; --sub:#9ab0d0; --panel:#19283f; --line:#2a426b;
+    --ok:#2ee6a6; --no:#ff6b7a; --accent:#56b0ff; --gold:#ffce5a;
+    --bg:#0d1626;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; min-height:100vh; background:var(--bg); color:var(--ink);
+    font-family:"Pretendard","Malgun Gothic","Apple SD Gothic Neo",sans-serif;
+    display:flex; justify-content:center; padding:30px 16px;
+  }
+  .wrap{
+    width:100%; max-width:720px; background:var(--panel);
+    border:1px solid var(--line); border-radius:18px; padding:26px 28px 32px;
+  }
+  .top{display:flex; align-items:center; justify-content:space-between; gap:12px;}
+  .top h1{font-size:1.3rem; margin:0; display:flex; align-items:center; gap:8px;}
+  .badge{
+    background:var(--bg); border:1px solid var(--line); color:var(--accent);
+    padding:4px 12px; border-radius:999px; font-size:.85rem; font-weight:700;
+  }
+  .bar{height:6px; background:var(--bg); border-radius:999px; margin:14px 0 6px; overflow:hidden;}
+  .bar .fill{height:100%; background:linear-gradient(90deg,var(--accent),var(--ok)); width:0%; transition:width .3s;}
+  .level{color:var(--gold); font-size:.85rem; font-weight:700; margin-bottom:14px;}
+  .chartbox{
+    background:var(--bg); border:1px solid var(--line); border-radius:12px;
+    padding:10px; margin-bottom:16px;
+  }
+  svg{width:100%; height:220px; display:block;}
+  .qtext{font-size:1.05rem; font-weight:700; margin:6px 0 16px; line-height:1.5;}
+  .hint{color:var(--sub); font-size:.85rem; margin:-8px 0 14px;}
+  .opts{display:flex; flex-direction:column; gap:10px; margin-bottom:14px;}
+  .opt{
+    background:var(--bg); border:1px solid var(--line); color:var(--ink);
+    padding:13px 16px; border-radius:10px; font-size:.98rem; text-align:left;
+    cursor:pointer; transition:all .15s;
+  }
+  .opt:hover:not(:disabled){border-color:var(--accent);}
+  .opt:disabled{cursor:default;}
+  .opt.ok{border-color:var(--ok); background:rgba(46,230,166,.12); color:var(--ok); font-weight:700;}
+  .opt.no{border-color:var(--no); background:rgba(255,107,122,.12); color:var(--no); font-weight:700;}
+  .opt.dim{opacity:.45;}
+  .fb{
+    display:none; border-radius:10px; padding:13px 16px; margin-bottom:14px;
+    font-size:.92rem; line-height:1.5; border:1px solid var(--line);
+  }
+  .fb.show{display:block;}
+  .fb.ok{border-color:var(--ok); background:rgba(46,230,166,.1); color:var(--ok);}
+  .fb.no{border-color:var(--no); background:rgba(255,107,122,.1); color:var(--no);}
+  .next{
+    display:none; width:100%; padding:13px; border:none; border-radius:10px;
+    background:var(--accent); color:#0d1626; font-weight:800; font-size:1rem; cursor:pointer;
+  }
+  .next.show{display:block;}
+  .result{display:none; text-align:center;}
+  .result.show{display:block;}
+  .result .score{font-size:2.4rem; font-weight:900; color:var(--gold); margin:10px 0;}
+  .note{
+    background:var(--bg); border:1px solid var(--line); border-radius:12px;
+    padding:18px 20px; margin:16px 0; text-align:left;
+  }
+  .note h3{margin:0 0 10px; font-size:1.05rem;}
+  .note h3.perfect{color:var(--ok); text-align:center;}
+  .note ul{margin:0; padding-left:18px; color:var(--sub); font-size:.9rem; line-height:1.7;}
+  .note li b{color:var(--ink);}
+  .again{
+    padding:12px 26px; border:none; border-radius:10px; background:var(--accent);
+    color:#0d1626; font-weight:800; cursor:pointer; font-size:.95rem;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <h1>📈 그래프 읽기 퀴즈</h1>
+    <div class="badge" id="badge">1 / 12</div>
+  </div>
+  <div class="bar"><div class="fill" id="fill"></div></div>
+  <div class="level" id="level"></div>
+
+  <div id="quizArea">
+    <div class="chartbox"><svg id="svg" viewBox="0 0 300 180"></svg></div>
+    <div class="qtext" id="qtext"></div>
+    <div class="hint" id="hint" style="display:none;"></div>
+    <div class="opts" id="opts"></div>
+    <div class="fb" id="fb"></div>
+    <button class="next" id="nextBtn">다음 ▶</button>
+  </div>
+
+  <div class="result" id="resultArea">
+    <div>점수</div>
+    <div class="score" id="scoreText">0 / 12</div>
+    <div class="note" id="noteArea"></div>
+    <button class="again" id="againBtn">다시 풀기 ↻</button>
+  </div>
+</div>
+
 <script>
-var cv=document.getElementById('rc'),ctx=cv.getContext('2d'),W=cv.width,H=cv.height;
-var data=[{l:"정기",v:145},{l:"수시",v:89},{l:"긴급",v:23}];
-var colors=['#3d8bfd','#6fe09f','#fdbc40'];
-ctx.strokeStyle='#2a3a4d';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(50,20);ctx.lineTo(50,H-40);ctx.lineTo(W-20,H-40);ctx.stroke();
-data.forEach(function(d,i){
-  var x=80+i*160,bh=(H-65)*(d.v/160),y=H-40-bh;
-  ctx.fillStyle=colors[i];ctx.fillRect(x,y,80,bh);
-  ctx.fillStyle='#9fb2c6';ctx.font='12px sans-serif';ctx.fillText(d.l,x+20,H-20);ctx.fillText(d.v,x+25,y-5);
-});
-ctx.fillText('건수',8,35);
-var qs=[
-  {q:"가장 많은 정비유형은?",opts:["수시","긴급","정기"],a:2,exp:"정기 145건으로 최다."},
-  {q:"긴급 정비는 정기의 약 몇%?",opts:["약 5%","약 16%","약 50%"],a:1,exp:"23/145 ≈ 16%."},
-  {q:"이 그래프로 알 수 없는 것은?",opts:["정비유형별 건수","소요시간 평균","수시+긴급 합계"],a:1,exp:"소요시간 정보는 이 그래프에 없습니다."},
+/* ---------- 데이터 ---------- */
+const QUESTIONS = [
+{ // Q1
+  level:1, levelLabel:"레벨 1 · 기본 읽기",
+  chartType:"hist",
+  data:{ labels:["12분대","13분대","14분대","15분대","16분대"], heights:[27,72,136,82,36] },
+  q:"다음 히스토그램에서 빈도가 가장 높은 구간은 어디인가요?",
+  opts:["12분대","14분대","16분대"], correct:1,
+  fbOk:"정답입니다! 막대 높이가 가장 큰 '14분대' 구간이 가장 빈도가 높습니다.",
+  fbNo:"정답은 '14분대'입니다. 막대 높이(빈도)가 가장 큰 구간을 찾아야 해요."
+},
+{ // Q2
+  level:1, levelLabel:"레벨 1 · 기본 읽기",
+  chartType:"bar",
+  data:{ labels:["A","B","C","D"], values:[42,45,40,47], ymax:50, yticks:[0,13,25,38,50] },
+  q:"다음 막대그래프에서 값이 가장 큰 항목은 무엇인가요?",
+  opts:["A","B","D","C"], correct:2,
+  fbOk:"정답입니다! D가 47로 가장 높은 막대입니다.",
+  fbNo:"정답은 'D'입니다. 막대의 높이를 비교하면 D가 가장 큽니다."
+},
+{ // Q3
+  level:1, levelLabel:"레벨 1 · 기본 읽기",
+  chartType:"box",
+  data:{ whiskerMin:60, whiskerMax:193, boxMin:100, boxMax:153, median:126 },
+  q:"박스플롯(상자그림)에서 상자 안의 굵은 선은 무엇을 나타낼까요?",
+  opts:["평균", "중앙값", "최댓값"], correct:1,
+  fbOk:"정답입니다! 상자 안의 선은 데이터를 절반으로 나누는 '중앙값'을 나타냅니다.",
+  fbNo:"정답은 '중앙값'입니다. 상자 안의 선은 평균이 아니라 중앙값 위치를 표시합니다."
+},
+{ // Q4
+  level:2, levelLabel:"레벨 2 · 해석하기",
+  chartType:"scatter",
+  data:{ points:[[40,150],[70,130],[95,120],[120,100],[150,90],[180,70],[210,55],[240,35]] },
+  q:"이 산점도에서 두 변수는 어떤 관계를 보이고 있나요?",
+  opts:["양(+)의 상관", "음(−)의 상관", "관계 없음"], correct:0,
+  fbOk:"정답입니다! x가 커질수록 y도 함께 커지는 '양(+)의 상관' 관계입니다.",
+  fbNo:"정답은 '양(+)의 상관'입니다. 점들이 오른쪽 위로 갈수록 함께 올라가는 모양을 보세요."
+},
+{ // Q5
+  level:2, levelLabel:"레벨 2 · 해석하기",
+  chartType:"hist",
+  data:{ labels:["","","","",""], heights:[136,102,68,34,17] },
+  q:"오른쪽으로 꼬리가 긴(오른쪽으로 치우친) 이 분포에서, 평균과 중앙값 중 어느 쪽이 더 클까요?",
+  opts:["평균", "중앙값", "둘은 같다"], correct:0,
+  fbOk:"정답입니다! 꼬리가 긴 큰 값들이 평균을 끌어올려서 '평균'이 중앙값보다 커집니다.",
+  fbNo:"정답은 '평균'입니다. 오른쪽 꼬리의 큰 값들이 평균을 더 크게 끌어올립니다."
+},
+{ // Q6
+  level:2, levelLabel:"레벨 2 · 해석하기",
+  chartType:"boxOutlier",
+  data:{ whiskerMin:60, whiskerMax:193, boxMin:100, boxMax:153, median:126, outlier:[259,90] },
+  q:"이 그래프에서 동그라미로 따로 표시된 점은 무엇을 의미할까요?",
+  opts:["중앙값의 위치", "동떨어진 이상값", "상자의 색깔"], correct:1,
+  fbOk:"정답입니다! 다른 데이터와 동떨어져 있는 '이상값(outlier)'을 표시한 것입니다.",
+  fbNo:"정답은 '동떨어진 이상값'입니다. 전체 분포에서 멀리 떨어진 특이한 값을 표시한 점이에요."
+},
+{ // Q7
+  level:3, levelLabel:"레벨 3 · 함정 간파",
+  chartType:"barTrunc",
+  data:{ labels:["A","B","C","D"], values:[42,45,44,43], ymin:40, ymax:46 },
+  q:"이 그래프는 세로축이 0이 아니라 40부터 시작합니다. 이로 인해 어떤 문제가 생길까요?",
+  opts:["차이가 실제보다 과장돼 보인다", "차이가 실제보다 축소돼 보인다", "특별한 문제가 없다"], correct:0,
+  fbOk:"정답입니다! 축을 중간부터 시작하면 작은 차이도 크게 부풀려 보입니다.",
+  fbNo:"정답은 '차이가 과장돼 보인다'입니다. 세로축을 잘라서 시작하면 실제보다 차이가 커 보여요."
+},
+{ // Q8
+  level:3, levelLabel:"레벨 3 · 함정 간파",
+  chartType:"scatterCurve",
+  q:"이 산점도를 상관계수(직선 관계) 하나만 보고 판단하면 어떤 문제가 생길까요?",
+  opts:["강한 양의 상관으로만 보인다", "곡선 관계인데 관계없음으로 오해할 수 있다", "강한 음의 상관으로만 보인다"], correct:1,
+  fbOk:"정답입니다! 이 데이터는 곡선(비선형) 관계라서 직선 기준 상관계수만 보면 관계가 없다고 착각할 수 있습니다.",
+  fbNo:"정답은 '곡선 관계인데 관계없음으로 오해할 수 있다'입니다. 상관계수는 직선 관계만 잘 잡아냅니다."
+},
+{ // Q9
+  level:3, levelLabel:"레벨 3 · 함정 간파",
+  chartType:"scatterCluster",
+  q:"대부분의 점은 모여 있는데, 멀리 떨어진 점 2개가 있습니다. 상관관계를 해석할 때 주의할 점은?",
+  opts:["이상값 때문에 상관관계를 의심해봐야 한다", "무조건 강한 상관관계로 봐도 된다", "이 데이터는 아예 믿을 수 없다"], correct:0,
+  fbOk:"정답입니다! 소수의 이상값이 전체 상관관계를 왜곡시킬 수 있으니 별도로 확인해야 합니다.",
+  fbNo:"정답은 '이상값 때문에 상관관계를 의심해봐야 한다'입니다. 동떨어진 점들이 결과를 왜곡할 수 있어요."
+},
+{ // Q10 - click type (scatter)
+  level:4, levelLabel:"레벨 4 · 직접 찾기",
+  chartType:"scatterClick",
+  data:{ points:[[60,120],[80,110],[100,115],[120,105],[140,100],[160,95],[180,100],[200,90],[252,40]], outlierIdx:8 },
+  q:"그래프에서 다른 점들과 동떨어진 '이상값'을 클릭하세요.",
+  hint:"👆 그래프 위의 점을 직접 클릭해 보세요.",
+  fbOk:"정답입니다! 오른쪽 위에 멀리 떨어진 점이 이상값입니다.",
+  fbNo:"아쉬워요. 초록색으로 표시된 점이 정답(이상값)입니다."
+},
+{ // Q11 - click type (bar)
+  level:4, levelLabel:"레벨 4 · 직접 찾기",
+  chartType:"barClick",
+  data:{ labels:["A","B","C","D","E"], values:[38,44,41,52,36], maxIdx:3 },
+  q:"가장 값이 큰 막대를 클릭하세요.",
+  hint:"👆 그래프 위의 막대를 직접 클릭해 보세요.",
+  fbOk:"정답입니다! D 막대(52분)가 가장 높습니다.",
+  fbNo:"아쉬워요. 초록색으로 표시된 D 막대가 정답입니다."
+},
+{ // Q12 - click type (histogram)
+  level:4, levelLabel:"레벨 4 · 직접 찾기",
+  chartType:"histClick",
+  data:{ labels:["12분대","13분대","14분대","15분대","16분대"], heights:[27,72,136,82,36], maxIdx:2 },
+  q:"가장 높은 막대(최빈값 구간)를 클릭하세요.",
+  hint:"👆 그래프 위의 막대를 직접 클릭해 보세요.",
+  fbOk:"정답입니다! '14분대' 막대가 가장 높습니다.",
+  fbNo:"아쉬워요. 초록색으로 표시된 '14분대' 막대가 정답입니다."
+}
 ];
-var c=document.getElementById('rd-qs');
-qs.forEach(function(q,i){
-  var div=document.createElement('div');div.className='card';div.style.marginBottom='14px';
-  var opts=q.opts.map(function(o,oi){return '<button class="btn" data-qi="'+i+'" data-val="'+oi+'" onclick="pickRD(this,'+i+','+oi+','+q.a+',''+q.exp.replace(/'/g,"'")+'')">'+o+'</button>';}).join('');
-  div.innerHTML='<h3 style="font-size:14.5px;margin-bottom:10px">Q'+(i+1)+'. '+q.q+'</h3><div style="display:flex;gap:6px;flex-wrap:wrap">'+opts+'</div><div class="rdfb-'+i+' fb"></div>';
-  c.appendChild(div);
+
+const SVGNS="http://www.w3.org/2000/svg";
+let idx=0, score=0, answered=false, wrongList=[];
+
+const svg=document.getElementById('svg');
+const qtextEl=document.getElementById('qtext');
+const optsEl=document.getElementById('opts');
+const fbEl=document.getElementById('fb');
+const nextBtn=document.getElementById('nextBtn');
+const badge=document.getElementById('badge');
+const fill=document.getElementById('fill');
+const levelEl=document.getElementById('level');
+const hintEl=document.getElementById('hint');
+const quizArea=document.getElementById('quizArea');
+const resultArea=document.getElementById('resultArea');
+
+function el(tag,attrs){
+  const e=document.createElementNS(SVGNS,tag);
+  for(const k in attrs) e.setAttribute(k,attrs[k]);
+  return e;
+}
+
+function clearSvg(){ svg.innerHTML=""; }
+
+function drawAxes(){
+  svg.appendChild(el('line',{x1:30,y1:150,x2:290,y2:150,stroke:'#2a426b','stroke-width':1}));
+  svg.appendChild(el('line',{x1:30,y1:20,x2:30,y2:150,stroke:'#2a426b','stroke-width':1}));
+}
+
+function barGeom(n,{x0=35,gap=10}={}){
+  const totalGap=gap*(n-1);
+  const w=(255-totalGap)/n;
+  const xs=[];
+  for(let i=0;i<n;i++) xs.push(x0+i*(w+gap));
+  return {w,xs};
+}
+
+function renderChart(q){
+  clearSvg();
+  const d=q.data;
+  if(q.chartType==='hist' || q.chartType==='histClick'){
+    drawAxes();
+    const n=d.heights.length;
+    const {w,xs}=barGeom(n,{x0:35,gap:6});
+    d.heights.forEach((h,i)=>{
+      const bar=el('rect',{x:xs[i],y:150-h*0.9,width:w,height:h*0.9,fill:'#56b0ff',rx:2});
+      if(q.chartType==='histClick'){
+        bar.style.cursor='pointer';
+        bar.dataset.idx=i;
+        bar.addEventListener('click',()=>handleClick(i===d.maxIdx,bar));
+      }
+      svg.appendChild(bar);
+      if(d.labels[i]) svg.appendChild(el('text',{x:xs[i]+w/2,y:164,'text-anchor':'middle',fill:'#9ab0d0','font-size':9},)).textContent=d.labels[i];
+    });
+  }
+  else if(q.chartType==='bar' || q.chartType==='barClick'){
+    drawAxes();
+    const n=d.values.length;
+    const {w,xs}=barGeom(n,{x0:40,gap:15});
+    const ymax=d.ymax||Math.max(...d.values)*1.15;
+    d.values.forEach((v,i)=>{
+      const h=(v/ymax)*126;
+      const bar=el('rect',{x:xs[i],y:150-h,width:w,height:h,fill:'#56b0ff',rx:2});
+      if(q.chartType==='barClick'){
+        bar.style.cursor='pointer';
+        bar.addEventListener('click',()=>handleClick(i===d.maxIdx,bar));
+      }
+      svg.appendChild(bar);
+      const t=el('text',{x:xs[i]+w/2,y:164,'text-anchor':'middle',fill:'#9ab0d0','font-size':9});
+      t.textContent=d.labels[i]; svg.appendChild(t);
+    });
+    if(d.yticks){
+      d.yticks.forEach(v=>{
+        const y=150-(v/ymax)*126;
+        const t=el('text',{x:24,y:y+3,'text-anchor':'end',fill:'#9ab0d0','font-size':8});
+        t.textContent=v; svg.appendChild(t);
+      });
+    }
+  }
+  else if(q.chartType==='barTrunc'){
+    drawAxes();
+    const n=d.values.length;
+    const {w,xs}=barGeom(n,{x0:40,gap:15});
+    const range=d.ymax-d.ymin;
+    d.values.forEach((v,i)=>{
+      const h=((v-d.ymin)/range)*126;
+      svg.appendChild(el('rect',{x:xs[i],y:150-h,width:w,height:h,fill:'#56b0ff',rx:2}));
+      const t=el('text',{x:xs[i]+w/2,y:164,'text-anchor':'middle',fill:'#9ab0d0','font-size':9});
+      t.textContent=d.labels[i]; svg.appendChild(t);
+    });
+    const t2=el('text',{x:24,y:24,'text-anchor':'end',fill:'#ffce5a','font-size':8});
+    t2.textContent=d.ymin+'~'; svg.appendChild(t2);
+  }
+  else if(q.chartType==='box' || q.chartType==='boxOutlier'){
+    drawAxes();
+    const y=90;
+    svg.appendChild(el('line',{x1:d.whiskerMin,y1:y,x2:d.whiskerMax,y2:y,stroke:'#9ab0d0','stroke-width':1.5}));
+    svg.appendChild(el('line',{x1:d.whiskerMin,y1:y-10,x2:d.whiskerMin,y2:y+10,stroke:'#9ab0d0','stroke-width':1.5}));
+    svg.appendChild(el('line',{x1:d.whiskerMax,y1:y-10,x2:d.whiskerMax,y2:y+10,stroke:'#9ab0d0','stroke-width':1.5}));
+    svg.appendChild(el('rect',{x:d.boxMin,y:y-20,width:d.boxMax-d.boxMin,height:40,fill:'rgba(86,176,255,.25)',stroke:'#56b0ff','stroke-width':1.5}));
+    svg.appendChild(el('line',{x1:d.median,y1:y-20,x2:d.median,y2:y+20,stroke:'#ffce5a','stroke-width':2}));
+    if(q.chartType==='boxOutlier'){
+      svg.appendChild(el('circle',{cx:d.outlier[0],cy:d.outlier[1],r:4.5,fill:'#ff6b7a'}));
+    }
+  }
+  else if(q.chartType==='scatter' || q.chartType==='scatterClick'){
+    drawAxes();
+    d.points.forEach((p,i)=>{
+      const c=el('circle',{cx:p[0],cy:p[1],r:4,fill:'#56b0ff',stroke:'#cde6ff','stroke-width':0.7});
+      if(q.chartType==='scatterClick'){
+        c.style.cursor='pointer';
+        c.addEventListener('click',()=>handleClick(i===d.outlierIdx,c));
+      }
+      svg.appendChild(c);
+    });
+  }
+  else if(q.chartType==='scatterCurve'){
+    drawAxes();
+    const pts=[];
+    for(let x=40;x<=260;x+=20){
+      const t=(x-150)/60;
+      const y=140-100*Math.exp(-t*t/2);
+      pts.push([x,y]);
+    }
+    pts.forEach(p=>svg.appendChild(el('circle',{cx:p[0],cy:p[1],r:4,fill:'#56b0ff','stroke-width':0})));
+  }
+  else if(q.chartType==='scatterCluster'){
+    drawAxes();
+    const cluster=[[60,120],[70,125],[80,118],[90,122],[100,115],[110,120],[75,110],[95,128],[65,115],[85,112]];
+    cluster.forEach(p=>svg.appendChild(el('circle',{cx:p[0],cy:p[1],r:4,fill:'#56b0ff','stroke-width':0})));
+    svg.appendChild(el('circle',{cx:230,cy:40,r:4.5,fill:'#ff6b7a'}));
+    svg.appendChild(el('circle',{cx:255,cy:150,r:4.5,fill:'#ff6b7a'}));
+  }
+}
+
+function renderQuestion(){
+  answered=false;
+  const q=QUESTIONS[idx];
+  badge.textContent=(idx+1)+" / 12";
+  fill.style.width=((idx)/12*100)+"%";
+  levelEl.textContent=q.levelLabel;
+  qtextEl.textContent=q.q;
+  fbEl.className="fb";
+  fbEl.textContent="";
+  nextBtn.className="next";
+  renderChart(q);
+
+  if(q.opts){
+    hintEl.style.display='none';
+    optsEl.style.display='flex';
+    optsEl.innerHTML="";
+    q.opts.forEach((label,i)=>{
+      const b=document.createElement('button');
+      b.className='opt';
+      b.textContent=label;
+      b.addEventListener('click',()=>selectOption(i,b));
+      optsEl.appendChild(b);
+    });
+  } else {
+    optsEl.style.display='none';
+    optsEl.innerHTML="";
+    hintEl.style.display='block';
+    hintEl.textContent=q.hint||"";
+  }
+}
+
+function selectOption(i,btn){
+  if(answered) return;
+  answered=true;
+  const q=QUESTIONS[idx];
+  const correct = i===q.correct;
+  const buttons=[...optsEl.children];
+  buttons.forEach((b,j)=>{
+    b.disabled=true;
+    if(j===q.correct) b.classList.add('ok');
+    else if(j===i) b.classList.add('no');
+    else b.classList.add('dim');
+  });
+  finishAnswer(correct);
+}
+
+function handleClick(correct,shapeEl){
+  if(answered) return;
+  answered=true;
+  const q=QUESTIONS[idx];
+  shapeEl.setAttribute('stroke', correct?'#2ee6a6':'#ff6b7a');
+  shapeEl.setAttribute('stroke-width',3);
+  // reveal correct target too if wrong
+  if(!correct){
+    const shapes=[...svg.querySelectorAll('rect,circle')];
+    const d=q.data;
+    const correctIdx = d.maxIdx!==undefined ? d.maxIdx : d.outlierIdx;
+    const bars=[...svg.querySelectorAll('rect')];
+    const circles=[...svg.querySelectorAll('circle')];
+    if(q.chartType==='scatterClick' && circles[correctIdx]){
+      circles[correctIdx].setAttribute('stroke','#2ee6a6');
+      circles[correctIdx].setAttribute('stroke-width',3);
+    } else if(bars[correctIdx]){
+      bars[correctIdx].setAttribute('stroke','#2ee6a6');
+      bars[correctIdx].setAttribute('stroke-width',3);
+    }
+  }
+  finishAnswer(correct);
+}
+
+function finishAnswer(correct){
+  const q=QUESTIONS[idx];
+  fbEl.classList.add('show');
+  if(correct){
+    score++;
+    fbEl.classList.add('ok');
+    fbEl.textContent="✅ "+q.fbOk;
+  } else {
+    fbEl.classList.add('no');
+    fbEl.textContent="❌ "+q.fbNo;
+    wrongList.push({q:q.q, explain:q.fbOk});
+  }
+  nextBtn.classList.add('show');
+  nextBtn.textContent = idx===QUESTIONS.length-1 ? "결과 보기" : "다음 ▶";
+}
+
+nextBtn.addEventListener('click',()=>{
+  if(idx===QUESTIONS.length-1){
+    showResult();
+  } else {
+    idx++;
+    renderQuestion();
+  }
 });
-function pickRD(btn,qi,val,a,exp){document.querySelectorAll('[data-qi="'+qi+'"]').forEach(function(b){b.disabled=true;});var fb=document.querySelector('.rdfb-'+qi);if(val===a){btn.classList.add('correct');fb.textContent='✅ '+exp;fb.className='rdfb-'+qi+' fb ok';}else{btn.classList.add('wrong');document.querySelector('[data-qi="'+qi+'"][data-val="'+a+'"]').classList.add('correct');fb.textContent='❌ '+exp;fb.className='rdfb-'+qi+' fb err';}}
-</script>
-<div class="foot">데이터 관리자 기본·실무 교육 · 10차시</div>
-</div></body></html>
+
+function showResult(){
+  quizArea.style.display='none';
+  resultArea.classList.add('show');
+  fill.style.width='100%';
+  document.getElementById('scoreText').textContent=score+" / 12";
+  const note=document.getElementById('noteArea');
+  if(score===12){
+    note.innerHTML='<h3 class="perfect">🎉 만점! 그래프 읽기 완벽합니다.</h3>';
+  } else {
+    let html='<h3>📒 오답노트</h3><ul>';
+    wrongList.forEach(w=>{
+      html+=`<li><b>${w.q}</b><br>→ ${w.explain}</li>`;
+    });
