@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>기술통계 계산기 + 퀴즈 · 9차시</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-user-select:none;user-select:none}
+  :root{--bg:#0e1726;--panel:#17243a;--ink:#eaf2ff;--sub:#9ab0d0;--line:#284064;--ok:#2ee6a6;--no:#ff6b7a;--accent:#46a0ff;--gold:#ffce5a;}
+  body{margin:0;min-height:100vh;background:radial-gradient(120% 90% at 50% 0%,#15294a,#0a111e 70%);
+    color:var(--ink);font-family:"Pretendard","Malgun Gothic","맑은 고딕",system-ui,sans-serif;
+    display:flex;justify-content:center;padding:16px 14px 40px}
+  .wrap{width:100%;max-width:660px}
+  .top{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+  .top h1{font-size:18px;margin-right:auto}
+  .pill{background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:5px 12px;font-size:13px;font-weight:700}
+  .lead{font-size:13px;color:var(--sub);line-height:1.5;margin-bottom:10px}
+  .lead b{color:#fff}
+  .lvname{font-size:12.5px;font-weight:800;color:var(--accent);margin-bottom:8px}
+  .sec{font-size:12px;font-weight:800;color:var(--sub);margin:6px 0 5px;letter-spacing:.03em}
+  /* raw excel-ish */
+  .raw{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+  .rawcol{background:#0d1830;display:flex;flex-direction:column}
+  .rawhead{background:#1c3358;color:#fff;font-weight:800;font-size:13px;text-align:center;padding:7px 4px;position:sticky;top:0}
+  .rawbody{max-height:200px;overflow-y:auto}
+  .rawbody div{font-size:12.5px;text-align:center;padding:3px 4px;border-top:1px solid #16233f;font-variant-numeric:tabular-nums;color:#cfe0ff}
+  .rawnote{font-size:11.5px;color:#7f93b5;margin-top:5px}
+  /* stat buttons + summary */
+  .statbtns{display:flex;flex-wrap:wrap;gap:7px;margin:10px 0}
+  .statbtns button{background:#15294a;border:1px solid var(--accent);color:#bcd6ff;border-radius:9px;padding:8px 12px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit}
+  .statbtns button.on{background:var(--accent);color:#04162a}
+  .summary{width:100%;border-collapse:collapse;font-size:13px;background:var(--panel);border-radius:8px;overflow:hidden}
+  .summary th,.summary td{border:1px solid var(--line);padding:7px 6px;text-align:center}
+  .summary th{background:#1c3358;color:#fff;font-size:12.5px}
+  .summary td.s{color:var(--gold);font-weight:800;font-variant-numeric:tabular-nums}
+  .summary td.lab{color:var(--sub);font-weight:700;text-align:left;padding-left:10px}
+  .summary tr.hidden td.s{color:#3a4f74}
+  /* quiz */
+  .qbox{background:var(--panel);border:2px solid var(--gold);border-radius:14px;padding:16px;margin-top:14px}
+  .q{font-size:16px;font-weight:700;line-height:1.5;margin-bottom:10px}
+  .pickrow{display:flex;gap:10px}
+  .pickrow button{flex:1;border:2px solid var(--line);background:#11203a;color:var(--ink);border-radius:12px;padding:14px;font-size:18px;font-weight:800;cursor:pointer;font-family:inherit}
+  .pickrow button:hover{border-color:var(--gold)}
+  .pickrow button.ok{border-color:var(--ok);background:rgba(46,230,166,.14)} .pickrow button.no{border-color:var(--no);background:rgba(255,107,122,.14)} .pickrow button.dim{opacity:.5}
+  .fb{display:none;margin-top:10px;font-size:13.5px;line-height:1.55;color:#cfe0ff} .fb.show{display:block} .fb b{color:#fff}
+  .next{display:none;margin-top:12px;width:100%;background:linear-gradient(90deg,#46a0ff,#2ee6a6);color:#04162a;font-weight:800;font-size:15px;border:none;border-radius:11px;padding:11px;cursor:pointer}
+  .next.show{display:block}
+  .result{display:none;background:linear-gradient(180deg,#16335a,#0e1f3a);border:1px solid var(--accent);border-radius:16px;padding:22px;text-align:center}
+  .result.show{display:block}
+  .result .sc{font-size:34px;font-weight:900;color:var(--ok);margin:6px 0}
+  .result p{font-size:13.5px;color:#cfe0ff;line-height:1.6}
+  .cnote{background:#11203a;border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:8px;text-align:left}
+  .cnote .cq{font-size:13px;font-weight:700} .cnote .ca{color:var(--ok);font-size:12.5px;font-weight:700;margin-top:3px} .cnote .cw{color:var(--sub);font-size:12px;margin-top:2px}
+  .again{margin-top:8px;background:none;border:1px solid var(--line);color:var(--sub);border-radius:11px;padding:10px 22px;cursor:pointer;font-weight:700}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <h1>📊 기술통계 계산기 + 퀴즈</h1>
+    <span class="pill">레벨 <b id="lv">1</b>/3</span>
+  </div>
+  <p class="lead">눈으로 다 못 보는 데이터는 <b>기술통계 버튼</b>으로 요약해 봅니다. <b>버튼이 곧 계산기</b>예요. 그 값으로 아래 문제를 푸세요.</p>
+  <div class="lvname" id="lvname"></div>
+
+  <div id="play">
+    <div class="sec">📄 원본 데이터 (소요시간, 분)</div>
+    <div class="raw" id="raw"></div>
+    <div class="rawnote" id="rawnote"></div>
+
+    <div class="sec">🧮 기술통계 — 버튼을 눌러 계산</div>
+    <div class="statbtns" id="statbtns"></div>
+    <table class="summary" id="summary"></table>
+
+    <div class="qbox" id="qbox" style="display:none">
+      <div class="q" id="q"></div>
+      <div class="pickrow" id="pick"></div>
+      <div class="fb" id="fb"></div>
+    </div>
+    <button class="next" id="next">다음 ▶</button>
+  </div>
+
+  <div class="result" id="result">
+    <p>기술통계 마스터 점수</p>
+    <div class="sc" id="sc"></div>
+    <p id="rmsg"></p>
+    <div id="notes" style="margin-top:10px"></div>
+    <button class="again" id="again">다시 하기 ↻</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  const DEV = ['A','B','C'];
+  function rnd(a,b){ return Math.floor(Math.random()*(b-a+1))+a; }
+  function gen(n,a,b){ return Array.from({length:n}, () => rnd(a,b)); }
+
+  const STATS = {
+    건수: a => a.length,
+    합계: a => a.reduce((x,y)=>x+y,0),
+    평균: a => Math.round(a.reduce((x,y)=>x+y,0)/a.length*10)/10,
+    중앙값: a => { const s=[...a].sort((x,y)=>x-y), m=s.length>>1; return s.length%2 ? s[m] : (s[m-1]+s[m])/2; },
+    최소: a => Math.min(...a),
+    최대: a => Math.max(...a),
+    표준편차: a => { const m=a.reduce((x,y)=>x+y,0)/a.length; return Math.round(Math.sqrt(a.reduce((x,y)=>x+(y-m)**2,0)/a.length)*10)/10; },
+  };
+  const ORDER = ['건수','합계','평균','중앙값','최소','최대','표준편차'];
+
+  // 레벨별 데이터 생성기 + 질문(stat/pick으로 정답 자동 계산)
+  const LEVELS = [
+    { name:"레벨 1 — 작은 데이터 (눈으로 확인하며 통계 익히기)",
+      gen: () => ({A:[21,20,22,23,21,20], B:[55,60,58], C:[10,12,11,13,250]}),
+      qs: [{t:"정비 대부분이 가장 빨리 끝나는(중앙값이 가장 낮은) 장비는?", st:'중앙값', pick:'min',
+            w:"평균만 보면 C가 제일 느려 보이지만(59분), 250 하나가 평균을 올린 것 — 중앙값은 12로 가장 낮습니다."}],
+      note:"작아서 눈으로도 보이죠? 그래도 버튼으로 값을 확인해 보세요." },
+    { name:"레벨 2 — 중간 데이터 (이제 슬슬 버튼이 필요)",
+      gen: () => ({A:gen(40,18,26), B:gen(6,50,65), C:[...gen(8,8,14),250,300]}),
+      qs: [
+        {t:"정비에 시간을 통틀어 가장 많이 쓴(합계가 가장 큰) 장비는?", st:'합계', pick:'max',
+         w:"평균만 보면 A가 제일 빨라 보이지만(약 22분), 건수가 많아 <b>합계는 A가 1등</b>입니다."},
+        {t:"값이 튀어 담당자 확인이 필요한(최댓값이 비현실적으로 큰) 장비는?", st:'최대', pick:'max',
+         w:"형식은 멀쩡해도 사실은 사람이 확인 — 이상값은 담당자에게(9차시 핵심)."},
+      ], note:"세기 시작하면 헷갈리죠? 버튼으로 계산하세요." },
+    { name:"레벨 3 — 대규모 데이터 (눈으로는 불가능! 기술통계가 필요한 이유)",
+      gen: () => ({A:gen(120,18,26), B:gen(28,50,65), C:[...gen(35,8,14),...gen(5,280,320)]}),
+      qs: [
+        {t:"정비에 시간을 통틀어 가장 많이 쓴(합계가 가장 큰) 장비는?", st:'합계', pick:'max',
+         w:"평균은 A가 꼴찌(약 22분)인데, 건수가 압도적으로 많아 <b>합계는 A가 수천 단위로 1등</b>. 큰 데이터는 눈으로 절대 못 셉니다."},
+        {t:"정비 대부분이 가장 빨리 끝나는(중앙값이 가장 낮은) 장비는?", st:'중앙값', pick:'min',
+         w:"C는 평균이 높지만, 그건 이상값(280~320) 몇 개 탓 — <b>중앙값을 보면 C가 대부분 가장 빠릅니다.</b>"},
+      ], note:"100건이 넘어요. 눈으로 평균·합계를 셀 수 있나요? — 그래서 기술통계입니다." },
+  ];
+
+  const $ = id => document.getElementById(id);
+  let level=0, qi=0, data=null, score=0, busy=false, wrong=[];
+
+  function argpick(st, pick){
+    const vals = DEV.map(d => STATS[st](data[d]));
+    let bi = 0;
+    for(let i=1;i<3;i++){ if(pick==='max' ? vals[i]>vals[bi] : vals[i]<vals[bi]) bi=i; }
+    return bi;
+  }
+
+  function build(){
+    const L = LEVELS[level];
+    data = L.gen();
+    qi = 0;
+    $('lv').textContent = level+1;
+    $('lvname').textContent = L.name;
+    $('rawnote').textContent = L.note;
+
+    // raw table
+    const raw = $('raw');
+    raw.innerHTML = '';
+    DEV.forEach(d => {
+      const col = document.createElement('div');
+      col.className = 'rawcol';
+      col.innerHTML = `<div class="rawhead">장비 ${d}</div><div class="rawbody">${data[d].map(v=>`<div>${v}</div>`).join('')}</div>`;
+      raw.appendChild(col);
+    });
+
+    // stat buttons
+    const sb = $('statbtns');
+    sb.innerHTML = '';
+    ORDER.forEach(st => {
+      const b = document.createElement('button');
+      b.textContent = st;
+      b.dataset.st = st;
+      b.onclick = () => revealStat(st, b);
+      sb.appendChild(b);
+    });
+
+    // summary skeleton
+    const sm = $('summary');
+    sm.innerHTML = `<tr><th>통계</th><th>장비 A</th><th>장비 B</th><th>장비 C</th></tr>` +
+      ORDER.map(st => `<tr class="hidden" id="srow_${st}"><td class="lab">${st}</td><td class="s">—</td><td class="s">—</td><td class="s">—</td></tr>`).join('');
+
+    showQ();
+  }
+
+  function revealStat(st, btn){
+    btn.classList.add('on');
+    const row = $('srow_'+st);
+    row.classList.remove('hidden');
+    const tds = row.querySelectorAll('td.s');
+    DEV.forEach((d,i) => tds[i].textContent = STATS[st](data[d]));
+  }
+
+  function showQ(){
+    busy = false;
+    const q = LEVELS[level].qs[qi];
+    $('q').textContent = q.t;
+    const pr = $('pick');
+    pr.innerHTML = '';
+    DEV.forEach((d,i) => {
+      const b = document.createElement('button');
+      b.textContent = '장비 '+d;
+      b.onclick = () => pick(i,b);
+      pr.appendChild(b);
+    });
+    $('qbox').style.display = 'block';
+    $('fb').className = 'fb';
+    $('next').className = 'next';
+  }
+
+  function pick(i, btn){
+    if(busy) return;
+    busy = true;
+    const q = LEVELS[level].qs[qi];
+    const corr = argpick(q.st, q.pick);
+    const ok = (i === corr);
+    if(ok) score++;
+    else wrong.push({q:q.t, a:'장비 '+DEV[corr], w:q.w});
+    [...$('pick').children].forEach((b,j) => {
+      b.disabled = true;
+      if(j===corr) b.classList.add('ok');
+      else if(j===i) b.classList.add('no');
+      else b.classList.add('dim');
+    });
+    const fb = $('fb');
+    fb.className = 'fb show';
+    fb.innerHTML = (ok ? `✅ 정답! 장비 ${DEV[corr]}. ` : `아쉬워요 — 정답은 장비 ${DEV[corr]}. `) + q.w;
+    const lastQ = qi >= LEVELS[level].qs.length-1, lastL = level >= LEVELS.length-1;
+    $('next').textContent = (lastQ&&lastL) ? '결과 보기' : (lastQ ? '다음 레벨 ▶' : '다음 문제 ▶');
+    $('next').className = 'next show';
+  }
+
+  $('next').onclick = () => {
+    if(qi < LEVELS[level].qs.length-1){
+      qi++; showQ();
+      $('qbox').scrollIntoView({behavior:'smooth', block:'nearest'});
+      return;
+    }
+    if(level < LEVELS.length-1){
+      level++; build();
+      window.scrollTo({top:0, behavior:'smooth'});
+    } else finish();
+  };
+
+  function finish(){
+    $('play').style.display = 'none';
+    const r = $('result');
+    r.classList.add('show');
+    const tot = LEVELS.reduce((s,l) => s+l.qs.length, 0);
+    $('sc').textContent = `${score} / ${tot}`;
+    $('rmsg').innerHTML = '핵심: <b>평균만 보지 마세요.</b> 합계·중앙값·표준편차·최대/최소를 함께 봐야 큰 데이터를 정확히 압니다. 데이터가 클수록 — 눈이 아니라 <b>기술통계</b>로!';
+    const notes = $('notes');
+    notes.innerHTML = wrong.length
+      ? '<div style="font-weight:800;text-align:left;margin-bottom:6px">📒 오답노트</div>' +
+        wrong.map(x => `<div class="cnote"><div class="cq">${x.q}</div><div class="ca">정답: ${x.a}</div><div class="cw">${x.w}</div></div>`).join('')
+      : '<div style="color:var(--ok);font-weight:700">오답 없음 — 완벽!</div>';
+  }
+
+  $('again').onclick = () => {
+    level=0; score=0; wrong=[];
+    $('result').classList.remove('show');
+    $('play').style.display = '';
+    build();
+  };
+
+  build();
+})();
+</script>
+</body>
+</html>

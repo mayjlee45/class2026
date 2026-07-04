@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>9차시 복습 · O/X 퀴즈쇼</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-user-select:none;user-select:none}
+  :root{--bg:#1a1330;--panel:#2a1f4d;--ink:#fdf6ff;--sub:#c7b6e8;--line:#43356e;--ok:#39e0a6;--no:#ff5e86;--gold:#ffd24a;}
+  body{margin:0;min-height:100vh;background:radial-gradient(80% 60% at 50% 0%,#3a2a6e,#150f28 70%);
+    color:var(--ink);font-family:"Pretendard","Malgun Gothic","맑은 고딕",system-ui,sans-serif;
+    display:flex;justify-content:center;padding:18px 14px 40px;overflow:hidden}
+  .wrap{width:100%;max-width:580px}
+  .top{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+  .top h1{font-size:18px;font-weight:900;margin-right:auto;color:var(--gold);letter-spacing:.02em}
+  .pill{background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:5px 12px;font-size:13px;font-weight:800}
+  .pill b{color:var(--gold)}
+  .lead{font-size:13px;color:var(--sub);margin-bottom:12px;line-height:1.5}
+  .lead b{color:#fff}
+  .timer{height:12px;border-radius:999px;background:#1c1438;border:1px solid var(--line);overflow:hidden;margin-bottom:14px}
+  .timer>span{display:block;height:100%;width:100%;background:linear-gradient(90deg,#39e0a6,#ffd24a,#ff5e86)}
+  .stage{position:relative;min-height:230px;display:flex;align-items:center;justify-content:center;margin-bottom:14px}
+  .card{width:100%;background:linear-gradient(180deg,#332456,#241a44);border:2px solid var(--line);border-radius:20px;
+    padding:30px 24px;text-align:center;box-shadow:0 14px 40px rgba(0,0,0,.5)}
+  .card .tag{font-size:13px;font-weight:800;color:var(--gold);margin-bottom:12px;letter-spacing:.05em}
+  .card .q{font-size:21px;font-weight:800;line-height:1.5}
+  .btns{display:flex;gap:14px}
+  .btns button{flex:1;height:74px;border-radius:16px;border:3px solid;cursor:pointer;font-size:24px;font-weight:900;
+    background:#241a44;font-family:inherit;box-shadow:0 8px 22px rgba(0,0,0,.4);transition:transform .08s}
+  .btns button:active{transform:scale(.95)}
+  .bx{border-color:var(--no);color:var(--no)} .bo{border-color:var(--ok);color:var(--ok)}
+  .blabel{display:flex;justify-content:space-between;margin-top:6px;font-size:12px;color:var(--sub);padding:0 8px}
+  .flash{position:fixed;inset:0;pointer-events:none;opacity:0;z-index:60}
+  .flash.f-ok{background:radial-gradient(circle,rgba(57,224,166,.5),transparent 72%);animation:fl .5s ease}
+  .flash.f-no{background:radial-gradient(circle,rgba(255,94,134,.55),transparent 72%);animation:fl .5s ease}
+  @keyframes fl{0%{opacity:1}100%{opacity:0}}
+  .result{display:none;background:linear-gradient(180deg,#2a1f4d,#1a1330);border:1px solid var(--gold);border-radius:18px;padding:24px;text-align:center}
+  .result.show{display:block}
+  .result h2{font-size:23px;margin-bottom:4px;color:var(--gold)}
+  .result .sc{font-size:42px;font-weight:900;color:var(--ok);margin:6px 0}
+  .note{background:#231a42;border:1px solid var(--line);border-radius:11px;padding:11px 13px;margin-bottom:8px;text-align:left}
+  .note .nq{font-size:13.5px;font-weight:700} .note .na{font-size:12.5px;color:var(--ok);font-weight:700;margin-top:3px} .note .nw{font-size:12px;color:var(--sub);margin-top:2px}
+  .again{margin-top:8px;background:linear-gradient(90deg,#ffd24a,#39e0a6);color:#22153f;font-weight:900;border:none;border-radius:12px;padding:12px 28px;cursor:pointer;font-size:16px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <h1>🎬 9차시 O/X 퀴즈쇼</h1>
+    <span class="pill"><b id="idx">1</b>/<span id="tot">8</span></span>
+    <span class="pill" id="combopill" style="display:none;color:#ffd24a">🔥 <b id="combo">0</b> 콤보</span>
+    <span class="pill">점수 <b id="score">0</b></span>
+  </div>
+  <p class="lead">설명이 <b>맞으면 O</b>, <b>틀리면 X</b> — <b>제한 시간 안에</b> 누르세요! (시간 초과 = 오답)</p>
+  <div class="timer"><span id="tbar"></span></div>
+
+  <div class="stage" id="stage">
+    <div class="card" id="card"><div class="tag">맞는 설명일까요?</div><div class="q" id="q"></div></div>
+    <div class="result" id="result">
+      <h2 id="rt"></h2><div class="sc" id="sc"></div>
+      <div id="notes"></div>
+      <button class="again" id="again">다시 하기 ↻</button>
+    </div>
+  </div>
+
+  <div class="btns" id="btns">
+    <button class="bx" id="bx">✗ 틀림</button>
+    <button class="bo" id="bo">○ 맞음</button>
+  </div>
+  <div class="blabel"><span>← X</span><span>키보드 ← / → 도 가능</span><span>O →</span></div>
+</div>
+<div class="flash" id="flash"></div>
+
+<script>
+(function(){
+  const Q = [
+    {q:"데이터 관리자의 주 역할은 직접 분석해 인사이트를 뽑는 것이다.", a:false,
+     why:"관리자는 '분석 가능한 상태'를 만드는 사람. 분석은 활용자의 역할입니다."},
+    {q:"기술통계는 데이터를 요약해 한눈에 보여주는 값들이다(평균·표준편차 등).", a:true,
+     why:"맞습니다 — '데이터의 재고표'."},
+    {q:"두 값이 함께 움직이면(상관) 하나가 다른 하나의 원인이다.", a:false,
+     why:"상관 ≠ 인과. 함께 움직여도 원인이라는 뜻은 아닙니다(교란변수 주의)."},
+    {q:"평균이 같으면 두 데이터는 항상 비슷하다.", a:false,
+     why:"평균이 같아도 퍼짐(표준편차)이 다르면 전혀 다른 데이터입니다."},
+    {q:"이상값(극단값) 하나가 평균을 크게 왜곡할 수 있다.", a:true,
+     why:"맞습니다 — 그래서 중앙값도 함께 봐야 합니다."},
+    {q:"교란변수는 두 값 모두에 영향을 주는 '숨은 요인'이다.", a:true,
+     why:"맞습니다(예: 노후 → 정비도↑ 고장도↑)."},
+    {q:"인과관계는 데이터만 있으면 쉽게 증명할 수 있다.", a:false,
+     why:"인과 입증은 변수를 통제·실험해야 해서 매우 어렵습니다."},
+    {q:"관리자에겐 상관·인과 분석보다 기술통계로 데이터를 정확히 파악하는 게 더 핵심이다.", a:true,
+     why:"맞습니다 — 분석 가능한 상태를 만드는 게 관리자의 일."},
+    {q:"중앙값은 이상값에 평균보다 강건하다(덜 흔들린다).", a:true,
+     why:"맞습니다 — 그래서 평균과 함께 봅니다."},
+    {q:"표준편차가 클수록 값들이 평균 가까이 모여 있다.", a:false,
+     why:"반대입니다. 표준편차가 크면 넓게 흩어져 있다는 뜻."},
+    {q:"히스토그램의 오른쪽 꼬리가 길면(우편포) 평균이 중앙값보다 크다.", a:true,
+     why:"큰 값 몇 개가 평균을 끌어올립니다 — 평균>중앙값."},
+    {q:"산점도에서 점이 우상향으로 모이면 음(−)의 상관이다.", a:false,
+     why:"우상향은 양(+)의 상관입니다."},
+    {q:"표본이 작으면 우연한 차이도 크게(유의미해) 보일 수 있다.", a:true,
+     why:"맞습니다 — '보인다고 다 진짜'는 아닙니다."},
+    {q:"메타데이터는 '어떻게 기록됐나', 기술통계는 '내용이 어떤가'를 알려준다.", a:true,
+     why:"맞습니다 — 둘을 잇는 게 데이터 프로파일링."},
+  ];
+
+  document.getElementById('tot').textContent = Q.length;
+  const DUR = 7000;
+  const $ = id => document.getElementById(id);
+  let i=0, score=0, wrong=[], busy=false, rafId=0, tStart=0, combo=0, best=0;
+
+  function show(){
+    busy = false;
+    $('idx').textContent = i+1;
+    $('q').textContent = Q[i].q;
+    tStart = performance.now();
+    cancelAnimationFrame(rafId);
+    rafId = requestAnimationFrame(tick);
+  }
+
+  function tick(now){
+    const left = Math.max(0, 1-(now-tStart)/DUR);
+    $('tbar').style.width = (left*100)+'%';
+    if(left <= 0){ judge(null); return; }
+    rafId = requestAnimationFrame(tick);
+  }
+
+  function judge(userYes){
+    if(busy) return;
+    busy = true;
+    cancelAnimationFrame(rafId);
+    const d = Q[i];
+    const correct = (userYes === d.a);
+    if(correct){ score++; combo++; if(combo>best) best=combo; }
+    else { wrong.push(d); combo=0; }
+    $('score').textContent = score;
+    const cp = $('combopill');
+    if(combo >= 2){ cp.style.display=''; $('combo').textContent=combo; }
+    else { cp.style.display='none'; }
+    const fl = $('flash');
+    fl.className = 'flash';
+    void fl.offsetWidth;
+    fl.classList.add(correct ? 'f-ok' : 'f-no');
+    setTimeout(() => { i++; if(i<Q.length) show(); else finish(); }, 480);
+  }
+
+  $('bo').onclick = () => judge(true);
+  $('bx').onclick = () => judge(false);
+  document.addEventListener('keydown', e => {
+    if(e.key==='ArrowRight') judge(true);
+    if(e.key==='ArrowLeft') judge(false);
+  });
+
+  function finish(){
+    cancelAnimationFrame(rafId);
+    $('tbar').style.width = '0%';
+    $('btns').style.visibility = 'hidden';
+    document.querySelector('.blabel').style.visibility = 'hidden';
+    $('card').style.display = 'none';
+    const r = $('result');
+    r.classList.add('show');
+    $('rt').textContent = score===Q.length ? '🏆 퍼펙트!' : (score>=6 ? '잘했어요!' : '복습 한 번 더!');
+    $('sc').textContent = `${score} / ${Q.length}`;
+    const streak = `<div style="color:#ffd24a;font-weight:800;margin:2px 0 12px;font-size:15px">🔥 최고 연속 정답 ${best}개${best===Q.length?' · 전부 연속!':''}</div>`;
+    const notes = $('notes');
+    if(wrong.length === 0){
+      notes.innerHTML = streak + '<div style="color:var(--ok);font-weight:700;margin-bottom:8px">오답 없음 — 완벽!</div>';
+    } else {
+      notes.innerHTML = streak + '<div style="font-weight:800;margin:4px 0 8px;text-align:left">📒 오답노트</div>' +
+        wrong.map(d => `<div class="note"><div class="nq">${d.q}</div><div class="na">정답: ${d.a?'O (맞음)':'X (틀림)'}</div><div class="nw">${d.why}</div></div>`).join('');
+    }
+  }
+
+  $('again').onclick = () => {
+    i=0; score=0; wrong=[]; combo=0; best=0;
+    $('score').textContent = '0';
+    $('combopill').style.display = 'none';
+    $('result').classList.remove('show');
+    $('btns').style.visibility = '';
+    document.querySelector('.blabel').style.visibility = '';
+    $('card').style.display = '';
+    show();
+  };
+
+  show();
+})();
+</script>
+</body>
+</html>
