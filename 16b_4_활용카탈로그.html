@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>16차시 · 이어 다듬기 + AI 활용 카탈로그</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{--bg:#FAF8F3;--ink:#23272e;--sub:#6b7280;--card:#fff;--line:#e7e3d8;--accent:#2f6df6;--ok:#1f8f5f;}
+  body{font-family:"Pretendard","Apple SD Gothic Neo","맑은 고딕",system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.6;max-width:720px;margin:0 auto;padding:24px 16px 56px}
+  h1{font-size:22px;font-weight:800;margin-bottom:4px}
+  .lead{font-size:13.5px;color:var(--sub);margin-bottom:16px}
+  .step{font-size:11.5px;font-weight:800;color:var(--accent);letter-spacing:.04em;margin:24px 0 8px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;margin-bottom:10px;overflow:hidden}
+  .ch{display:flex;align-items:center;gap:8px;padding:11px 14px;border-bottom:1px solid var(--line)}
+  .ch h3{font-size:14.5px;font-weight:700;margin-right:auto}
+  .ch .eff{font-size:11.5px;color:var(--sub);font-weight:500}
+  .copy{background:var(--accent);color:#fff;border:none;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;flex-shrink:0}
+  .copy.done{background:var(--ok)}
+  .cb{padding:12px 14px;font-size:12.5px;white-space:pre-wrap;font-family:"D2Coding","Consolas",monospace;color:#1d3a6b;background:#f4f7fc}
+  .num{display:inline-block;width:20px;height:20px;border-radius:6px;background:#eef1f5;color:#334;font-size:11px;font-weight:800;text-align:center;line-height:20px;margin-right:2px}
+  .tip{background:#eef6ff;border-left:3px solid #5b8fd6;border-radius:8px;padding:10px 13px;font-size:12.5px;color:#2c466b;margin:9px 0}
+  .foot{font-size:12px;color:#a39c8e;text-align:center;margin-top:26px}
+</style>
+</head>
+<body>
+  <h1>🪄 이어 다듬기 + AI 활용 카탈로그</h1>
+  <p class="lead">15차시에서 만든 표를 <b>이어서 다듬어</b> 봅니다. 그리고 아래 <b>8가지 활용</b>은 두고두고 꺼내 쓰세요. (복사 버튼 → 자동 선택+복사, 안 되면 Ctrl+C)</p>
+
+  <div class="step">A · 15차시 결과물 이어 다듬기 (복붙)</div>
+  <div class="card"><div class="ch"><h3>① 발전 제안 받기</h3><span class="eff">빠진 관점 짚기</span><button class="copy" data-t="r1">복사</button></div>
+    <div class="cb" id="r1">방금 만든 표야. 여기서 빠진 거 뭐야? 더 넣으면 좋을 항목을 이유와 함께 제안해줘.
+
+[15차시에서 만든 표 붙여넣기]</div></div>
+  <div class="card"><div class="ch"><h3>② 가독성 좋게</h3><span class="eff">핵심 먼저</span><button class="copy" data-t="r2">복사</button></div>
+    <div class="cb" id="r2">이 표를 가독성 좋게 정리해줘. 핵심이 먼저 보이게, 불필요한 건 빼고.</div></div>
+  <div class="card"><div class="ch"><h3>③ 근거로 판단</h3><span class="eff">검증 관점</span><button class="copy" data-t="r3">복사</button></div>
+    <div class="cb" id="r3">네가 제안한 것 중, 우리 실제 데이터로 확인해야 맞는지 알 수 있는 항목은 뭐야? 무엇을 보면 되는지 알려줘.</div></div>
+  <div class="tip">💡 토큰이 막히면 — 결과를 복사해 <b>다른 AI</b>(Claude·GPT·Gemini)에 "이거 더 깔끔하게 만들어줘"로 이어가면 됩니다. <b>채택은 우리 데이터가 받쳐주는 것만</b> — 판단은 사람이.</div>
+
+  <div class="step">B · AI 활용 8가지 카탈로그 (군/업무 맥락 예시)</div>
+
+  <div class="card"><div class="ch"><h3><span class="num">1</span> 학습</h3><span class="eff">개념·용어 습득</span><button class="copy" data-t="c1">복사</button></div>
+    <div class="cb" id="c1">데이터 관리에서 '메타데이터'와 '기술통계'의 차이를, 처음 듣는 사람도 이해하게 일상 예시로 설명해줘.</div></div>
+
+  <div class="card"><div class="ch"><h3><span class="num">2</span> 정보수집</h3><span class="eff">빠른 정리</span><button class="copy" data-t="c2">복사</button></div>
+    <div class="cb" id="c2">노코드 데이터 분석 도구의 종류와 각 장단점을 표로 정리해줘. 가능하면 출처도 같이.</div></div>
+
+  <div class="card"><div class="ch"><h3><span class="num">3</span> 바이브코딩</h3><span class="eff">코드 결과를 코드 없이</span><button class="copy" data-t="c3">복사</button></div>
+    <div class="cb" id="c3">정비일지 엑셀에서 '소요시간'의 음수·9999 행을 제거하는 파이썬 코드를 짜줘. 한 줄씩 주석 달아서, 초보도 이해하게.</div></div>
+
+  <div class="card"><div class="ch"><h3><span class="num">4</span> 문서작성</h3><span class="eff">초안 생성</span><button class="copy" data-t="c4">복사</button></div>
+    <div class="cb" id="c4">장비 정비 지연 현황을 보고하는 공문 초안을 작성해줘. 두괄식, 한 장, 개조식으로. 실제 수치 자리는 [ ]로 비워줘.</div></div>
+
+  <div class="card"><div class="ch"><h3><span class="num">5</span> 검토·벽치기</h3><span class="eff">허점 찾기</span><button class="copy" data-t="c5">복사</button></div>
+    <div class="cb" id="c5">아래 내 보고서에서 논리 허점, 빠진 관점, 반박당할 지점을 짚어줘.
+
+[내 글 붙여넣기]</div></div>
+
+  <div class="card"><div class="ch"><h3><span class="num">6</span> 변환</h3><span class="eff">비정형→정형</span><button class="copy" data-t="c6">복사</button></div>
+    <div class="cb" id="c6">아래 줄글 메모를 안건/담당/기한/상태 표로. 없는 건 지어내지 말고 '미정'. 표만 출력.
+
+[메모 붙여넣기]</div></div>
+
+  <div class="card"><div class="ch"><h3><span class="num">7</span> 요약·질의</h3><span class="eff">조항 추출</span><button class="copy" data-t="c7">복사</button></div>
+    <div class="cb" id="c7">이 규정에서 '정비 지연 보고'에 해당하는 조항만 번호·원문 인용해서. 추측 말고 문서 기준으로만.
+
+[규정 붙여넣기]</div></div>
+
+  <div class="card"><div class="ch"><h3><span class="num">8</span> 기록·정리</h3><span class="eff">구조화</span><button class="copy" data-t="c8">복사</button></div>
+    <div class="cb" id="c8">아래 일일 작업 메모를 날짜/작업/담당/결과 표로 정리해줘.
+
+[작업 메모 붙여넣기]</div></div>
+
+  <div class="tip">⚠️ 공통: <b>결과는 반드시 검토</b>(지어낸 것·빠진 것 확인). 그리고 <b>실데이터 금지</b> — 가공 샘플만(17차시).</div>
+
+  <p class="foot">강사 박지윤 · 데이터 관리자 기본·실무 교육</p>
+<script>
+  document.querySelectorAll('.copy').forEach(b=>{
+    b.onclick=()=>{ const el=document.getElementById(b.dataset.t);
+      const r=document.createRange(); r.selectNodeContents(el);
+      const sel=getSelection(); sel.removeAllRanges(); sel.addRange(r);
+      let ok=false; try{ ok=document.execCommand('copy'); }catch(e){}
+      try{ if(navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(el.innerText); }catch(e){}
+      b.textContent= ok ? '✓ 복사됨' : '선택됨 · Ctrl+C'; b.classList.add('done');
+      setTimeout(()=>{ b.textContent='복사'; b.classList.remove('done'); sel.removeAllRanges(); },1900); };
+  });
+</script>
+</body>
+</html>
