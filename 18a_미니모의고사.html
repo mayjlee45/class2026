@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>미니 모의고사 (18차시)</title>
+<style>
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:-apple-system,"Apple SD Gothic Neo","맑은 고딕",sans-serif; background:#FAFAF8; color:#2C2C2A; line-height:1.6; max-width:640px; margin:0 auto; padding:28px 16px; }
+  h1 { font-size:22px; font-weight:600; margin-bottom:4px; }
+  .sub { font-size:13px; color:#5F5E5A; margin-bottom:20px; }
+  .bar { font-size:14px; color:#5F5E5A; margin-bottom:14px; } .bar b{ font-size:18px; color:#2C2C2A; }
+  .card { background:#fff; border:1px solid #E6E3DA; border-radius:14px; padding:20px; margin-bottom:14px; }
+  .q { font-size:16px; font-weight:600; margin-bottom:14px; }
+  .opt { display:block; width:100%; text-align:left; padding:12px 14px; margin-bottom:9px; border:1px solid #CFC9BC; background:#fff; border-radius:10px; font-size:15px; cursor:pointer; font-family:inherit; color:#2C2C2A; }
+  .opt:hover { background:#F1EFE8; }
+  .fb { margin-top:6px; padding:10px 14px; border-radius:8px; font-size:14px; display:none; }
+  .fb.ok { background:#E1F5EE; color:#085041; } .fb.no { background:#FAEAE6; color:#8A2A1A; }
+  .card.done .opt { pointer-events:none; opacity:.6; } .card.done .fb { display:block; }
+  .result { text-align:center; background:#EEEDFE; color:#3C3489; border-radius:14px; padding:24px; font-size:18px; display:none; }
+  .reset { display:block; margin:16px auto 0; padding:9px 20px; border:1px solid #CFC9BC; background:#fff; border-radius:8px; font-size:13px; cursor:pointer; color:#5F5E5A; }
+</style>
+</head>
+<body>
+  <h1>📝 미니 모의고사</h1>
+  <p class="sub">18차시 · 기록 안 되니 편하게! 기억 되살리기용이에요. (5문항)</p>
+  <div class="bar">맞힌 개수 <b id="score">0</b> / 5</div>
+  <div id="cards"></div>
+  <div class="result" id="result"></div>
+  <button class="reset" onclick="init()">다시 하기</button>
+<script>
+const QS = [
+  { q:"1. 품질 4대 기준 중 '값이 비어 있다'는?", opts:["완전성","유효성","일관성","정확성"], a:0 },
+  { q:"2. 메타데이터를 한 마디로 하면?", opts:["데이터 설명서","데이터 청소","데이터 압축"], a:0 },
+  { q:"3. AI에 절대 입력하면 안 되는 것은?", opts:["공개 자료","민감·실데이터","연습용 더미"], a:1 },
+  { q:"4. AI 답을 받으면 꼭 해야 할 일은?", opts:["바로 보고","사람이 검증","즉시 삭제"], a:1 },
+  { q:"5. '쓰레기를 넣으면 ___가 나온다'", opts:["보석","쓰레기","오류 메시지"], a:1 },
+];
+let score=0, done=0;
+function init(){
+  score=0; done=0;
+  document.getElementById("score").textContent=0;
+  document.getElementById("result").style.display="none";
+  const w=document.getElementById("cards"); w.innerHTML="";
+  QS.forEach((it,i)=>{ const c=document.createElement("div"); c.className="card";
+    c.innerHTML='<div class="q">'+it.q+'</div>'+
+      it.opts.map((o,j)=>'<button class="opt" onclick="pick('+i+','+j+',this)">'+o+'</button>').join('')+
+      '<div class="fb" id="fb'+i+'"></div>'; w.appendChild(c); });
+}
+function pick(i,j,btn){ const it=QS[i]; const card=btn.closest(".card"); if(card.classList.contains("done"))return;
+  const fb=document.getElementById("fb"+i); const ok=j===it.a; if(ok)score++;
+  document.getElementById("score").textContent=score;
+  fb.className="fb "+(ok?"ok":"no"); fb.innerHTML=ok?"✅ 정답!":"❌ 정답: <b>"+it.opts[it.a]+"</b>";
+  card.classList.add("done"); done++;
+  if(done===QS.length){ const r=document.getElementById("result"); r.style.display="block";
+    r.innerHTML="🎉 <b>"+score+" / 5</b> 정답!<br><span style='font-size:14px'>3일간 정말 수고하셨습니다 🙂</span>"; }
+}
+init();
+</script>
+</body>
+</html>
