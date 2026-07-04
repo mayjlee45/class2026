@@ -2,192 +2,263 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>숫자는 같은데, 그림은? · 안스콤 콰르텟</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>숫자는 같은데 그림은? · 안스콤 콰르텟</title>
 <style>
-  :root{
-    --mint:#e3f8f0; --mint-dark:#0f9d78; --ink:#1f2a24; --sub:#5b6b63;
-    --card:#ffffff; --border:#d9ece3; --pink:#e85d9c;
-  }
-  *{box-sizing:border-box;}
-  body{margin:0; padding:24px; background:#f4faf7; font-family:"Pretendard","Apple SD Gothic Neo","Malgun Gothic",sans-serif; color:var(--ink);}
-  .wrap{max-width:720px; margin:0 auto;}
-  h1{font-size:22px; margin-bottom:8px;}
-  .lead{color:var(--sub); font-size:14px; line-height:1.7; margin-bottom:18px;}
-
-  .statbox{background:var(--card); border:1px solid var(--border); border-radius:14px; padding:18px 20px; margin-bottom:18px;}
-  .statbox h2{font-size:15px; margin:0 0 12px;}
-  .stat-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:8px 16px; font-size:14px;}
-  .stat-grid div span{color:var(--mint-dark); font-weight:700;}
-  .statnote{margin-top:10px; font-size:12px; color:var(--sub);}
-
-  .panel{background:var(--card); border:1px solid var(--border); border-radius:14px; padding:20px;}
-  .panel h2{font-size:15px; margin:0 0 12px;}
-  .tabs{display:flex; gap:8px; margin-bottom:14px; flex-wrap:wrap;}
-  .tabs button{padding:8px 16px; border-radius:20px; border:1px solid var(--mint-dark); background:var(--mint); color:var(--mint-dark); font-size:13px; font-weight:600; cursor:pointer;}
-  .tabs button.active{background:var(--mint-dark); color:#fff;}
-  canvas{width:100%; height:auto; background:#fbfffd; border-radius:10px;}
-  .reading{margin-top:14px; font-size:13px; line-height:1.7; background:var(--mint); padding:12px 14px; border-radius:10px; color:#0b5c44;}
-
-  .quizbtn{display:block; width:100%; margin-top:16px; padding:10px; border-radius:10px; border:none; background:var(--ink); color:#fff; font-size:14px; cursor:pointer;}
-  .quizbtn:disabled{background:#b9c7c0; cursor:not-allowed;}
-
-  .quiz{margin-top:18px; padding-top:16px; border-top:1px dashed var(--border);}
-  .quiz p.q{font-size:14px; font-weight:600; margin-bottom:10px;}
-  .quiz .opt{display:block; width:100%; text-align:left; margin-bottom:8px; padding:10px 14px; border-radius:10px; border:1px solid var(--border); background:#fff; font-size:13px; cursor:pointer;}
-  .opt.correct{border-color:var(--mint-dark); background:var(--mint);}
-  .opt.wrong{border-color:var(--pink); background:#fdeaf2;}
-  .feedback{margin-top:10px; font-size:13px; line-height:1.7; padding:12px 14px; border-radius:10px;}
-  .feedback.ok{background:var(--mint); color:#0b5c44;}
-  .feedback.no{background:#fdeaf2; color:#9c1f5a;}
-  .hidden{display:none;}
+:root{
+  --bg:#101826; --panel:#19283f; --ink:#eaf2ff; --sub:#9ab0d0; --line:#2a426b;
+  --ok:#2ee6a6; --no:#ff6b7a; --accent:#56b0ff; --gold:#ffce5a;
+}
+*{box-sizing:border-box;margin:0;padding:0;user-select:none;}
+body{
+  min-height:100vh;
+  background:radial-gradient(120% 90% at 50% 0%, #152a4a, #0a111e 70%);
+  color:var(--ink);
+  font-family:Pretendard,"Malgun Gothic","맑은 고딕",system-ui,sans-serif;
+  display:flex; justify-content:center; padding:18px 14px 40px;
+}
+.wrap{width:100%; max-width:620px;}
+.top{display:flex; align-items:center; gap:8px; margin-bottom:6px;}
+.top h1{font-size:18px; margin-right:auto;}
+.lead{font-size:13.5px; color:var(--sub); line-height:1.55; margin-bottom:12px;}
+.lead b{color:#fff;}
+.sec{font-size:12px; font-weight:800; color:var(--sub); margin:8px 0 6px; letter-spacing:.03em;}
+.stats{display:flex; flex-wrap:wrap; gap:8px; background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:12px; margin-bottom:6px;}
+.stat{font-size:13px;}
+.stat b{color:var(--gold);}
+.same{font-size:12px; color:var(--gold); font-weight:700; margin-bottom:12px;}
+.tabs{display:flex; gap:7px; margin-bottom:10px;}
+.tabs button{flex:1 1 0; background:#16263f; border:1px solid var(--line); color:var(--sub); border-radius:10px; padding:9px; font-weight:800; cursor:pointer; font-family:inherit;}
+.tabs button.on{border-color:var(--accent); color:#fff; background:#1d3556;}
+.chartbox{background:#0c1626; border:1px solid var(--line); border-radius:12px; padding:8px; margin-bottom:6px;}
+.chartbox svg{width:100%; height:auto; display:block;}
+.chartcap{font-size:12.5px; color:var(--sub); text-align:center; margin-bottom:12px;}
+.startQ{display:block; margin:8px auto 0; background:var(--gold); color:#22153f; font-weight:800; border:none; border-radius:11px; padding:11px 24px; cursor:pointer; font-size:15px;}
+.qbox{background:var(--panel); border:2px solid var(--gold); border-radius:14px; padding:16px; margin-top:6px; display:none;}
+.qbox.show{display:block;}
+.q{font-size:15.5px; font-weight:700; line-height:1.5; margin-bottom:10px;}
+.opts{display:flex; flex-direction:column; gap:8px;}
+.opt{text-align:left; background:#11203a; border:1.5px solid var(--line); border-radius:10px; padding:12px; font-size:14px; color:var(--ink); cursor:pointer; font-family:inherit; width:100%;}
+.opt:hover{border-color:var(--gold);}
+.opt.ok{border-color:var(--ok); background:rgba(46,230,166,.13);}
+.opt.no{border-color:var(--no); background:rgba(255,107,122,.13);}
+.opt.dim{opacity:.5;}
+.fb{display:none; margin-top:10px; font-size:13.5px; color:#cfe0ff; line-height:1.55;}
+.fb.show{display:block;}
+.fb b{color:#fff;}
+.next{display:none; margin-top:10px; width:100%; background:linear-gradient(90deg,#56b0ff,#2ee6a6); color:#04162a; font-weight:800; font-size:15px; border:none; border-radius:11px; padding:11px; cursor:pointer;}
+.next.show{display:block;}
+.result{display:none; background:linear-gradient(#16335a,#0e1f3a); border:1px solid var(--accent); border-radius:16px; padding:22px; text-align:center;}
+.result.show{display:block;}
+.result .sc{font-size:34px; font-weight:900; color:var(--ok);}
+.result p{font-size:13.5px; color:#cfe0ff; margin-top:10px; line-height:1.6;}
+.again{margin-top:10px; background:none; border:1px solid var(--line); color:var(--sub); border-radius:11px; padding:10px 22px; cursor:pointer; font-weight:700;}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <h1>🔢🆚📈 숫자는 같은데, 그림은?</h1>
-  <p class="lead">아래 네 데이터셋은 평균·상관 같은 기술통계가 완전히 똑같습니다. 그런데 그래프로 그리면 어떨까요? 직접 눌러서 확인하고, 그래프를 봐야만 풀리는 문제에 도전하세요. (안스콤 콰르텟)</p>
+  <div class="top"><h1>🔢🆚📈 숫자는 같은데, 그림은?</h1></div>
+  <p class="lead">아래 네 데이터셋은 <b>평균·상관 같은 기술통계가 완전히 똑같습니다.</b> 그런데 <b>그래프로 그리면?</b> 직접 눌러서 확인하고, 그래프를 봐야만 풀리는 문제에 도전하세요. (안스콤 콰르텟)</p>
 
-  <div class="statbox">
-    <h2>📊 네 데이터셋의 기술통계 (전부 동일!)</h2>
-    <div class="stat-grid">
-      <div>x 평균 <span>9.0</span></div>
-      <div>y 평균 <span>7.5</span></div>
-      <div>x 분산 <span>11.0</span></div>
-      <div>상관계수 <span>0.82</span></div>
-      <div>추세선 <span>y = 3 + 0.5x</span></div>
-    </div>
-    <p class="statnote">↑ 데이터셋 I·II·III·IV가 이 숫자들은 전부 똑같습니다.</p>
+  <div class="sec">📊 네 데이터셋의 기술통계 (전부 동일!)</div>
+  <div class="stats">
+    <span class="stat">x 평균 <b>9.0</b></span>
+    <span class="stat">y 평균 <b>7.5</b></span>
+    <span class="stat">x 분산 <b>11.0</b></span>
+    <span class="stat">상관계수 <b>0.82</b></span>
+    <span class="stat">추세선 <b>y=3+0.5x</b></span>
   </div>
+  <div class="same">↑ 데이터셋 I·II·III·IV가 이 숫자들은 전부 똑같습니다.</div>
 
-  <div class="panel">
-    <h2>📈 그래프로 보기 — 탭을 눌러보세요</h2>
-    <div class="tabs" id="tabs">
-      <button data-k="I" class="active">데이터 I</button>
-      <button data-k="II">데이터 II</button>
-      <button data-k="III">데이터 III</button>
-      <button data-k="IV">데이터 IV</button>
-    </div>
-    <canvas id="chart" width="640" height="320"></canvas>
-    <p class="reading" id="reading"></p>
+  <div class="sec">📈 그래프로 보기 — 탭을 눌러보세요</div>
+  <div class="tabs" id="tabs">
+    <button class="on" data-i="0">데이터 I</button>
+    <button data-i="1">데이터 II</button>
+    <button data-i="2">데이터 III</button>
+    <button data-i="3">데이터 IV</button>
+  </div>
+  <div class="chartbox"><svg id="svg" viewBox="0 0 300 210"></svg></div>
+  <div class="chartcap" id="cap"></div>
 
-    <button class="quizbtn" id="quizStartBtn">네 개 다 봤어요 → 문제 풀기 ▶</button>
+  <button class="startQ" id="startQ">네 개 다 봤어요 → 문제 풀기 ▶</button>
 
-    <div class="quiz hidden" id="quiz">
-      <p class="q">기술통계(평균·상관)가 4개 다 똑같습니다. 그래도 4개는 '같은 데이터'일까요?</p>
-      <button class="opt" data-correct="false">네, 숫자가 같으니 같은 데이터</button>
-      <button class="opt" data-correct="true">아니요 — 그래프로 보면 모양이 전혀 다릅니다</button>
-      <div class="feedback hidden" id="feedback"></div>
-      <button class="quizbtn hidden" id="nextBtn">다음 ▶</button>
-      <button class="quizbtn hidden" id="retryBtn" style="background:#5b6b63;">다시 보기 ↻</button>
-    </div>
+  <div class="qbox" id="qbox">
+    <div class="q" id="q"></div>
+    <div class="opts" id="opts"></div>
+    <div class="fb" id="fb"></div>
+  </div>
+  <button class="next" id="next"></button>
+
+  <div class="result" id="result">
+    <p>점수</p>
+    <div class="sc" id="sc">0 / 4</div>
+    <p id="rmsg">핵심: 요약 숫자(기술통계) 하나만 맹신하지 마세요. 수치도 보고 그림(시각화)도 보고, 여러 각도로 확인해야 진짜가 보입니다.</p>
+    <button class="again" id="again">다시 보기 ↻</button>
   </div>
 </div>
 
 <script>
-// ---------- 안스콤 콰르텟 데이터 (1973년 발표된 공개 통계 데이터셋) ----------
-const X_SHARED = [10,8,13,9,11,14,6,4,12,7,5];
-const X_IV     = [8,8,8,8,8,8,8,19,8,8,8];
+/* ---------- 안스콤 콰르텟 표준 데이터 ---------- */
+const DATASETS = [
+  { name:"I",  cap:"I — 대체로 깔끔한 직선 관계",
+    x:[10,8,13,9,11,14,6,4,12,7,5],
+    y:[8.04,6.95,7.58,8.81,8.33,9.96,7.24,4.26,10.84,4.82,5.68] },
+  { name:"II", cap:"II — 직선이 아니라 '휘어진(곡선)' 관계",
+    x:[10,8,13,9,11,14,6,4,12,7,5],
+    y:[9.14,8.14,8.74,8.77,9.26,8.10,6.13,3.10,9.13,7.26,4.74] },
+  { name:"III",cap:"III — 직선인데 이상값 1개가 위로 튐",
+    x:[10,8,13,9,11,14,6,4,12,7,5],
+    y:[7.46,6.77,12.74,7.11,7.81,8.84,6.08,5.39,8.15,6.42,5.73] },
+  { name:"IV", cap:"IV — 거의 한 줄(같은 x)인데 이상값 1개가 관계를 만든 것처럼",
+    x:[8,8,8,8,8,8,8,19,8,8,8],
+    y:[6.58,5.76,7.71,8.84,8.47,7.04,5.25,12.50,5.56,7.91,6.89] }
+];
 
-const datasets = {
-  I:  { x:X_SHARED, y:[8.04,6.95,7.58,8.81,8.33,9.96,7.24,4.26,10.84,4.82,5.68],
-        reading:"I — 대체로 깔끔한 직선 관계" },
-  II: { x:X_SHARED, y:[9.14,8.14,8.74,8.77,9.26,8.10,6.13,3.10,9.13,7.26,4.74],
-        reading:"II — 직선이 아니라 '휘어진(곡선)' 관계" },
-  III:{ x:X_SHARED, y:[7.46,6.77,12.74,7.11,7.81,8.84,6.08,5.39,8.15,6.42,5.73],
-        reading:"III — 직선인데 이상값 1개가 위로 튐" },
-  IV: { x:X_IV,     y:[6.58,5.76,7.71,8.84,8.47,7.04,5.25,12.50,5.56,7.91,6.89],
-        reading:"IV — 거의 한 줄(같은 x)인데 이상값 1개가 관계를 만든 것처럼" }
-};
+/* 좌표 변환: x도메인 [2,20] -> pixel[34,288], y도메인 [2,14] -> pixel[184,12] */
+function px(v){ return 34 + (v-2)/18*(288-34); }
+function py(v){ return 184 - (v-2)/12*(184-12); }
 
-const seen = new Set();
-
-function drawChart(key){
-  const d = datasets[key];
-  const c = document.getElementById('chart');
-  const ctx = c.getContext('2d');
-  ctx.clearRect(0,0,c.width,c.height);
-
-  const padL=45, padB=40, padT=16, padR=16;
-  const w = c.width-padL-padR, h = c.height-padT-padB;
-  const xMin=0, xMax=20, yMin=0, yMax=20;
-  const toX = v => padL + (v-xMin)/(xMax-xMin)*w;
-  const toY = v => padT + h - (v-yMin)/(yMax-yMin)*h;
-
-  // 축
-  ctx.strokeStyle='#9fb8ac'; ctx.lineWidth=1;
-  ctx.beginPath(); ctx.moveTo(padL,padT); ctx.lineTo(padL,padT+h); ctx.lineTo(padL+w,padT+h); ctx.stroke();
-
-  ctx.fillStyle='#5b6b63'; ctx.font='11px sans-serif'; ctx.textAlign='center';
-  [4,8,12,16,20].forEach(v=>ctx.fillText(v, toX(v), padT+h+16));
-  ctx.textAlign='right';
-  [5,10,15,20].forEach(v=>ctx.fillText(v, padL-8, toY(v)+4));
-
-  ctx.fillStyle='#1f2a24'; ctx.textAlign='center';
-  ctx.fillText('x', padL+w/2, padT+h+34);
-  ctx.save(); ctx.translate(14, padT+h/2); ctx.rotate(-Math.PI/2); ctx.fillText('y',0,0); ctx.restore();
-
-  // 추세선 y = 3 + 0.5x (네 데이터셋 공통)
-  ctx.strokeStyle='#c9c9c9'; ctx.lineWidth=1.5; ctx.setLineDash([5,4]);
-  ctx.beginPath(); ctx.moveTo(toX(xMin), toY(3+0.5*xMin)); ctx.lineTo(toX(xMax), toY(3+0.5*xMax)); ctx.stroke();
-  ctx.setLineDash([]);
-
-  // 점
-  ctx.fillStyle='#0f9d78';
-  d.x.forEach((xv,i)=>{
-    const yv = d.y[i];
-    ctx.beginPath(); ctx.arc(toX(xv), toY(yv), 5, 0, Math.PI*2); ctx.fill();
-  });
-
-  document.getElementById('reading').textContent = d.reading;
+const SVGNS="http://www.w3.org/2000/svg";
+function el(tag,attrs){
+  const e=document.createElementNS(SVGNS,tag);
+  for(const k in attrs) e.setAttribute(k,attrs[k]);
+  return e;
 }
 
-document.getElementById('tabs').addEventListener('click', e=>{
-  if(e.target.tagName!=='BUTTON') return;
-  document.querySelectorAll('#tabs button').forEach(b=>b.classList.remove('active'));
-  e.target.classList.add('active');
-  const k = e.target.dataset.k;
-  seen.add(k);
-  drawChart(k);
-});
+const svg=document.getElementById('svg');
+const cap=document.getElementById('cap');
 
-drawChart('I'); seen.add('I');
+function renderChart(idx){
+  svg.innerHTML="";
+  const d=DATASETS[idx];
+  svg.appendChild(el('rect',{x:0,y:0,width:300,height:210,fill:'#0c1626'}));
 
-// ---------- 퀴즈 ----------
-document.getElementById('quizStartBtn').addEventListener('click', ()=>{
-  document.getElementById('quiz').classList.remove('hidden');
-  document.getElementById('quiz').scrollIntoView({behavior:'smooth', block:'nearest'});
-});
+  // 가로 그리드(값 4,8,12) + y축 라벨
+  [4,8,12].forEach(v=>{
+    svg.appendChild(el('line',{x1:34,y1:py(v),x2:288,y2:py(v),stroke:'#1b2c47','stroke-width':1}));
+    const t=el('text',{x:29,y:py(v)+3,fill:'#6f86ad','text-anchor':'end','font-size':9});
+    t.textContent=v; svg.appendChild(t);
+  });
+  // 세로 그리드(값 5,10,15,20) + x축 라벨
+  [5,10,15,20].forEach(v=>{
+    svg.appendChild(el('line',{x1:px(v),y1:12,x2:px(v),y2:184,stroke:'#1b2c47','stroke-width':1}));
+    const t=el('text',{x:px(v),y:197,fill:'#6f86ad','text-anchor':'middle','font-size':9});
+    t.textContent=v; svg.appendChild(t);
+  });
+  // 축 (진한 색)
+  svg.appendChild(el('line',{x1:34,y1:12,x2:34,y2:184,stroke:'#3a557f','stroke-width':1.5}));
+  svg.appendChild(el('line',{x1:34,y1:184,x2:288,y2:184,stroke:'#3a557f','stroke-width':1.5}));
+  // 추세선 y=3+0.5x (점선, 골드)
+  svg.appendChild(el('line',{x1:px(2),y1:py(3+0.5*2),x2:px(20),y2:py(3+0.5*20),stroke:'#ffce5a','stroke-width':1.5,'stroke-dasharray':'5 4'}));
+  // 데이터 점
+  d.x.forEach((xv,i)=>{
+    svg.appendChild(el('circle',{cx:px(xv),cy:py(d.y[i]),r:4.5,fill:'#56b0ff',stroke:'#cde6ff','stroke-width':1}));
+  });
+  // 축 이름
+  const yl=el('text',{x:8,y:72,fill:'#6f86ad','font-size':9}); yl.textContent='y'; svg.appendChild(yl);
+  const xl=el('text',{x:288,y:197,fill:'#6f86ad','font-size':9}); xl.textContent='x'; svg.appendChild(xl);
 
-document.querySelectorAll('.opt').forEach(btn=>{
-  btn.addEventListener('click', ()=>{
-    const correct = btn.dataset.correct === 'true';
-    const fb = document.getElementById('feedback');
-    fb.classList.remove('hidden','ok','no');
-    document.querySelectorAll('.opt').forEach(o=>o.classList.remove('correct','wrong'));
+  cap.textContent=d.cap;
+}
 
-    if(correct){
-      btn.classList.add('correct');
-      fb.classList.add('ok');
-      fb.textContent = "✅ 정답! 요약 숫자가 같아도 실제 분포는 완전히 다를 수 있습니다. 그래서 '그림'도 봐야 해요.";
-      document.getElementById('nextBtn').classList.remove('hidden');
-    } else {
-      btn.classList.add('wrong');
-      fb.classList.add('no');
-      fb.textContent = "❌ 다시 생각해보세요. 네 데이터셋의 평균·분산·상관계수는 같지만, 그래프 모양은 서로 다릅니다.";
-      document.getElementById('retryBtn').classList.remove('hidden');
-    }
+let curTab=0;
+const tabsEl=document.getElementById('tabs');
+[...tabsEl.children].forEach((b,i)=>{
+  b.addEventListener('click',()=>{
+    curTab=i;
+    [...tabsEl.children].forEach(x=>x.classList.remove('on'));
+    b.classList.add('on');
+    renderChart(i);
   });
 });
+renderChart(0);
 
-document.getElementById('retryBtn').addEventListener('click', ()=>{
-  document.getElementById('feedback').classList.add('hidden');
-  document.getElementById('retryBtn').classList.add('hidden');
-  document.querySelectorAll('.opt').forEach(o=>o.classList.remove('correct','wrong'));
+/* ---------- 퀴즈 ---------- */
+const QUESTIONS=[
+  { q:"기술통계(평균·상관)가 4개 다 똑같습니다. 그래도 4개는 '같은 데이터'일까요?",
+    opts:["네, 숫자가 같으니 같은 데이터","아니요 — 그래프로 보면 모양이 전혀 다릅니다"],
+    correct:1,
+    fb:"요약 숫자가 같아도 실제 분포는 완전히 다를 수 있습니다. 그래서 '그림'도 봐야 해요." },
+  { q:"관계가 '직선'이 아니라 휘어진(곡선) 데이터는?",
+    opts:["I","II","III","IV"], correct:1,
+    fb:"II는 포물선처럼 휘어 있습니다 — 상관계수만 보면 절대 모릅니다." },
+  { q:"거의 한 줄(같은 x)에 모여 있는데, 이상값 1개가 관계를 '만든 것처럼' 보이게 한 데이터는?",
+    opts:["I","II","III","IV"], correct:3,
+    fb:"IV는 x가 거의 다 8인데, 19짜리 점 하나가 직선처럼 보이게 합니다." },
+  { q:"대체로 직선인데, 위로 튄 이상값 1개가 섞인 데이터는?",
+    opts:["I","II","III","IV"], correct:2,
+    fb:"III는 직선 추세에 이상값 하나(12.74)가 끼어 있습니다 — 담당자 확인 대상." }
+];
+
+let qi=0, score=0, answered=false;
+const startQBtn=document.getElementById('startQ');
+const qbox=document.getElementById('qbox');
+const qEl=document.getElementById('q');
+const optsEl=document.getElementById('opts');
+const fbEl=document.getElementById('fb');
+const nextBtn=document.getElementById('next');
+const resultEl=document.getElementById('result');
+const scEl=document.getElementById('sc');
+
+startQBtn.addEventListener('click', ()=>{
+  qi=0; score=0;
+  qbox.classList.add('show');
+  renderQ();
 });
 
-document.getElementById('nextBtn').addEventListener('click', ()=>{
-  alert('다음 학습 콘텐츠로 이동합니다. (실제 서비스에서는 다음 차시 링크로 연결하세요)');
+function renderQ(){
+  answered=false;
+  const cur=QUESTIONS[qi];
+  qEl.textContent=cur.q;
+  fbEl.className='fb'; fbEl.innerHTML='';
+  nextBtn.className='next';
+  nextBtn.textContent = qi===QUESTIONS.length-1 ? "결과 보기" : "다음 ▶";
+  optsEl.innerHTML='';
+  cur.opts.forEach((label,i)=>{
+    const b=document.createElement('button');
+    b.className='opt';
+    b.textContent=label;
+    b.addEventListener('click',()=>select(i));
+    optsEl.appendChild(b);
+  });
+}
+
+function select(i){
+  if(answered) return;
+  answered=true;
+  const cur=QUESTIONS[qi];
+  const correct = i===cur.correct;
+  [...optsEl.children].forEach((b,j)=>{
+    if(j===cur.correct) b.classList.add('ok');
+    else if(j===i) b.classList.add('no');
+    else b.classList.add('dim');
+  });
+  fbEl.classList.add('show');
+  fbEl.innerHTML = correct ? ("✅ 정답! "+cur.fb) : ("아쉬워요 — "+cur.fb);
+  if(correct) score++;
+  nextBtn.classList.add('show');
+}
+
+nextBtn.addEventListener('click', ()=>{
+  if(qi===QUESTIONS.length-1){
+    showResult();
+  } else {
+    qi++;
+    renderQ();
+  }
+});
+
+function showResult(){
+  qbox.classList.remove('show');
+  resultEl.classList.add('show');
+  scEl.textContent=score+" / "+QUESTIONS.length;
+}
+
+document.getElementById('again').addEventListener('click', ()=>{
+  resultEl.classList.remove('show');
+  qi=0; score=0;
+  qbox.classList.add('show');
+  renderQ();
 });
 </script>
 </body>
